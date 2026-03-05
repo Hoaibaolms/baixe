@@ -951,7 +951,7 @@
 
       <!-- ── PAGE: DASHBOARD ── -->
       <div class="page active" id="page-dashboard">
-        <div class="page-title">Dashboard</div>
+        <div class="page-title">Trang chủ</div>
         <div class="page-subtitle">Tổng quan bãi xe thời gian thực</div>
 
         <div class="section-gap">
@@ -1016,38 +1016,18 @@
                   <div class="gate-icon">🚧</div>
                   <div class="gate-name">Cổng Vào</div>
                   <div class="gate-state closed" id="entryState">● Đóng</div>
-                  <button class="btn-gate open-btn" onclick="toggleGate('entry')">▲ Mở cổng</button>
+                  <button id="btn-gate-entry" class="btn-gate open-btn" onclick="toggleGate('entry')">▲ Mở cổng</button>
                 </div>
                 <div class="gate-card">
                   <div class="gate-icon">🚦</div>
                   <div class="gate-name">Cổng Ra</div>
                   <div class="gate-state closed" id="exitState">● Đóng</div>
-                  <button class="btn-gate open-btn" onclick="toggleGate('exit')">▲ Mở cổng</button>
+                  <button id="btn-gate-exit" class="btn-gate open-btn" onclick="toggleGate('exit')">▲ Mở cổng</button>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Recent activity -->
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">Hoạt động gần đây</div>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Thời gian</th>
-                    <th>UID Thẻ</th>
-                    <th>Loại thẻ</th>
-                    <th>Sự kiện</th>
-                    <th>Phí</th>
-                  </tr>
-                </thead>
-                <tbody id="recentTable"></tbody>
-              </table>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -1070,7 +1050,6 @@
               <option>Ra</option>
             </select>
             <button class="btn-sm primary">🔍 Lọc</button>
-            <button class="btn-sm outline">📤 Xuất Excel</button>
           </div>
           <div class="table-wrap">
             <table>
@@ -1164,72 +1143,66 @@
         </div>
       </div>
 
-      <!-- ── PAGE: QUẢN LÝ THẺ ── -->
+      <!-- ── PAGE: QUẢN LÝ THẺ & TÀI KHOẢN (GỘP) ── -->
       <div class="page" id="page-cards">
-        <div class="page-title">Quản lý thẻ RFID</div>
-        <div class="page-subtitle">Danh sách thẻ thường và thẻ tháng</div>
+        <div class="page-title">Quản lý thẻ & tài khoản</div>
+        <div class="page-subtitle">Thẻ RFID và thành viên đăng ký</div>
 
-        <div class="card">
-          <div class="filter-row">
-            <input class="filter-input" placeholder="🔍 Tìm UID hoặc tên chủ xe..." style="flex:1">
-            <select class="filter-input" style="width:140px">
-              <option>Tất cả loại thẻ</option>
-              <option>Thẻ thường</option>
-              <option>Thẻ tháng</option>
-            </select>
-            <select class="filter-input" style="width:130px">
-              <option>Tất cả trạng thái</option>
-              <option>Hoạt động</option>
-              <option>Hết hạn</option>
-              <option>Bị khóa</option>
-            </select>
-            <button class="btn-sm primary" onclick="openAddCardModal()">+ Thêm thẻ tháng</button>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>UID Thẻ</th>
-                  <th>Tên chủ xe</th>
-                  <th>Loại thẻ</th>
-                  <th>Ngày đăng ký</th>
-                  <th>Hết hạn</th>
-                  <th>Phí/tháng</th>
-                  <th>Trạng thái</th>
-                  <th>Thao tác</th>
-                </tr>
-              </thead>
-              <tbody id="cardsTable"></tbody>
-            </table>
+        <!-- Tab switch -->
+        <div class="tab-switch" style="margin-bottom:16px">
+          <button class="tab-btn active" id="mgmtTab-cards" onclick="switchMgmtTab('cards')">💳 Thẻ RFID</button>
+          <button class="tab-btn" id="mgmtTab-accounts" onclick="switchMgmtTab('accounts')">👥 Tài khoản</button>
+        </div>
+
+        <!-- ── PANEL: THẺ RFID ── -->
+        <div id="mgmtPanel-cards">
+          <div class="card">
+            <div class="filter-row">
+              <input class="filter-input" id="cardSearch" placeholder="🔍 Tìm UID hoặc tên..." style="flex:1" oninput="renderCardsTable()">
+              <button class="btn-sm primary" onclick="openAddMemberModal()">+ Thêm</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>UID Thẻ</th>
+                    <th>Tên chủ xe</th>
+                    <th>Loại thẻ</th>
+                    <th>Hết hạn</th>
+                    <th>Phí/tháng</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="cardsTable"></tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- ── PAGE: TÀI KHOẢN ── -->
-      <div class="page" id="page-accounts">
-        <div class="page-title">Quản lý tài khoản</div>
-        <div class="page-subtitle">Tài khoản thành viên thẻ tháng</div>
-
-        <div class="card">
-          <div class="filter-row">
-            <input class="filter-input" placeholder="🔍 Tìm theo tên hoặc SĐT..." style="flex:1">
-            <button class="btn-sm primary" onclick="openAddAccountModal()">+ Tạo tài khoản</button>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Tên đăng nhập</th>
-                  <th>Họ tên</th>
-                  <th>SĐT</th>
-                  <th>Thẻ RFID</th>
-                  <th>Ngày tạo</th>
-                  <th>Trạng thái</th>
-                  <th>Thao tác</th>
-                </tr>
-              </thead>
-              <tbody id="accountsTable"></tbody>
-            </table>
+        <!-- ── PANEL: TÀI KHOẢN ── -->
+        <div id="mgmtPanel-accounts" style="display:none">
+          <div class="card">
+            <div class="filter-row">
+              <input class="filter-input" id="accountSearch" placeholder="🔍 Tìm theo tên hoặc SĐT..." style="flex:1" oninput="renderAccountsTable()">
+              <button class="btn-sm primary" onclick="openAddMemberModal()">+ Thêm</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Tên đăng nhập</th>
+                    <th>Họ tên</th>
+                    <th>SĐT</th>
+                    <th>Thẻ RFID</th>
+                    <th>Ngày tạo</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="accountsTable"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -1329,72 +1302,42 @@
 <!--  MODALS                                    -->
 <!-- ══════════════════════════════════════════ -->
 
-<!-- Modal thêm thẻ tháng -->
-<div class="modal-overlay" id="modalAddCard">
+<!-- Modal thêm thành viên (gộp thẻ + tài khoản) -->
+<div class="modal-overlay" id="modalAddMember">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">➕ Thêm thẻ tháng mới</div>
-      <button class="modal-close" onclick="closeModal('modalAddCard')">✕</button>
+      <div class="modal-title">➕ Thêm thành viên mới</div>
+      <button class="modal-close" onclick="closeModal('modalAddMember')">✕</button>
     </div>
     <div class="form-group">
-      <label class="form-label">UID Thẻ RFID</label>
-      <input class="form-input" placeholder="VD: AA:BB:CC:DD" id="newCardUID">
+      <label class="form-label">Tên đăng nhập <span style="color:var(--danger)">*</span></label>
+      <input class="form-input" placeholder="VD: member04" id="newUsername">
     </div>
     <div class="form-group">
-      <label class="form-label">Tên chủ thẻ</label>
-      <input class="form-input" placeholder="VD: Nguyễn Văn A" id="newCardAccount">
+      <label class="form-label">Mật khẩu <span style="color:var(--danger)">*</span></label>
+      <input class="form-input" type="password" placeholder="••••••••" id="newPassword">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Họ và tên <span style="color:var(--danger)">*</span></label>
+      <input class="form-input" placeholder="VD: Nguyễn Văn A" id="newFullname">
+    </div>
+    <div class="form-group">
+      <label class="form-label">ID thẻ RFID <span style="color:var(--danger)">*</span></label>
+      <input class="form-input" placeholder="VD: AA:BB:CC:DD" id="newMemberUID">
     </div>
     <div class="grid-2" style="gap:12px">
-      <div class="form-group">
-        <label class="form-label">Ngày bắt đầu</label>
-        <input class="form-input" type="date" id="newCardStart">
-      </div>
       <div class="form-group">
         <label class="form-label">Phí / tháng (đ)</label>
-        <input class="form-input" type="number" placeholder="120000" id="newCardFee">
+        <input class="form-input" type="number" placeholder="120000" id="newMemberFee">
       </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Ghi chú</label>
-      <input class="form-input" placeholder="Biển số xe, ghi chú thêm..." id="newCardNote">
-    </div>
-    <div class="modal-footer">
-      <button class="btn-sm outline" onclick="closeModal('modalAddCard')">Hủy</button>
-      <button class="btn-sm primary" onclick="submitAddCard()">✅ Tạo thẻ</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal tạo tài khoản -->
-<div class="modal-overlay" id="modalAddAccount">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">👤 Tạo tài khoản thành viên</div>
-      <button class="modal-close" onclick="closeModal('modalAddAccount')">✕</button>
-    </div>
-    <div class="grid-2" style="gap:12px">
-      <div class="form-group">
-        <label class="form-label">Họ tên</label>
-        <input class="form-input" placeholder="Nguyễn Văn A">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Tên đăng nhập</label>
-        <input class="form-input" placeholder="member04">
-      </div>
-    </div>
-    <div class="grid-2" style="gap:12px">
       <div class="form-group">
         <label class="form-label">Số điện thoại</label>
-        <input class="form-input" placeholder="0912345678">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Mật khẩu</label>
-        <input class="form-input" type="password" placeholder="••••••••">
+        <input class="form-input" placeholder="0912345678" id="newMemberPhone">
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-sm outline" onclick="closeModal('modalAddAccount')">Hủy</button>
-      <button class="btn-sm primary" onclick="closeModal('modalAddAccount');showToast('✅ Tạo tài khoản thành công!','success')">✅ Tạo tài khoản</button>
+      <button class="btn-sm outline" onclick="closeModal('modalAddMember')">Hủy</button>
+      <button class="btn-sm primary" onclick="submitAddMember()">✅ Tạo thành viên</button>
     </div>
   </div>
 </div>
@@ -1456,11 +1399,10 @@ const gateState = { entry: false, exit: false };
 
 // ── ADMIN NAV ─────────────────────────────────
 const adminNav = [
-  { id:'dashboard', icon:'📊', label:'Dashboard' },
+  { id:'dashboard', icon:'📊', label:'Trang chủ' },
   { id:'history',   icon:'📋', label:'Lịch sử vào/ra' },
   { id:'revenue',   icon:'💰', label:'Doanh thu',     section:'Tài chính' },
   { id:'cards',     icon:'💳', label:'Quản lý thẻ',   section:'Quản lý' },
-  { id:'accounts',  icon:'👥', label:'Tài khoản' },
 ];
 
 const memberNav = [
@@ -1555,9 +1497,9 @@ function navigateTo(pageId) {
   window.scrollTo(0, 0);
 
   const titles = {
-    dashboard:'Dashboard', history:'Lịch sử vào/ra',
-    revenue:'Doanh thu', cards:'Quản lý thẻ',
-    accounts:'Tài khoản', profile:'Hồ sơ của tôi'
+    dashboard:'Trang chủ', history:'Lịch sử vào/ra',
+    revenue:'Doanh thu', cards:'Quản lý thẻ & tài khoản',
+    profile:'Hồ sơ của tôi'
   };
   const titleEl = document.getElementById('topbarTitle');
   if (titleEl) titleEl.textContent = titles[pageId] || pageId;
@@ -1646,33 +1588,93 @@ function renderHistoryTable() {
   `).join('');
 }
 
+// ── MGMT TABS ─────────────────────────────────
+function switchMgmtTab(tab) {
+  ['cards','accounts'].forEach(t => {
+    document.getElementById('mgmtPanel-' + t).style.display = t === tab ? '' : 'none';
+    document.getElementById('mgmtTab-' + t).classList.toggle('active', t === tab);
+  });
+}
+
 function renderCardsTable() {
-  const tbody = document.getElementById('cardsTable');
-  tbody.innerHTML = cardsData.map(c => `
-    <tr>
+  const tbody  = document.getElementById('cardsTable');
+  if (!tbody) return;
+  const search = (document.getElementById('cardSearch')?.value || '').toLowerCase();
+  const list   = search
+    ? cardsData.filter(c => c.uid.toLowerCase().includes(search) || c.owner.toLowerCase().includes(search))
+    : cardsData;
+
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px">Không tìm thấy thẻ nào</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map((c, idx) => {
+    const realIdx = cardsData.indexOf(c);
+    const statusBadge = c.status === 'active'
+      ? '<span class="badge green">Hoạt động</span>'
+      : c.status === 'expiring'
+      ? '<span class="badge orange">Sắp hết hạn</span>'
+      : '<span class="badge red">Hết hạn</span>';
+    const typeBadge = c.type === 'month'
+      ? '<span class="badge purple">Thẻ tháng</span>'
+      : '<span class="badge blue">Thẻ thường</span>';
+    return `<tr>
       <td data-label="UID"><span class="mono">${c.uid}</span></td>
       <td data-label="Chủ xe">${c.owner}</td>
-      <td data-label="Loại thẻ">${c.type==='month' ? '<span class="badge purple">Thẻ tháng</span>' : '<span class="badge blue">Thẻ thường</span>'}</td>
-      <td data-label="Ngày đăng ký">${c.regDate}</td>
+      <td data-label="Loại thẻ">${typeBadge}</td>
       <td data-label="Hết hạn">${c.expiry}</td>
       <td data-label="Phí"><b>${c.fee}</b></td>
-      <td data-label="Trạng thái">${c.status==='active'
-        ? '<span class="badge green">Hoạt động</span>'
-        : c.status==='expiring'
-        ? '<span class="badge orange">Sắp hết hạn</span>'
-        : '<span class="badge red">Hết hạn</span>'}</td>
+      <td data-label="Trạng thái">${statusBadge}</td>
       <td data-label="Thao tác" style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn-sm success" onclick="showToast('✅ Đã gia hạn thẻ!','success')">Gia hạn</button>
-        <button class="btn-sm danger"  onclick="showToast('🔒 Đã khóa thẻ!','danger')">Khóa</button>
+        <button class="btn-sm success" onclick="renewCard(${realIdx})">🔄 Gia hạn</button>
+        <button class="btn-sm danger"  onclick="deleteCard(${realIdx})">🗑️ Xóa</button>
       </td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
+}
+
+function renewCard(idx) {
+  const card = cardsData[idx];
+  if (!card) return;
+  // Tính hết hạn mới: 1 tháng từ ngày hết hạn cũ (hoặc từ hôm nay nếu đã hết)
+  const fmt = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  const parseFmt = s => { const [d,m,y] = s.split('/'); return new Date(+y, +m-1, +d); };
+  let base = parseFmt(card.expiry);
+  if (isNaN(base)) base = new Date();
+  if (base < new Date()) base = new Date(); // nếu đã hết hạn thì tính từ hôm nay
+  base.setMonth(base.getMonth() + 1);
+  card.expiry = fmt(base);
+  card.status = 'active';
+  renderCardsTable();
+  showToast(`✅ Đã gia hạn thẻ ${card.uid} đến ${card.expiry}`, 'success');
+}
+
+function deleteCard(idx) {
+  const card = cardsData[idx];
+  if (!card) return;
+  if (!confirm(`Xóa thẻ ${card.uid} — ${card.owner}?`)) return;
+  cardsData.splice(idx, 1);
+  renderCardsTable();
+  showToast(`🗑️ Đã xóa thẻ ${card.uid}`, 'danger');
 }
 
 function renderAccountsTable() {
-  const tbody = document.getElementById('accountsTable');
-  tbody.innerHTML = accountsData.map(a => `
-    <tr>
+  const tbody  = document.getElementById('accountsTable');
+  if (!tbody) return;
+  const search = (document.getElementById('accountSearch')?.value || '').toLowerCase();
+  const list   = search
+    ? accountsData.filter(a => a.name.toLowerCase().includes(search) || a.phone.includes(search))
+    : accountsData;
+
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px">Không tìm thấy tài khoản nào</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map((a) => {
+    const realIdx = accountsData.indexOf(a);
+    return `<tr>
       <td data-label="Username"><b>${a.username}</b></td>
       <td data-label="Họ tên">${a.name}</td>
       <td data-label="SĐT">${a.phone}</td>
@@ -1681,10 +1683,19 @@ function renderAccountsTable() {
       <td data-label="Trạng thái"><span class="badge green">Hoạt động</span></td>
       <td data-label="Thao tác" style="display:flex;gap:6px">
         <button class="btn-sm outline" onclick="showToast('✏️ Chỉnh sửa tài khoản','info')">Sửa</button>
-        <button class="btn-sm danger"  onclick="showToast('🔒 Đã khóa tài khoản!','danger')">Khóa</button>
+        <button class="btn-sm danger"  onclick="deleteAccount(${realIdx})">🗑️ Xóa</button>
       </td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
+}
+
+function deleteAccount(idx) {
+  const acc = accountsData[idx];
+  if (!acc) return;
+  if (!confirm(`Xóa tài khoản ${acc.username} — ${acc.name}?`)) return;
+  accountsData.splice(idx, 1);
+  renderAccountsTable();
+  showToast(`🗑️ Đã xóa tài khoản ${acc.username}`, 'danger');
 }
 
 function renderMemberHistory() {
@@ -1749,60 +1760,69 @@ function toggleGate(gate) {
 }
 
 // ── MODALS ────────────────────────────────────
-function openAddCardModal() {
-  document.getElementById('newCardUID').value     = '';
-  document.getElementById('newCardAccount').value = '';
-  document.getElementById('newCardStart').value   = new Date().toISOString().split('T')[0];
-  document.getElementById('newCardFee').value     = '';
-  document.getElementById('newCardNote').value    = '';
-  document.getElementById('modalAddCard').classList.add('show');
+function openAddMemberModal() {
+  ['newUsername','newPassword','newFullname','newMemberUID','newMemberFee','newMemberPhone']
+    .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  document.getElementById('modalAddMember').classList.add('show');
 }
-function openAddAccountModal() {
-  document.getElementById('modalAddAccount').classList.add('show');
-}
+// alias cũ phòng khi còn ref
+function openAddCardModal()    { openAddMemberModal(); }
+function openAddAccountModal() { openAddMemberModal(); }
+
 function closeModal(id) {
   document.getElementById(id).classList.remove('show');
 }
-function submitAddCard() {
-  const uid   = document.getElementById('newCardUID').value.trim();
-  const owner = document.getElementById('newCardAccount').value.trim();
-  const start = document.getElementById('newCardStart').value;
-  const fee   = document.getElementById('newCardFee').value.trim();
-  const note  = document.getElementById('newCardNote').value.trim();
 
-  if (!uid)   { showToast('❌ Vui lòng nhập UID thẻ!', 'danger'); return; }
-  if (!owner) { showToast('❌ Vui lòng nhập tên chủ thẻ!', 'danger'); return; }
+function submitAddMember() {
+  const username = document.getElementById('newUsername').value.trim();
+  const password = document.getElementById('newPassword').value.trim();
+  const fullname = document.getElementById('newFullname').value.trim();
+  const uid      = document.getElementById('newMemberUID').value.trim().toUpperCase();
+  const fee      = document.getElementById('newMemberFee').value.trim();
+  const phone    = document.getElementById('newMemberPhone').value.trim();
 
-  // Tính ngày hết hạn (1 tháng sau ngày bắt đầu)
-  const startDate  = start ? new Date(start) : new Date();
-  const expiryDate = new Date(startDate);
-  expiryDate.setMonth(expiryDate.getMonth() + 1);
-  const fmt = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  if (!username) { showToast('❌ Vui lòng nhập tên đăng nhập!', 'danger'); return; }
+  if (!password) { showToast('❌ Vui lòng nhập mật khẩu!', 'danger'); return; }
+  if (!fullname) { showToast('❌ Vui lòng nhập họ và tên!', 'danger'); return; }
+  if (!uid)      { showToast('❌ Vui lòng nhập ID thẻ RFID!', 'danger'); return; }
 
-  const newCard = {
-    uid:     uid.toUpperCase(),
-    owner:   owner,
-    type:    'month',
-    regDate: fmt(startDate),
-    expiry:  fmt(expiryDate),
-    fee:     fee ? Number(fee).toLocaleString('vi-VN') + 'đ' : '—',
-    status:  'active',
-    account: '—',
-    note:    note,
+  // Kiểm tra trùng
+  if (USERS[username]) { showToast('❌ Tên đăng nhập đã tồn tại!', 'danger'); return; }
+  if (cardsData.find(c => c.uid === uid)) { showToast('❌ UID thẻ đã tồn tại!', 'danger'); return; }
+
+  const today    = new Date();
+  const expiry   = new Date(today); expiry.setMonth(expiry.getMonth() + 1);
+  const fmt      = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+
+  // Thêm vào USERS (đăng nhập được ngay)
+  USERS[username] = {
+    pass: password, role: 'member',
+    name: fullname, uid, fee: fee ? +fee : 0, expiry: fmt(expiry)
   };
 
-  cardsData.unshift(newCard); // thêm vào đầu danh sách
-  renderCardsTable();
-  closeModal('modalAddCard');
-  showToast(`✅ Đã thêm thẻ: ${uid} — ${owner}`, 'success');
+  // Thêm vào cardsData
+  cardsData.unshift({
+    uid, owner: fullname, type: 'month',
+    regDate: fmt(today), expiry: fmt(expiry),
+    fee: fee ? Number(fee).toLocaleString('vi-VN') + 'đ' : '—',
+    status: 'active', account: username
+  });
 
-  // Ghi lên Firebase nếu đang kết nối
+  // Thêm vào accountsData
+  accountsData.unshift({
+    username, name: fullname,
+    phone: phone || '—', uid,
+    created: fmt(today), status: 'active'
+  });
+
+  renderCardsTable();
+  renderAccountsTable();
+  closeModal('modalAddMember');
+  showToast(`✅ Đã thêm thành viên: ${fullname} (${uid})`, 'success');
+
+  // Ghi Firebase
   if (typeof fbPut === 'function') {
-    fbPut('/cards/' + uid.replace(/:/g,'-'), {
-      uid, owner, type:'month',
-      regDate: fmt(startDate), expiry: fmt(expiryDate),
-      fee: fee || 0, note
-    });
+    fbPut('/members/' + username, { username, fullname, uid, phone: phone||'', fee: fee||0 });
   }
 }
 
@@ -1929,14 +1949,19 @@ async function syncFromFirebase() {
 }
 
 function updateGateUI(gate, state) {
-  const el = document.getElementById(gate + 'State');
+  const el  = document.getElementById(gate + 'State');
+  const btn = document.getElementById('btn-gate-' + gate);
   if (!el) return;
   if (state === 'open' || state === 'opening') {
+    gateOpenState[gate] = true;
     el.textContent = '● Đang mở';
-    el.className = 'gate-state open';
+    el.className   = 'gate-state open';
+    if (btn) { btn.textContent = '▼ Đóng cổng'; btn.className = 'btn-gate close-btn'; }
   } else {
+    gateOpenState[gate] = false;
     el.textContent = '● Đóng';
-    el.className = 'gate-state closed';
+    el.className   = 'gate-state closed';
+    if (btn) { btn.textContent = '▲ Mở cổng'; btn.className = 'btn-gate open-btn'; }
   }
 }
 
@@ -1963,14 +1988,31 @@ function renderFirebaseHistory(rows) {
 }
 
 // Override toggleGate để gửi lệnh lên Firebase thật
-async function toggleGate(gate) {
-  const el = document.getElementById(gate + 'State');
-  el.textContent = '● Đang mở';
-  el.className = 'gate-state open';
-  showToast(`🚧 Đã gửi lệnh mở cổng ${gate==='entry'?'vào':'ra'} lên ESP32!`, 'success');
+// Mỗi cổng độc lập: nhấn 1 lần = mở, nhấn lại = đóng
+const gateOpenState = { entry: false, exit: false };
 
-  // Ghi lệnh lên Firebase → ESP32 sẽ đọc và thực hiện
-  await fbPut(`/gates/${gate}`, 'open');
+async function toggleGate(gate) {
+  const el  = document.getElementById(gate + 'State');
+  const btn = document.getElementById('btn-gate-' + gate);
+  const isOpen = gateOpenState[gate];
+
+  if (!isOpen) {
+    // Mở cổng
+    gateOpenState[gate] = true;
+    el.textContent  = '● Đang mở';
+    el.className    = 'gate-state open';
+    if (btn) { btn.textContent = '▼ Đóng cổng'; btn.className = 'btn-gate close-btn'; }
+    showToast(`🚧 Đã mở cổng ${gate==='entry'?'vào':'ra'}!`, 'success');
+    await fbPut(`/gates/${gate}`, 'open');
+  } else {
+    // Đóng cổng
+    gateOpenState[gate] = false;
+    el.textContent  = '● Đóng';
+    el.className    = 'gate-state closed';
+    if (btn) { btn.textContent = '▲ Mở cổng'; btn.className = 'btn-gate open-btn'; }
+    showToast(`🔒 Đã đóng cổng ${gate==='entry'?'vào':'ra'}!`, 'info');
+    await fbPut(`/gates/${gate}`, 'closed');
+  }
 }
 
 // ── ESP32 HEARTBEAT STATUS ────────────────────
