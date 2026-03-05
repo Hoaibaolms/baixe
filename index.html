@@ -1341,13 +1341,8 @@
       <input class="form-input" placeholder="VD: AA:BB:CC:DD" id="newCardUID">
     </div>
     <div class="form-group">
-      <label class="form-label">Tài khoản thành viên</label>
-      <select class="form-input" id="newCardAccount">
-        <option value="">-- Chọn tài khoản --</option>
-        <option>member01 — Nguyễn Văn A</option>
-        <option>member02 — Trần Thị B</option>
-        <option>member03 — Lê Văn C</option>
-      </select>
+      <label class="form-label">Tên chủ thẻ</label>
+      <input class="form-input" placeholder="VD: Nguyễn Văn A" id="newCardAccount">
     </div>
     <div class="grid-2" style="gap:12px">
       <div class="form-group">
@@ -1755,7 +1750,11 @@ function toggleGate(gate) {
 
 // ── MODALS ────────────────────────────────────
 function openAddCardModal() {
-  document.getElementById('newCardStart').value = new Date().toISOString().split('T')[0];
+  document.getElementById('newCardUID').value     = '';
+  document.getElementById('newCardAccount').value = '';
+  document.getElementById('newCardStart').value   = new Date().toISOString().split('T')[0];
+  document.getElementById('newCardFee').value     = '';
+  document.getElementById('newCardNote').value    = '';
   document.getElementById('modalAddCard').classList.add('show');
 }
 function openAddAccountModal() {
@@ -1765,10 +1764,46 @@ function closeModal(id) {
   document.getElementById(id).classList.remove('show');
 }
 function submitAddCard() {
-  const uid = document.getElementById('newCardUID').value;
-  if (!uid) { showToast('❌ Vui lòng nhập UID thẻ!', 'danger'); return; }
+  const uid   = document.getElementById('newCardUID').value.trim();
+  const owner = document.getElementById('newCardAccount').value.trim();
+  const start = document.getElementById('newCardStart').value;
+  const fee   = document.getElementById('newCardFee').value.trim();
+  const note  = document.getElementById('newCardNote').value.trim();
+
+  if (!uid)   { showToast('❌ Vui lòng nhập UID thẻ!', 'danger'); return; }
+  if (!owner) { showToast('❌ Vui lòng nhập tên chủ thẻ!', 'danger'); return; }
+
+  // Tính ngày hết hạn (1 tháng sau ngày bắt đầu)
+  const startDate  = start ? new Date(start) : new Date();
+  const expiryDate = new Date(startDate);
+  expiryDate.setMonth(expiryDate.getMonth() + 1);
+  const fmt = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+
+  const newCard = {
+    uid:     uid.toUpperCase(),
+    owner:   owner,
+    type:    'month',
+    regDate: fmt(startDate),
+    expiry:  fmt(expiryDate),
+    fee:     fee ? Number(fee).toLocaleString('vi-VN') + 'đ' : '—',
+    status:  'active',
+    account: '—',
+    note:    note,
+  };
+
+  cardsData.unshift(newCard); // thêm vào đầu danh sách
+  renderCardsTable();
   closeModal('modalAddCard');
-  showToast('✅ Đã thêm thẻ tháng: ' + uid, 'success');
+  showToast(`✅ Đã thêm thẻ: ${uid} — ${owner}`, 'success');
+
+  // Ghi lên Firebase nếu đang kết nối
+  if (typeof fbPut === 'function') {
+    fbPut('/cards/' + uid.replace(/:/g,'-'), {
+      uid, owner, type:'month',
+      regDate: fmt(startDate), expiry: fmt(expiryDate),
+      fee: fee || 0, note
+    });
+  }
 }
 
 // Close modal on overlay click
