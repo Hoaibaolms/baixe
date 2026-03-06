@@ -429,6 +429,25 @@
   }
   .gate-state.closed { background: var(--danger-light); color: var(--danger); }
   .gate-state.open { background: var(--success-light); color: var(--success); }
+
+  /* Toggle switch */
+  .toggle-switch { position:relative; display:inline-block; width:46px; height:26px; flex-shrink:0; }
+  .toggle-switch input { opacity:0; width:0; height:0; }
+  .toggle-slider {
+    position:absolute; cursor:pointer; inset:0;
+    background:#cbd5e1; border-radius:26px; transition:.3s;
+  }
+  .toggle-slider:before {
+    content:""; position:absolute;
+    width:20px; height:20px; left:3px; bottom:3px;
+    background:white; border-radius:50%;
+    transition:.3s; box-shadow:0 1px 3px rgba(0,0,0,.2);
+  }
+  .toggle-switch input:checked + .toggle-slider { background:#f59e0b; }
+  .toggle-switch input:checked + .toggle-slider:before { transform:translateX(20px); }
+  /* Gate disabled when not manual mode */
+  .gate-controls.disabled .btn-gate { opacity:.4; pointer-events:none; cursor:not-allowed; }
+  .gate-controls.disabled .gate-card { opacity:.6; }
   .btn-gate {
     width: 100%; padding: 10px;
     border: none; border-radius: var(--radius-sm);
@@ -1045,10 +1064,21 @@
               <div class="card-header">
                 <div>
                   <div class="card-title">Điều khiển cổng</div>
-                  <div class="card-subtitle">Mở / đóng thủ công</div>
+                  <div class="card-subtitle" id="gateSubtitle">RFID đang hoạt động</div>
                 </div>
               </div>
-              <div class="gate-controls">
+              <!-- Công tắc chế độ thủ công -->
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg);border-radius:10px;margin-bottom:12px;">
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:var(--text1)">🎛️ Chế độ thủ công</div>
+                  <div style="font-size:11px;color:var(--text3)" id="manualModeDesc">Tắt — RFID hoạt động bình thường</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="manualModeToggle" onchange="setManualMode(this.checked)">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="gate-controls" id="gateControlBtns">
                 <div class="gate-card">
                   <div class="gate-icon">🚧</div>
                   <div class="gate-name">Cổng Vào</div>
@@ -1209,6 +1239,33 @@
         </div>
       </div>
 
+      <!-- ── PAGE: THẺ THƯỜNG ── -->
+      <div class="page" id="page-normalcards">
+        <div class="page-title">Thẻ thường</div>
+        <div class="page-subtitle">Quản lý thẻ vãng lai (không có tài khoản)</div>
+
+        <div class="card">
+          <div class="filter-row">
+            <input class="filter-input" id="normalCardSearch" placeholder="🔍 Tìm theo UID..." style="flex:1" oninput="renderNormalCards()">
+            <button class="btn-sm primary" onclick="openAddNormalCardModal()">+ Thêm thẻ</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>UID Thẻ</th>
+                  <th>Ghi chú</th>
+                  <th>Ngày thêm</th>
+                  <th>Trạng thái</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="normalCardsTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <!-- ── PAGE: HỒ SƠ THÀNH VIÊN ── -->
       <div class="page" id="page-profile">
         <div class="page-title">Hồ sơ của tôi</div>
@@ -1344,6 +1401,28 @@
   </div>
 </div>
 
+<!-- Modal thêm thẻ thường -->
+<div class="modal-overlay" id="modalAddNormalCard">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">💳 Thêm thẻ thường</div>
+      <button class="modal-close" onclick="closeModal('modalAddNormalCard')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">UID Thẻ RFID <span style="color:var(--danger)">*</span></label>
+      <input class="form-input" placeholder="VD: AA:BB:CC:DD" id="newNormalUID">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Ghi chú (biển số, tên...)</label>
+      <input class="form-input" placeholder="VD: 51A-12345" id="newNormalNote">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm outline" onclick="closeModal('modalAddNormalCard')">Hủy</button>
+      <button class="btn-sm primary" onclick="submitAddNormalCard()">✅ Thêm thẻ</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast container -->
 <div class="toast-container" id="toastContainer"></div>
 
@@ -1382,7 +1461,8 @@ const adminNav = [
   { id:'dashboard', icon:'📊', label:'Trang chủ' },
   { id:'history',   icon:'📋', label:'Lịch sử vào/ra' },
   { id:'revenue',   icon:'💰', label:'Doanh thu',     section:'Tài chính' },
-  { id:'cards', icon:'👥', label:'Tài khoản', section:'Quản lý' },
+  { id:'cards',     icon:'👥', label:'Tài khoản',     section:'Quản lý' },
+  { id:'normalcards', icon:'💳', label:'Thẻ thường' },
 ];
 
 const memberNav = [
@@ -1504,13 +1584,91 @@ function navigateTo(pageId) {
   const titles = {
     dashboard:'Trang chủ', history:'Lịch sử vào/ra',
     revenue:'Doanh thu', cards:'Quản lý tài khoản',
-    profile:'Hồ sơ của tôi'
+    normalcards:'Thẻ thường', profile:'Hồ sơ của tôi'
   };
   const titleEl = document.getElementById('topbarTitle');
   if (titleEl) titleEl.textContent = titles[pageId] || pageId;
 }
 
 function navTo(pageId) { navigateTo(pageId); }
+
+// ── NORMAL CARDS ───────────────────────────────
+let normalCardsData = [];
+
+function renderNormalCards() {
+  const tbody  = document.getElementById('normalCardsTable');
+  if (!tbody) return;
+  const search = (document.getElementById('normalCardSearch')?.value || '').toLowerCase();
+  const list   = search
+    ? normalCardsData.filter(c => c.uid.toLowerCase().includes(search) || (c.note||'').toLowerCase().includes(search))
+    : normalCardsData;
+
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:24px">Chưa có thẻ thường nào</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map((c) => {
+    const realIdx = normalCardsData.indexOf(c);
+    return `<tr>
+      <td data-label="UID"><span class="mono">${c.uid}</span></td>
+      <td data-label="Ghi chú">${c.note || '—'}</td>
+      <td data-label="Ngày thêm">${c.created}</td>
+      <td data-label="Trạng thái"><span class="badge ${c.blocked ? 'red' : 'green'}">${c.blocked ? 'Bị khóa' : 'Hoạt động'}</span></td>
+      <td data-label="Thao tác" style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn-sm ${c.blocked ? 'success' : 'outline'}" onclick="toggleBlockNormalCard(${realIdx})">${c.blocked ? '🔓 Mở khóa' : '🔒 Khóa'}</button>
+        <button class="btn-sm danger" onclick="deleteNormalCard(${realIdx})">🗑️ Xóa</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openAddNormalCardModal() {
+  document.getElementById('newNormalUID').value  = '';
+  document.getElementById('newNormalNote').value = '';
+  document.getElementById('modalAddNormalCard').classList.add('show');
+}
+
+async function submitAddNormalCard() {
+  const uid  = document.getElementById('newNormalUID').value.trim().toUpperCase();
+  const note = document.getElementById('newNormalNote').value.trim();
+  if (!uid) { showToast('❌ Vui lòng nhập UID thẻ!', 'danger'); return; }
+  if (normalCardsData.find(c => c.uid === uid)) { showToast('❌ UID đã tồn tại!', 'danger'); return; }
+
+  const fmt   = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  const entry = { uid, note, created: fmt(new Date()), blocked: false };
+
+  await fbPut('/normalcards/' + uid.replace(/:/g,'-'), entry);
+  normalCardsData.unshift(entry);
+  renderNormalCards();
+  closeModal('modalAddNormalCard');
+  showToast(`✅ Đã thêm thẻ ${uid}`, 'success');
+}
+
+async function toggleBlockNormalCard(idx) {
+  const c = normalCardsData[idx];
+  if (!c) return;
+  c.blocked = !c.blocked;
+  await fbPatch('/normalcards/' + c.uid.replace(/:/g,'-'), { blocked: c.blocked });
+  renderNormalCards();
+  showToast(c.blocked ? `🔒 Đã khóa thẻ ${c.uid}` : `🔓 Đã mở khóa ${c.uid}`, c.blocked ? 'danger' : 'success');
+}
+
+async function deleteNormalCard(idx) {
+  const c = normalCardsData[idx];
+  if (!c) return;
+  if (!confirm(`Xóa thẻ ${c.uid}?`)) return;
+  await fetch(`${FIREBASE_URL}/normalcards/${c.uid.replace(/:/g,'-')}.json`, { method: 'DELETE' });
+  normalCardsData.splice(idx, 1);
+  renderNormalCards();
+  showToast(`🗑️ Đã xóa thẻ ${c.uid}`, 'danger');
+}
+
+async function loadNormalCardsFromFirebase() {
+  const data = await fbGet('/normalcards');
+  if (!data) return;
+  normalCardsData = Object.values(data);
+  renderNormalCards();
+}
 
 // ── RENDER ────────────────────────────────────
 function renderAll() {
@@ -1544,7 +1702,6 @@ function toggleSlot(id) {
   if (slot) {
     slot.occupied = !slot.occupied;
     renderSlots();
-    showToast(`${slot.label}: ${slot.occupied ? '🚗 Có xe' : '✅ Trống'}`, slot.occupied ? 'danger' : 'success');
   }
 }
 
@@ -1801,7 +1958,32 @@ function toggleGate(gate) {
   }
 }
 
-// ── FIREBASE MEMBERS SYNC ─────────────────────
+// ── MANUAL MODE ───────────────────────────────
+async function setManualMode(enabled) {
+  const btns     = document.getElementById('gateControlBtns');
+  const subtitle = document.getElementById('gateSubtitle');
+  const desc     = document.getElementById('manualModeDesc');
+
+  if (enabled) {
+    btns.classList.remove('disabled');
+    subtitle.textContent = '⚠️ Chế độ thủ công — RFID bị vô hiệu';
+    subtitle.style.color = '#f59e0b';
+    desc.textContent = 'Bật — RFID bị vô hiệu hoá';
+  } else {
+    btns.classList.add('disabled');
+    subtitle.textContent = 'RFID đang hoạt động';
+    subtitle.style.color = '';
+    desc.textContent = 'Tắt — RFID hoạt động bình thường';
+  }
+  // Ghi lên Firebase để ESP32 đọc
+  await fbPut('/settings/manualMode', enabled ? 'true' : 'false');
+}
+
+// Khởi tạo: buttons bị disable cho đến khi bật manual mode
+function initGateControls() {
+  const btns = document.getElementById('gateControlBtns');
+  if (btns) btns.classList.add('disabled');
+}
 
 async function loadMembersFromFirebase() {
   const data = await fbGet('/members');
@@ -2184,6 +2366,8 @@ window.initApp = async function() {
   _origInitApp();
   // Load members từ Firebase trước khi sync realtime
   await loadMembersFromFirebase();
+  await loadNormalCardsFromFirebase();
+  initGateControls();
   startFirebaseSync();
   startESP32Monitor();
 };
