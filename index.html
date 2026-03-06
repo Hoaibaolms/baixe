@@ -1526,7 +1526,7 @@ function doLogout() {
 }
 
 // ── INIT APP ──────────────────────────────────
-function initApp() {
+async function initApp() {
   const isAdmin = currentUser.role === 'admin';
 
   // Sidebar user
@@ -1566,6 +1566,15 @@ function initApp() {
   navigateTo(firstPage);
   renderAll();
   startClock();
+
+  // Load Firebase data
+  await Promise.all([
+    loadMembersFromFirebase(),
+    loadNormalCardsFromFirebase(),
+  ]);
+  initGateControls();
+  startFirebaseSync();
+  startESP32Monitor();
 }
 
 function navigateTo(pageId) {
@@ -2392,21 +2401,6 @@ function updateMobileNavActive(pageId) {
 
 // ── INIT ──────────────────────────────────────
 document.getElementById('historyDate').value = new Date().toISOString().split('T')[0];
-
-const _origInitApp = initApp;
-window.initApp = async function() {
-  // Bước 1: setup UI (nav, avatar, clock...)
-  _origInitApp();
-  // Bước 2: load data từ Firebase TRƯỚC khi render bảng
-  await Promise.all([
-    loadMembersFromFirebase(),
-    loadNormalCardsFromFirebase(),
-  ]);
-  // Bước 3: bắt đầu sync realtime
-  initGateControls();
-  startFirebaseSync();
-  startESP32Monitor();
-};
 </script>
 </body>
 </html>
