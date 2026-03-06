@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
@@ -34,869 +33,862 @@
     --radius-lg: 20px;
   }
 
-- { margin: 0; padding: 0; box-sizing: border-box; }
-
-html, body { overflow-x: hidden; width: 100%; }
-
-body {
-font-family: ‘Be Vietnam Pro’, sans-serif;
-background: var(–bg);
-color: var(–text);
-min-height: 100vh;
-font-size: 14px;
-}
-
-/* ── LOGIN ── */
-.login-screen {
-min-height: 100vh;
-display: flex;
-align-items: center;
-justify-content: center;
-background: linear-gradient(135deg, #e8effd 0%, #f0f2f5 50%, #ede9fe 100%);
-position: relative;
-overflow: hidden;
-}
-.login-screen::before {
-content: ‘’;
-position: absolute;
-width: 600px; height: 600px;
-background: radial-gradient(circle, rgba(26,86,219,0.08) 0%, transparent 70%);
-top: -200px; right: -200px;
-border-radius: 50%;
-}
-.login-screen::after {
-content: ‘’;
-position: absolute;
-width: 400px; height: 400px;
-background: radial-gradient(circle, rgba(124,58,237,0.07) 0%, transparent 70%);
-bottom: -100px; left: -100px;
-border-radius: 50%;
-}
-.login-card {
-background: var(–surface);
-border-radius: var(–radius-lg);
-padding: 48px 44px;
-width: 420px;
-box-shadow: var(–shadow-lg);
-position: relative;
-z-index: 1;
-animation: slideUp 0.5s cubic-bezier(0.34,1.56,0.64,1);
-}
-@keyframes slideUp {
-from { opacity: 0; transform: translateY(24px) scale(0.97); }
-to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-.login-logo {
-display: flex; align-items: center; gap: 12px;
-margin-bottom: 32px;
-}
-.login-logo-icon {
-width: 48px; height: 48px;
-background: linear-gradient(135deg, var(–primary), var(–accent));
-border-radius: 14px;
-display: flex; align-items: center; justify-content: center;
-font-size: 22px;
-}
-.login-logo h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
-.login-logo span { color: var(–primary); }
-.login-subtitle { color: var(–text2); margin-bottom: 32px; line-height: 1.5; }
-
-.tab-switch {
-display: flex; gap: 4px;
-background: var(–surface2);
-border-radius: var(–radius-sm);
-padding: 4px;
-margin-bottom: 28px;
-}
-.tab-btn {
-flex: 1; padding: 8px;
-border: none; background: none; cursor: pointer;
-border-radius: 6px;
-font-family: inherit; font-size: 13px; font-weight: 600;
-color: var(–text2);
-transition: all 0.2s;
-}
-.tab-btn.active {
-background: var(–surface);
-color: var(–primary);
-box-shadow: var(–shadow-sm);
-}
-
-.form-group { margin-bottom: 18px; }
-.form-label {
-display: block; font-size: 13px; font-weight: 600;
-color: var(–text2); margin-bottom: 7px;
-}
-.form-input {
-width: 100%; padding: 11px 14px;
-border: 1.5px solid var(–border);
-border-radius: var(–radius-sm);
-font-family: inherit; font-size: 14px;
-background: var(–surface2);
-color: var(–text);
-transition: all 0.2s;
-outline: none;
-}
-.form-input:focus {
-border-color: var(–primary);
-background: var(–surface);
-box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
-}
-.btn-primary {
-width: 100%; padding: 13px;
-background: linear-gradient(135deg, var(–primary), var(–primary-dark));
-color: white; border: none; border-radius: var(–radius-sm);
-font-family: inherit; font-size: 14px; font-weight: 700;
-cursor: pointer; transition: all 0.2s;
-letter-spacing: 0.3px;
-}
-.btn-primary:hover {
-transform: translateY(-1px);
-box-shadow: 0 6px 20px rgba(26,86,219,0.35);
-}
-.btn-primary:active { transform: translateY(0); }
-.login-hint {
-text-align: center; margin-top: 20px;
-font-size: 12px; color: var(–text3);
-}
-.login-hint b { color: var(–primary); font-weight: 600; }
-
-/* ── APP LAYOUT ── */
-.app { display: none; min-height: 100vh; width: 100%; overflow-x: hidden; }
-.app.visible { display: flex; }
-
-/* SIDEBAR */
-.sidebar {
-width: 240px; min-height: 100vh;
-background: var(–surface);
-border-right: 1px solid var(–border);
-display: flex; flex-direction: column;
-position: fixed; left: 0; top: 0; bottom: 0;
-z-index: 100;
-transition: transform 0.3s;
-}
-.sidebar-header {
-padding: 24px 20px 20px;
-border-bottom: 1px solid var(–border);
-}
-.sidebar-logo {
-display: flex; align-items: center; gap: 10px;
-}
-.sidebar-logo-icon {
-width: 36px; height: 36px;
-background: linear-gradient(135deg, var(–primary), var(–accent));
-border-radius: 10px;
-display: flex; align-items: center; justify-content: center;
-font-size: 16px;
-}
-.sidebar-logo h2 { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
-.sidebar-logo span { color: var(–primary); }
-
-.sidebar-user {
-padding: 16px 20px;
-border-bottom: 1px solid var(–border);
-display: flex; align-items: center; gap: 10px;
-}
-.user-avatar {
-width: 34px; height: 34px; border-radius: 50%;
-display: flex; align-items: center; justify-content: center;
-font-size: 13px; font-weight: 700; color: white;
-flex-shrink: 0;
-}
-.user-avatar.admin { background: linear-gradient(135deg, var(–primary), var(–accent)); }
-.user-avatar.member { background: linear-gradient(135deg, var(–success), #059669); }
-.user-info { min-width: 0; }
-.user-name { font-size: 13px; font-weight: 700; truncate: ellipsis; white-space: nowrap; overflow: hidden; }
-.user-role { font-size: 11px; color: var(–text3); font-weight: 500; }
-
-.sidebar-nav { flex: 1; padding: 12px 12px; overflow-y: auto; }
-.nav-section-title {
-font-size: 10px; font-weight: 700; text-transform: uppercase;
-letter-spacing: 1px; color: var(–text3);
-padding: 8px 8px 6px; margin-top: 8px;
-}
-.nav-item {
-display: flex; align-items: center; gap: 10px;
-padding: 9px 10px; border-radius: var(–radius-sm);
-cursor: pointer; transition: all 0.15s;
-color: var(–text2); font-weight: 500; font-size: 13.5px;
-border: none; background: none; width: 100%; text-align: left;
-}
-.nav-item:hover { background: var(–surface2); color: var(–text); }
-.nav-item.active { background: var(–primary-light); color: var(–primary); font-weight: 700; }
-.nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
-.nav-badge {
-margin-left: auto; background: var(–danger);
-color: white; font-size: 10px; font-weight: 700;
-padding: 1px 6px; border-radius: 10px;
-}
-
-.sidebar-footer {
-padding: 12px;
-border-top: 1px solid var(–border);
-}
-.btn-logout {
-width: 100%; padding: 9px 10px;
-display: flex; align-items: center; gap: 10px;
-border: none; background: none; cursor: pointer;
-color: var(–danger); font-family: inherit; font-size: 13px; font-weight: 600;
-border-radius: var(–radius-sm); transition: all 0.15s;
-}
-.btn-logout:hover { background: var(–danger-light); }
-
-/* MAIN CONTENT */
-.main {
-margin-left: 240px;
-flex: 1;
-display: flex; flex-direction: column;
-min-height: 100vh;
-min-width: 0;
-overflow-x: hidden;
-}
-.topbar {
-background: var(–surface);
-border-bottom: 1px solid var(–border);
-padding: 0 28px;
-height: 60px;
-display: flex; align-items: center; justify-content: space-between;
-position: sticky; top: 0; z-index: 50;
-}
-.topbar-title { font-size: 16px; font-weight: 700; }
-.topbar-actions { display: flex; align-items: center; gap: 12px; }
-.topbar-time {
-font-family: ‘JetBrains Mono’, monospace;
-font-size: 13px; color: var(–text2); font-weight: 600;
-}
-.status-dot {
-width: 8px; height: 8px; border-radius: 50%;
-background: var(–success);
-box-shadow: 0 0 0 3px rgba(13,148,136,0.2);
-animation: pulse 2s infinite;
-}
-@keyframes pulse {
-0%,100% { box-shadow: 0 0 0 3px rgba(13,148,136,0.2); }
-50% { box-shadow: 0 0 0 6px rgba(13,148,136,0.1); }
-}
-
-/* ESP32 Status Badge */
-.esp32-badge {
-display: flex; align-items: center; gap: 7px;
-padding: 5px 12px 5px 8px;
-border-radius: 20px;
-font-size: 12px; font-weight: 700;
-border: 1.5px solid;
-transition: all 0.4s;
-cursor: default;
-}
-.esp32-badge .esp32-dot {
-width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-}
-.esp32-badge.connected {
-background: var(–success-light);
-color: var(–success);
-border-color: #99f6e4;
-}
-.esp32-badge.connected .esp32-dot {
-background: var(–success);
-box-shadow: 0 0 0 3px rgba(13,148,136,0.25);
-animation: pulse 2s infinite;
-}
-.esp32-badge.disconnected {
-background: var(–danger-light);
-color: var(–danger);
-border-color: #fca5a5;
-}
-.esp32-badge.disconnected .esp32-dot {
-background: var(–danger);
-animation: none;
-}
-.esp32-badge.connecting {
-background: var(–warning-light);
-color: var(–warning);
-border-color: #fcd34d;
-}
-.esp32-badge.connecting .esp32-dot {
-background: var(–warning);
-animation: pulse-orange 1s infinite;
-}
-@keyframes pulse-orange {
-0%,100% { box-shadow: 0 0 0 3px rgba(217,119,6,0.25); }
-50% { box-shadow: 0 0 0 6px rgba(217,119,6,0.1); }
-}
-
-.content { padding: 24px 28px; flex: 1; }
-
-/* PAGE */
-.page { display: none; }
-.page.active { display: block; animation: fadeIn 0.25s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-.page-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.3px; }
-.page-subtitle { color: var(–text2); font-size: 13px; margin-bottom: 24px; }
-
-/* CARDS */
-.card {
-background: var(–surface);
-border-radius: var(–radius);
-border: 1px solid var(–border);
-padding: 20px;
-box-shadow: var(–shadow-sm);
-}
-.card-header {
-display: flex; align-items: center; justify-content: space-between;
-margin-bottom: 16px;
-}
-.card-title { font-size: 14px; font-weight: 700; }
-.card-subtitle { font-size: 12px; color: var(–text3); margin-top: 2px; }
-
-/* GRID */
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-
-/* STAT CARD */
-.stat-card {
-background: var(–surface);
-border-radius: var(–radius);
-border: 1px solid var(–border);
-padding: 18px 20px;
-box-shadow: var(–shadow-sm);
-display: flex; align-items: flex-start; gap: 14px;
-}
-.stat-icon {
-width: 44px; height: 44px; border-radius: 12px;
-display: flex; align-items: center; justify-content: center;
-font-size: 20px; flex-shrink: 0;
-}
-.stat-icon.blue { background: var(–primary-light); }
-.stat-icon.green { background: var(–success-light); }
-.stat-icon.orange { background: var(–warning-light); }
-.stat-icon.purple { background: var(–accent-light); }
-.stat-value { font-size: 26px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
-.stat-label { font-size: 12px; color: var(–text2); margin-top: 4px; font-weight: 500; }
-.stat-change { font-size: 11px; margin-top: 6px; font-weight: 600; }
-.stat-change.up { color: var(–success); }
-.stat-change.down { color: var(–danger); }
-
-/* PARKING SLOTS */
-.slots-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.slot-card {
-border-radius: var(–radius);
-border: 2px solid var(–border);
-padding: 18px 14px;
-text-align: center;
-transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-cursor: default;
-position: relative;
-overflow: hidden;
-}
-.slot-card::before {
-content: ‘’;
-position: absolute; inset: 0;
-opacity: 0; transition: opacity 0.3s;
-}
-.slot-card.empty {
-background: var(–success-light);
-border-color: #99f6e4;
-}
-.slot-card.occupied {
-background: var(–danger-light);
-border-color: #fca5a5;
-}
-.slot-icon { font-size: 32px; margin-bottom: 8px; }
-.slot-number { font-size: 11px; font-weight: 700; color: var(–text2); text-transform: uppercase; letter-spacing: 0.5px; }
-.slot-status {
-font-size: 12px; font-weight: 700; margin-top: 4px;
-}
-.slot-card.empty .slot-status { color: var(–success); }
-.slot-card.occupied .slot-status { color: var(–danger); }
-.slot-card.empty .slot-icon::after { content: ‘🟢’; font-size: 10px; }
-
-/* GATE CONTROLS */
-.gate-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.gate-card {
-border-radius: var(–radius);
-border: 1px solid var(–border);
-padding: 18px;
-background: var(–surface);
-text-align: center;
-}
-.gate-icon { font-size: 36px; margin-bottom: 8px; }
-.gate-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-.gate-state {
-display: inline-block; padding: 3px 10px;
-border-radius: 20px; font-size: 11px; font-weight: 700;
-margin-bottom: 14px;
-}
-.gate-state.closed { background: var(–danger-light); color: var(–danger); }
-.gate-state.open { background: var(–success-light); color: var(–success); }
-.btn-gate {
-width: 100%; padding: 10px;
-border: none; border-radius: var(–radius-sm);
-font-family: inherit; font-size: 13px; font-weight: 700;
-cursor: pointer; transition: all 0.2s;
-}
-.btn-gate.open-btn {
-background: var(–success-light); color: var(–success);
-border: 1.5px solid #99f6e4;
-}
-.btn-gate.open-btn:hover { background: var(–success); color: white; }
-.btn-gate.close-btn {
-background: var(–danger-light); color: var(–danger);
-border: 1.5px solid #fca5a5;
-}
-.btn-gate.close-btn:hover { background: var(–danger); color: white; }
-
-/* TABLE */
-.table-wrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; }
-th {
-font-size: 11px; font-weight: 700; text-transform: uppercase;
-letter-spacing: 0.5px; color: var(–text3);
-padding: 10px 14px; text-align: left;
-border-bottom: 1px solid var(–border);
-background: var(–surface2);
-}
-th:first-child { border-radius: 8px 0 0 0; }
-th:last-child { border-radius: 0 8px 0 0; }
-td {
-padding: 12px 14px; border-bottom: 1px solid var(–border);
-font-size: 13px; vertical-align: middle;
-}
-tr:last-child td { border-bottom: none; }
-tr:hover td { background: var(–surface2); }
-
-.badge {
-display: inline-flex; align-items: center; gap: 4px;
-padding: 3px 9px; border-radius: 20px;
-font-size: 11px; font-weight: 700;
-}
-.badge.green { background: var(–success-light); color: var(–success); }
-.badge.red { background: var(–danger-light); color: var(–danger); }
-.badge.blue { background: var(–primary-light); color: var(–primary); }
-.badge.purple { background: var(–accent-light); color: var(–accent); }
-.badge.orange { background: var(–warning-light); color: var(–warning); }
-
-.mono { font-family: ‘JetBrains Mono’, monospace; font-size: 12px; font-weight: 600; }
-
-/* CHART AREA */
-.chart-bar-wrap { display: flex; align-items: flex-end; gap: 6px; height: 120px; padding: 0 4px; }
-.chart-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.chart-bar {
-width: 100%; border-radius: 6px 6px 0 0;
-background: linear-gradient(180deg, var(–primary), #3b82f6);
-transition: height 0.5s cubic-bezier(0.34,1.56,0.64,1);
-min-height: 4px;
-position: relative;
-}
-.chart-bar:hover { filter: brightness(1.1); }
-.chart-label { font-size: 10px; color: var(–text3); font-weight: 600; }
-.chart-val { font-size: 10px; color: var(–primary); font-weight: 700; }
-
-/* REVENUE TABS */
-.rev-tabs { display: flex; gap: 4px; }
-.rev-tab {
-padding: 5px 12px; border-radius: 20px;
-font-size: 12px; font-weight: 600;
-border: none; cursor: pointer; font-family: inherit;
-background: none; color: var(–text2);
-transition: all 0.15s;
-}
-.rev-tab.active { background: var(–primary); color: white; }
-.rev-tab:hover:not(.active) { background: var(–surface2); }
-
-/* FILTERS */
-.filter-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
-.filter-input {
-padding: 8px 12px; border: 1.5px solid var(–border);
-border-radius: var(–radius-sm); font-family: inherit; font-size: 13px;
-background: var(–surface2); color: var(–text);
-outline: none; transition: border-color 0.2s;
-}
-.filter-input:focus { border-color: var(–primary); }
-.btn-sm {
-padding: 8px 14px; border-radius: var(–radius-sm);
-font-family: inherit; font-size: 12px; font-weight: 700;
-cursor: pointer; transition: all 0.2s; border: none;
-}
-.btn-sm.primary { background: var(–primary); color: white; }
-.btn-sm.primary:hover { background: var(–primary-dark); }
-.btn-sm.outline {
-background: none; color: var(–primary);
-border: 1.5px solid var(–primary);
-}
-.btn-sm.outline:hover { background: var(–primary-light); }
-.btn-sm.danger { background: var(–danger-light); color: var(–danger); }
-.btn-sm.danger:hover { background: var(–danger); color: white; }
-.btn-sm.success { background: var(–success-light); color: var(–success); }
-.btn-sm.success:hover { background: var(–success); color: white; }
-
-/* MODAL */
-.modal-overlay {
-display: none; position: fixed; inset: 0;
-background: rgba(15,28,46,0.4); backdrop-filter: blur(4px);
-z-index: 200; align-items: center; justify-content: center;
-}
-.modal-overlay.show { display: flex; animation: fadeIn 0.2s; }
-.modal {
-background: var(–surface);
-border-radius: var(–radius-lg);
-padding: 28px;
-width: 480px; max-width: 95vw;
-box-shadow: var(–shadow-lg);
-animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
-}
-.modal-header {
-display: flex; align-items: center; justify-content: space-between;
-margin-bottom: 20px;
-}
-.modal-title { font-size: 17px; font-weight: 800; }
-.modal-close {
-width: 32px; height: 32px; border-radius: 8px;
-border: none; background: var(–surface2); cursor: pointer;
-font-size: 16px; display: flex; align-items: center; justify-content: center;
-transition: background 0.15s;
-}
-.modal-close:hover { background: var(–border); }
-.modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
-
-/* PROFILE */
-.profile-hero {
-background: linear-gradient(135deg, var(–primary) 0%, var(–accent) 100%);
-border-radius: var(–radius-lg);
-padding: 28px;
-color: white; margin-bottom: 20px;
-display: flex; align-items: center; gap: 20px;
-}
-.profile-avatar-big {
-width: 64px; height: 64px; border-radius: 50%;
-background: rgba(255,255,255,0.25);
-display: flex; align-items: center; justify-content: center;
-font-size: 24px; font-weight: 800; flex-shrink: 0;
-border: 3px solid rgba(255,255,255,0.4);
-}
-.profile-name { font-size: 20px; font-weight: 800; }
-.profile-sub { font-size: 13px; opacity: 0.8; margin-top: 4px; }
-.profile-card-badge {
-margin-left: auto; background: rgba(255,255,255,0.2);
-border: 1px solid rgba(255,255,255,0.3);
-border-radius: 10px; padding: 10px 16px; text-align: center;
-min-width: 130px;
-}
-.profile-card-uid { font-family: ‘JetBrains Mono’, monospace; font-size: 13px; font-weight: 700; }
-.profile-card-type { font-size: 11px; opacity: 0.8; margin-top: 3px; }
-.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.info-item { padding: 14px 16px; background: var(–surface2); border-radius: var(–radius-sm); border: 1px solid var(–border); }
-.info-label { font-size: 11px; color: var(–text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-.info-value { font-size: 15px; font-weight: 700; margin-top: 4px; }
-
-/* EMPTY STATE */
-.empty-state { text-align: center; padding: 40px 20px; color: var(–text3); }
-.empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
-.empty-state p { font-size: 13px; }
-
-/* TOAST */
-.toast-container { position: fixed; top: 16px; right: 16px; z-index: 999; display: flex; flex-direction: column; gap: 8px; }
-.toast {
-background: var(–text); color: white;
-padding: 12px 18px; border-radius: var(–radius-sm);
-font-size: 13px; font-weight: 600;
-box-shadow: var(–shadow-lg);
-animation: slideIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
-display: flex; align-items: center; gap: 8px;
-}
-@keyframes slideIn { from { opacity:0; transform: translateX(20px); } to { opacity:1; transform:translateX(0); } }
-.toast.success { background: var(–success); }
-.toast.danger { background: var(–danger); }
-.toast.info { background: var(–primary); }
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(–border); border-radius: 10px; }
-
-/* Section spacing */
-.section-gap { display: flex; flex-direction: column; gap: 20px; }
-.row-gap { display: flex; gap: 16px; }
-.row-gap > * { flex: 1; }
-
-select.form-input { appearance: none; }
-
-/* ══════════════════════════════════════════════
-MOBILE RESPONSIVE — Tối ưu điện thoại
-══════════════════════════════════════════════ */
-
-/* Bottom nav bar cho mobile */
-.mobile-nav {
-display: none;
-position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
-background: var(–surface);
-border-top: 1px solid var(–border);
-box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
-padding: 0 4px;
-padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-.mobile-nav-inner {
-display: flex; align-items: stretch;
-height: 56px;
-}
-.mobile-nav-item {
-flex: 1; display: flex; flex-direction: column;
-align-items: center; justify-content: center; gap: 2px;
-border: none; background: none; cursor: pointer;
-color: var(–text3); font-family: inherit;
-font-size: 9px; font-weight: 600;
-letter-spacing: 0.2px;
-padding: 6px 2px;
-border-radius: 10px;
-transition: color 0.15s, background 0.15s;
-position: relative;
-}
-.mobile-nav-item .mnav-icon { font-size: 20px; line-height: 1; }
-.mobile-nav-item.active {
-color: var(–primary);
-}
-.mobile-nav-item.active .mnav-icon {
-background: var(–primary-light);
-border-radius: 10px;
-padding: 3px 10px;
-display: block;
-}
-.mobile-nav-badge {
-position: absolute; top: 4px; right: calc(50% - 18px);
-background: var(–danger); color: white;
-font-size: 9px; font-weight: 700;
-width: 16px; height: 16px; border-radius: 50%;
-display: flex; align-items: center; justify-content: center;
-}
-
-/* Mobile topbar */
-.mobile-topbar {
-display: none;
-position: fixed; top: 0; left: 0; right: 0; z-index: 150;
-background: var(–surface);
-border-bottom: 1px solid var(–border);
-padding: 0 16px;
-padding-top: env(safe-area-inset-top, 0px);
-height: calc(52px + env(safe-area-inset-top, 0px));
-align-items: flex-end; justify-content: space-between;
-padding-bottom: 10px;
-box-shadow: var(–shadow-sm);
-}
-.mobile-topbar-left { display: flex; align-items: center; gap: 10px; }
-.mobile-topbar-logo { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
-.mobile-topbar-logo span { color: var(–primary); }
-.mobile-topbar-right { display: flex; align-items: center; gap: 8px; }
-
-.mobile-logout-btn {
-width: 32px; height: 32px;
-border: none; background: var(–danger-light);
-color: var(–danger); border-radius: 8px;
-font-size: 15px; cursor: pointer;
-display: flex; align-items: center; justify-content: center;
-transition: background 0.15s;
-flex-shrink: 0;
-}
-.mobile-logout-btn:hover { background: var(–danger); color: white; }
-
-@media (max-width: 768px) {
-/* Ẩn sidebar, topbar desktop */
-.sidebar { display: none !important; }
-.topbar { display: none !important; }
-
-```
-/* App full width, block layout */
-.app, .app.visible {
-  display: block !important;
-  width: 100vw !important;
-  overflow-x: hidden !important;
-}
-
-/* Main full width, no offset */
-.main {
-  margin-left: 0 !important;
-  width: 100vw !important;
-  max-width: 100vw !important;
-  overflow-x: hidden !important;
-}
-
-/* Hiện mobile nav + topbar */
-.mobile-nav { display: block; }
-.mobile-topbar { display: flex; }
-
-/* Nội dung main: padding cho topbar + bottom nav */
-.content {
-  padding: 16px 14px !important;
-  padding-top: calc(52px + env(safe-area-inset-top, 0px) + 12px) !important;
-  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 16px) !important;
-}
-
-/* Login card */
-.login-card {
-  width: 100% !important;
-  max-width: 100vw;
-  min-height: 100vh;
-  border-radius: 0 !important;
-  padding: 40px 24px !important;
-  display: flex; flex-direction: column; justify-content: center;
-}
-
-/* Page title */
-.page-title { font-size: 18px !important; }
-.page-subtitle { font-size: 12px !important; margin-bottom: 16px !important; }
-
-/* Grid responsive */
-.grid-4 { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
-.grid-3 { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
-.grid-2 { grid-template-columns: 1fr !important; gap: 10px !important; }
-
-/* Stat cards nhỏ lại */
-.stat-card { padding: 14px 12px !important; gap: 10px !important; }
-.stat-icon { width: 36px !important; height: 36px !important; font-size: 16px !important; border-radius: 10px !important; }
-.stat-value { font-size: 20px !important; }
-.stat-label { font-size: 11px !important; }
-.stat-change { display: none; }
-
-/* Slots */
-.slots-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
-.slot-card { padding: 14px 10px !important; }
-.slot-icon { font-size: 26px !important; }
-
-/* Row-gap stack vertically */
-.row-gap { flex-direction: column !important; gap: 12px !important; }
-
-/* Gate controls */
-.gate-controls { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
-.gate-card { padding: 14px 10px !important; }
-.gate-icon { font-size: 28px !important; }
-
-/* Cards */
-.card { padding: 16px 14px !important; border-radius: 12px !important; }
-.card-header { margin-bottom: 12px !important; }
-
-/* Bảng → card list trên mobile */
-.table-wrap { margin: 0 -14px; }
-table thead { display: none; }
-table, tbody, tr, td { display: block; width: 100%; }
-tr {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 12px 14px;
-  position: relative;
-}
-tr:last-child { border-bottom: none; }
-tr:hover td { background: transparent !important; }
-td {
-  padding: 2px 0 !important;
-  border: none !important;
-  font-size: 13px !important;
-}
-td[data-label]::before {
-  content: attr(data-label) ': ';
-  font-size: 10px; font-weight: 700;
-  color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px;
-  display: block; margin-bottom: 1px;
-}
-
-/* Filter row */
-.filter-row {
-  flex-wrap: wrap !important;
-  gap: 8px !important;
-}
-.filter-row .filter-input,
-.filter-row input,
-.filter-row select {
-  flex: 1 1 calc(50% - 4px) !important;
-  min-width: 120px !important;
-  width: auto !important;
-  font-size: 13px !important;
-}
-.filter-row .btn-sm {
-  flex: 1 1 calc(50% - 4px) !important;
-}
-
-/* Charts */
-.chart-bar-wrap { height: 180px !important; gap: 4px !important; }
-.chart-val { font-size: 9px !important; }
-.chart-label { font-size: 9px !important; }
-
-/* Revenue tabs */
-.rev-tabs { gap: 2px !important; }
-.rev-tab { padding: 4px 8px !important; font-size: 11px !important; }
-
-/* Card-header flex on mobile */
-.card-header { flex-wrap: wrap !important; gap: 8px !important; }
-
-/* Modals full screen */
-.modal-overlay { align-items: flex-end !important; padding: 0 !important; }
-.modal {
-  width: 100% !important; max-width: 100% !important;
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
-  padding: 24px 20px !important;
-  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important;
-}
-
-/* Profile hero */
-.profile-hero {
-  flex-direction: column !important;
-  text-align: center !important;
-  gap: 12px !important;
-  padding: 20px 16px !important;
-}
-.profile-card-badge { margin-left: 0 !important; width: 100% !important; }
-
-/* Info grid */
-.info-grid { grid-template-columns: 1fr 1fr !important; }
-
-/* Section gap */
-.section-gap { gap: 14px !important; }
-
-/* ESP32 badge compact */
-.esp32-badge {
-  padding: 4px 8px 4px 6px !important;
-  font-size: 10px !important;
-}
-
-/* Toast position */
-.toast-container {
-  top: auto !important;
-  bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
-  right: 12px !important; left: 12px !important;
-}
-.toast { font-size: 12px !important; padding: 10px 14px !important; }
-
-/* Buttons bigger touch targets */
-.btn-gate { padding: 12px !important; font-size: 13px !important; }
-.btn-sm { padding: 10px 14px !important; }
-```
-
-}
-
-/* Chống zoom input trên iOS — font-size >= 16px */
-@media (max-width: 768px) {
-.form-input, .filter-input, input, select, textarea {
-font-size: 16px !important;
-}
-}
-
-/* Tablet */
-@media (min-width: 769px) and (max-width: 1024px) {
-.sidebar { width: 200px !important; }
-.main { margin-left: 200px !important; }
-.grid-4 { grid-template-columns: 1fr 1fr !important; }
-.grid-3 { grid-template-columns: 1fr 1fr !important; }
-}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body { overflow-x: hidden; width: 100%; }
+
+  body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* ── LOGIN ── */
+  .login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #e8effd 0%, #f0f2f5 50%, #ede9fe 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .login-screen::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(26,86,219,0.08) 0%, transparent 70%);
+    top: -200px; right: -200px;
+    border-radius: 50%;
+  }
+  .login-screen::after {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(124,58,237,0.07) 0%, transparent 70%);
+    bottom: -100px; left: -100px;
+    border-radius: 50%;
+  }
+  .login-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 48px 44px;
+    width: 420px;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    z-index: 1;
+    animation: slideUp 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(24px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .login-logo {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 32px;
+  }
+  .login-logo-icon {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .login-logo h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+  .login-logo span { color: var(--primary); }
+  .login-subtitle { color: var(--text2); margin-bottom: 32px; line-height: 1.5; }
+
+  .tab-switch {
+    display: flex; gap: 4px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 4px;
+    margin-bottom: 28px;
+  }
+  .tab-btn {
+    flex: 1; padding: 8px;
+    border: none; background: none; cursor: pointer;
+    border-radius: 6px;
+    font-family: inherit; font-size: 13px; font-weight: 600;
+    color: var(--text2);
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: var(--surface);
+    color: var(--primary);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .form-group { margin-bottom: 18px; }
+  .form-label {
+    display: block; font-size: 13px; font-weight: 600;
+    color: var(--text2); margin-bottom: 7px;
+  }
+  .form-input {
+    width: 100%; padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: inherit; font-size: 14px;
+    background: var(--surface2);
+    color: var(--text);
+    transition: all 0.2s;
+    outline: none;
+  }
+  .form-input:focus {
+    border-color: var(--primary);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
+  }
+  .btn-primary {
+    width: 100%; padding: 13px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white; border: none; border-radius: var(--radius-sm);
+    font-family: inherit; font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(26,86,219,0.35);
+  }
+  .btn-primary:active { transform: translateY(0); }
+  .login-hint {
+    text-align: center; margin-top: 20px;
+    font-size: 12px; color: var(--text3);
+  }
+  .login-hint b { color: var(--primary); font-weight: 600; }
+
+  /* ── APP LAYOUT ── */
+  .app { display: none; min-height: 100vh; width: 100%; overflow-x: hidden; }
+  .app.visible { display: flex; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 240px; min-height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    position: fixed; left: 0; top: 0; bottom: 0;
+    z-index: 100;
+    transition: transform 0.3s;
+  }
+  .sidebar-header {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-logo {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sidebar-logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .sidebar-logo h2 { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
+  .sidebar-logo span { color: var(--primary); }
+
+  .sidebar-user {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .user-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: white;
+    flex-shrink: 0;
+  }
+  .user-avatar.admin { background: linear-gradient(135deg, var(--primary), var(--accent)); }
+  .user-avatar.member { background: linear-gradient(135deg, var(--success), #059669); }
+  .user-info { min-width: 0; }
+  .user-name { font-size: 13px; font-weight: 700; truncate: ellipsis; white-space: nowrap; overflow: hidden; }
+  .user-role { font-size: 11px; color: var(--text3); font-weight: 500; }
+
+  .sidebar-nav { flex: 1; padding: 12px 12px; overflow-y: auto; }
+  .nav-section-title {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--text3);
+    padding: 8px 8px 6px; margin-top: 8px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px; border-radius: var(--radius-sm);
+    cursor: pointer; transition: all 0.15s;
+    color: var(--text2); font-weight: 500; font-size: 13.5px;
+    border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--primary-light); color: var(--primary); font-weight: 700; }
+  .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-badge {
+    margin-left: auto; background: var(--danger);
+    color: white; font-size: 10px; font-weight: 700;
+    padding: 1px 6px; border-radius: 10px;
+  }
+
+  .sidebar-footer {
+    padding: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .btn-logout {
+    width: 100%; padding: 9px 10px;
+    display: flex; align-items: center; gap: 10px;
+    border: none; background: none; cursor: pointer;
+    color: var(--danger); font-family: inherit; font-size: 13px; font-weight: 600;
+    border-radius: var(--radius-sm); transition: all 0.15s;
+  }
+  .btn-logout:hover { background: var(--danger-light); }
+
+  /* MAIN CONTENT */
+  .main {
+    margin-left: 240px;
+    flex: 1;
+    display: flex; flex-direction: column;
+    min-height: 100vh;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .topbar-title { font-size: 16px; font-weight: 700; }
+  .topbar-actions { display: flex; align-items: center; gap: 12px; }
+  .topbar-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; color: var(--text2); font-weight: 600;
+  }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 0 3px rgba(13,148,136,0.2);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 3px rgba(13,148,136,0.2); }
+    50% { box-shadow: 0 0 0 6px rgba(13,148,136,0.1); }
+  }
+
+  /* ESP32 Status Badge */
+  .esp32-badge {
+    display: flex; align-items: center; gap: 7px;
+    padding: 5px 12px 5px 8px;
+    border-radius: 20px;
+    font-size: 12px; font-weight: 700;
+    border: 1.5px solid;
+    transition: all 0.4s;
+    cursor: default;
+  }
+  .esp32-badge .esp32-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .esp32-badge.connected {
+    background: var(--success-light);
+    color: var(--success);
+    border-color: #99f6e4;
+  }
+  .esp32-badge.connected .esp32-dot {
+    background: var(--success);
+    box-shadow: 0 0 0 3px rgba(13,148,136,0.25);
+    animation: pulse 2s infinite;
+  }
+  .esp32-badge.disconnected {
+    background: var(--danger-light);
+    color: var(--danger);
+    border-color: #fca5a5;
+  }
+  .esp32-badge.disconnected .esp32-dot {
+    background: var(--danger);
+    animation: none;
+  }
+  .esp32-badge.connecting {
+    background: var(--warning-light);
+    color: var(--warning);
+    border-color: #fcd34d;
+  }
+  .esp32-badge.connecting .esp32-dot {
+    background: var(--warning);
+    animation: pulse-orange 1s infinite;
+  }
+  @keyframes pulse-orange {
+    0%,100% { box-shadow: 0 0 0 3px rgba(217,119,6,0.25); }
+    50% { box-shadow: 0 0 0 6px rgba(217,119,6,0.1); }
+  }
+
+  .content { padding: 24px 28px; flex: 1; }
+
+  /* PAGE */
+  .page { display: none; }
+  .page.active { display: block; animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .page-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.3px; }
+  .page-subtitle { color: var(--text2); font-size: 13px; margin-bottom: 24px; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+  .card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .card-title { font-size: 14px; font-weight: 700; }
+  .card-subtitle { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+  /* STAT CARD */
+  .stat-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 18px 20px;
+    box-shadow: var(--shadow-sm);
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .stat-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .stat-icon.blue { background: var(--primary-light); }
+  .stat-icon.green { background: var(--success-light); }
+  .stat-icon.orange { background: var(--warning-light); }
+  .stat-icon.purple { background: var(--accent-light); }
+  .stat-value { font-size: 26px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
+  .stat-label { font-size: 12px; color: var(--text2); margin-top: 4px; font-weight: 500; }
+  .stat-change { font-size: 11px; margin-top: 6px; font-weight: 600; }
+  .stat-change.up { color: var(--success); }
+  .stat-change.down { color: var(--danger); }
+
+  /* PARKING SLOTS */
+  .slots-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .slot-card {
+    border-radius: var(--radius);
+    border: 2px solid var(--border);
+    padding: 18px 14px;
+    text-align: center;
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+  .slot-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .slot-card.empty {
+    background: var(--success-light);
+    border-color: #99f6e4;
+  }
+  .slot-card.occupied {
+    background: var(--danger-light);
+    border-color: #fca5a5;
+  }
+  .slot-icon { font-size: 32px; margin-bottom: 8px; }
+  .slot-number { font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .slot-status {
+    font-size: 12px; font-weight: 700; margin-top: 4px;
+  }
+  .slot-card.empty .slot-status { color: var(--success); }
+  .slot-card.occupied .slot-status { color: var(--danger); }
+  .slot-card.empty .slot-icon::after { content: '🟢'; font-size: 10px; }
+
+  /* GATE CONTROLS */
+  .gate-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .gate-card {
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 18px;
+    background: var(--surface);
+    text-align: center;
+  }
+  .gate-icon { font-size: 36px; margin-bottom: 8px; }
+  .gate-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .gate-state {
+    display: inline-block; padding: 3px 10px;
+    border-radius: 20px; font-size: 11px; font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .gate-state.closed { background: var(--danger-light); color: var(--danger); }
+  .gate-state.open { background: var(--success-light); color: var(--success); }
+  .btn-gate {
+    width: 100%; padding: 10px;
+    border: none; border-radius: var(--radius-sm);
+    font-family: inherit; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-gate.open-btn {
+    background: var(--success-light); color: var(--success);
+    border: 1.5px solid #99f6e4;
+  }
+  .btn-gate.open-btn:hover { background: var(--success); color: white; }
+  .btn-gate.close-btn {
+    background: var(--danger-light); color: var(--danger);
+    border: 1.5px solid #fca5a5;
+  }
+  .btn-gate.close-btn:hover { background: var(--danger); color: white; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--text3);
+    padding: 10px 14px; text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  th:first-child { border-radius: 8px 0 0 0; }
+  th:last-child { border-radius: 0 8px 0 0; }
+  td {
+    padding: 12px 14px; border-bottom: 1px solid var(--border);
+    font-size: 13px; vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 9px; border-radius: 20px;
+    font-size: 11px; font-weight: 700;
+  }
+  .badge.green { background: var(--success-light); color: var(--success); }
+  .badge.red { background: var(--danger-light); color: var(--danger); }
+  .badge.blue { background: var(--primary-light); color: var(--primary); }
+  .badge.purple { background: var(--accent-light); color: var(--accent); }
+  .badge.orange { background: var(--warning-light); color: var(--warning); }
+
+  .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; }
+
+  /* CHART AREA */
+  .chart-bar-wrap { display: flex; align-items: flex-end; gap: 6px; height: 120px; padding: 0 4px; }
+  .chart-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .chart-bar {
+    width: 100%; border-radius: 6px 6px 0 0;
+    background: linear-gradient(180deg, var(--primary), #3b82f6);
+    transition: height 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    min-height: 4px;
+    position: relative;
+  }
+  .chart-bar:hover { filter: brightness(1.1); }
+  .chart-label { font-size: 10px; color: var(--text3); font-weight: 600; }
+  .chart-val { font-size: 10px; color: var(--primary); font-weight: 700; }
+
+  /* REVENUE TABS */
+  .rev-tabs { display: flex; gap: 4px; }
+  .rev-tab {
+    padding: 5px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 600;
+    border: none; cursor: pointer; font-family: inherit;
+    background: none; color: var(--text2);
+    transition: all 0.15s;
+  }
+  .rev-tab.active { background: var(--primary); color: white; }
+  .rev-tab:hover:not(.active) { background: var(--surface2); }
+
+  /* FILTERS */
+  .filter-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+  .filter-input {
+    padding: 8px 12px; border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); font-family: inherit; font-size: 13px;
+    background: var(--surface2); color: var(--text);
+    outline: none; transition: border-color 0.2s;
+  }
+  .filter-input:focus { border-color: var(--primary); }
+  .btn-sm {
+    padding: 8px 14px; border-radius: var(--radius-sm);
+    font-family: inherit; font-size: 12px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s; border: none;
+  }
+  .btn-sm.primary { background: var(--primary); color: white; }
+  .btn-sm.primary:hover { background: var(--primary-dark); }
+  .btn-sm.outline {
+    background: none; color: var(--primary);
+    border: 1.5px solid var(--primary);
+  }
+  .btn-sm.outline:hover { background: var(--primary-light); }
+  .btn-sm.danger { background: var(--danger-light); color: var(--danger); }
+  .btn-sm.danger:hover { background: var(--danger); color: white; }
+  .btn-sm.success { background: var(--success-light); color: var(--success); }
+  .btn-sm.success:hover { background: var(--success); color: white; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(15,28,46,0.4); backdrop-filter: blur(4px);
+    z-index: 200; align-items: center; justify-content: center;
+  }
+  .modal-overlay.show { display: flex; animation: fadeIn 0.2s; }
+  .modal {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    width: 480px; max-width: 95vw;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .modal-title { font-size: 17px; font-weight: 800; }
+  .modal-close {
+    width: 32px; height: 32px; border-radius: 8px;
+    border: none; background: var(--surface2); cursor: pointer;
+    font-size: 16px; display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .modal-close:hover { background: var(--border); }
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+  /* PROFILE */
+  .profile-hero {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    color: white; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 20px;
+  }
+  .profile-avatar-big {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; font-weight: 800; flex-shrink: 0;
+    border: 3px solid rgba(255,255,255,0.4);
+  }
+  .profile-name { font-size: 20px; font-weight: 800; }
+  .profile-sub { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+  .profile-card-badge {
+    margin-left: auto; background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 10px; padding: 10px 16px; text-align: center;
+    min-width: 130px;
+  }
+  .profile-card-uid { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; }
+  .profile-card-type { font-size: 11px; opacity: 0.8; margin-top: 3px; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .info-item { padding: 14px 16px; background: var(--surface2); border-radius: var(--radius-sm); border: 1px solid var(--border); }
+  .info-label { font-size: 11px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .info-value { font-size: 15px; font-weight: 700; margin-top: 4px; }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text3); }
+  .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 13px; }
+
+  /* TOAST */
+  .toast-container { position: fixed; top: 16px; right: 16px; z-index: 999; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    background: var(--text); color: white;
+    padding: 12px 18px; border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 600;
+    box-shadow: var(--shadow-lg);
+    animation: slideIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    display: flex; align-items: center; gap: 8px;
+  }
+  @keyframes slideIn { from { opacity:0; transform: translateX(20px); } to { opacity:1; transform:translateX(0); } }
+  .toast.success { background: var(--success); }
+  .toast.danger { background: var(--danger); }
+  .toast.info { background: var(--primary); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+  /* Section spacing */
+  .section-gap { display: flex; flex-direction: column; gap: 20px; }
+  .row-gap { display: flex; gap: 16px; }
+  .row-gap > * { flex: 1; }
+
+  select.form-input { appearance: none; }
+
+  /* ══════════════════════════════════════════════
+     MOBILE RESPONSIVE — Tối ưu điện thoại
+  ══════════════════════════════════════════════ */
+
+  /* Bottom nav bar cho mobile */
+  .mobile-nav {
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+    padding: 0 4px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .mobile-nav-inner {
+    display: flex; align-items: stretch;
+    height: 56px;
+  }
+  .mobile-nav-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 2px;
+    border: none; background: none; cursor: pointer;
+    color: var(--text3); font-family: inherit;
+    font-size: 9px; font-weight: 600;
+    letter-spacing: 0.2px;
+    padding: 6px 2px;
+    border-radius: 10px;
+    transition: color 0.15s, background 0.15s;
+    position: relative;
+  }
+  .mobile-nav-item .mnav-icon { font-size: 20px; line-height: 1; }
+  .mobile-nav-item.active {
+    color: var(--primary);
+  }
+  .mobile-nav-item.active .mnav-icon {
+    background: var(--primary-light);
+    border-radius: 10px;
+    padding: 3px 10px;
+    display: block;
+  }
+  .mobile-nav-badge {
+    position: absolute; top: 4px; right: calc(50% - 18px);
+    background: var(--danger); color: white;
+    font-size: 9px; font-weight: 700;
+    width: 16px; height: 16px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Mobile topbar */
+  .mobile-topbar {
+    display: none;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 150;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    padding-top: env(safe-area-inset-top, 0px);
+    height: calc(52px + env(safe-area-inset-top, 0px));
+    align-items: flex-end; justify-content: space-between;
+    padding-bottom: 10px;
+    box-shadow: var(--shadow-sm);
+  }
+  .mobile-topbar-left { display: flex; align-items: center; gap: 10px; }
+  .mobile-topbar-logo { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+  .mobile-topbar-logo span { color: var(--primary); }
+  .mobile-topbar-right { display: flex; align-items: center; gap: 8px; }
+
+  .mobile-logout-btn {
+    width: 32px; height: 32px;
+    border: none; background: var(--danger-light);
+    color: var(--danger); border-radius: 8px;
+    font-size: 15px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .mobile-logout-btn:hover { background: var(--danger); color: white; }
+
+  @media (max-width: 768px) {
+    /* Ẩn sidebar, topbar desktop */
+    .sidebar { display: none !important; }
+    .topbar { display: none !important; }
+
+    /* App full width, block layout */
+    .app, .app.visible {
+      display: block !important;
+      width: 100vw !important;
+      overflow-x: hidden !important;
+    }
+
+    /* Main full width, no offset */
+    .main {
+      margin-left: 0 !important;
+      width: 100vw !important;
+      max-width: 100vw !important;
+      overflow-x: hidden !important;
+    }
+
+    /* Hiện mobile nav + topbar */
+    .mobile-nav { display: block; }
+    .mobile-topbar { display: flex; }
+
+    /* Nội dung main: padding cho topbar + bottom nav */
+    .content {
+      padding: 16px 14px !important;
+      padding-top: calc(52px + env(safe-area-inset-top, 0px) + 12px) !important;
+      padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 16px) !important;
+    }
+
+    /* Login card */
+    .login-card {
+      width: 100% !important;
+      max-width: 100vw;
+      min-height: 100vh;
+      border-radius: 0 !important;
+      padding: 40px 24px !important;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+
+    /* Page title */
+    .page-title { font-size: 18px !important; }
+    .page-subtitle { font-size: 12px !important; margin-bottom: 16px !important; }
+
+    /* Grid responsive */
+    .grid-4 { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+    .grid-3 { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+    .grid-2 { grid-template-columns: 1fr !important; gap: 10px !important; }
+
+    /* Stat cards nhỏ lại */
+    .stat-card { padding: 14px 12px !important; gap: 10px !important; }
+    .stat-icon { width: 36px !important; height: 36px !important; font-size: 16px !important; border-radius: 10px !important; }
+    .stat-value { font-size: 20px !important; }
+    .stat-label { font-size: 11px !important; }
+    .stat-change { display: none; }
+
+    /* Slots */
+    .slots-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+    .slot-card { padding: 14px 10px !important; }
+    .slot-icon { font-size: 26px !important; }
+
+    /* Row-gap stack vertically */
+    .row-gap { flex-direction: column !important; gap: 12px !important; }
+
+    /* Gate controls */
+    .gate-controls { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+    .gate-card { padding: 14px 10px !important; }
+    .gate-icon { font-size: 28px !important; }
+
+    /* Cards */
+    .card { padding: 16px 14px !important; border-radius: 12px !important; }
+    .card-header { margin-bottom: 12px !important; }
+
+    /* Bảng → card list trên mobile */
+    .table-wrap { margin: 0 -14px; }
+    table thead { display: none; }
+    table, tbody, tr, td { display: block; width: 100%; }
+    tr {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 14px;
+      position: relative;
+    }
+    tr:last-child { border-bottom: none; }
+    tr:hover td { background: transparent !important; }
+    td {
+      padding: 2px 0 !important;
+      border: none !important;
+      font-size: 13px !important;
+    }
+    td[data-label]::before {
+      content: attr(data-label) ': ';
+      font-size: 10px; font-weight: 700;
+      color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px;
+      display: block; margin-bottom: 1px;
+    }
+
+    /* Filter row */
+    .filter-row {
+      flex-wrap: wrap !important;
+      gap: 8px !important;
+    }
+    .filter-row .filter-input,
+    .filter-row input,
+    .filter-row select {
+      flex: 1 1 calc(50% - 4px) !important;
+      min-width: 120px !important;
+      width: auto !important;
+      font-size: 13px !important;
+    }
+    .filter-row .btn-sm {
+      flex: 1 1 calc(50% - 4px) !important;
+    }
+
+    /* Charts */
+    .chart-bar-wrap { height: 180px !important; gap: 4px !important; }
+    .chart-val { font-size: 9px !important; }
+    .chart-label { font-size: 9px !important; }
+
+    /* Revenue tabs */
+    .rev-tabs { gap: 2px !important; }
+    .rev-tab { padding: 4px 8px !important; font-size: 11px !important; }
+
+    /* Card-header flex on mobile */
+    .card-header { flex-wrap: wrap !important; gap: 8px !important; }
+
+    /* Modals full screen */
+    .modal-overlay { align-items: flex-end !important; padding: 0 !important; }
+    .modal {
+      width: 100% !important; max-width: 100% !important;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+      padding: 24px 20px !important;
+      padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    /* Profile hero */
+    .profile-hero {
+      flex-direction: column !important;
+      text-align: center !important;
+      gap: 12px !important;
+      padding: 20px 16px !important;
+    }
+    .profile-card-badge { margin-left: 0 !important; width: 100% !important; }
+
+    /* Info grid */
+    .info-grid { grid-template-columns: 1fr 1fr !important; }
+
+    /* Section gap */
+    .section-gap { gap: 14px !important; }
+
+    /* ESP32 badge compact */
+    .esp32-badge {
+      padding: 4px 8px 4px 6px !important;
+      font-size: 10px !important;
+    }
+
+    /* Toast position */
+    .toast-container {
+      top: auto !important;
+      bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+      right: 12px !important; left: 12px !important;
+    }
+    .toast { font-size: 12px !important; padding: 10px 14px !important; }
+
+    /* Buttons bigger touch targets */
+    .btn-gate { padding: 12px !important; font-size: 13px !important; }
+    .btn-sm { padding: 10px 14px !important; }
+  }
+
+  /* Chống zoom input trên iOS — font-size >= 16px */
+  @media (max-width: 768px) {
+    .form-input, .filter-input, input, select, textarea {
+      font-size: 16px !important;
+    }
+  }
+
+  /* Tablet */
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .sidebar { width: 200px !important; }
+    .main { margin-left: 200px !important; }
+    .grid-4 { grid-template-columns: 1fr 1fr !important; }
+    .grid-3 { grid-template-columns: 1fr 1fr !important; }
+  }
 </style>
-
 </head>
 <body>
 
 <!-- ══════════════════════════════════════════ -->
-
 <!--  LOGIN SCREEN                             -->
-
 <!-- ══════════════════════════════════════════ -->
-
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
     <div class="login-logo">
@@ -905,37 +897,30 @@ font-size: 16px !important;
     </div>
     <p class="login-subtitle">Hệ thống quản lý bãi xe thông minh.<br>Đăng nhập để tiếp tục.</p>
 
-```
-<div class="tab-switch">
-  <button class="tab-btn active" onclick="switchLoginTab('admin')">🔑 Admin</button>
-  <button class="tab-btn" onclick="switchLoginTab('member')">👤 Thành viên</button>
-</div>
+    <div class="tab-switch">
+      <button class="tab-btn active" onclick="switchLoginTab('admin')">🔑 Admin</button>
+      <button class="tab-btn" onclick="switchLoginTab('member')">👤 Thành viên</button>
+    </div>
 
-<div class="form-group">
-  <label class="form-label">Tên đăng nhập</label>
-  <input class="form-input" id="loginUser" placeholder="admin / member01..." value="admin">
-</div>
-<div class="form-group">
-  <label class="form-label">Mật khẩu</label>
-  <input class="form-input" type="password" id="loginPass" placeholder="••••••••" value="123456">
-</div>
-<button class="btn-primary" onclick="doLogin()">Đăng nhập →</button>
-<p class="login-hint">Demo: admin/<b>123456</b> &nbsp;|&nbsp; member01/<b>123456</b></p>
-```
-
+    <div class="form-group">
+      <label class="form-label">Tên đăng nhập</label>
+      <input class="form-input" id="loginUser" placeholder="admin / member01..." value="admin">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Mật khẩu</label>
+      <input class="form-input" type="password" id="loginPass" placeholder="••••••••" value="123456">
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Đăng nhập →</button>
+    <p class="login-hint">Demo: admin/<b>123456</b> &nbsp;|&nbsp; member01/<b>123456</b></p>
   </div>
 </div>
 
 <!-- ══════════════════════════════════════════ -->
-
 <!--  MAIN APP                                  -->
-
 <!-- ══════════════════════════════════════════ -->
-
 <div class="app" id="app">
 
   <!-- ── MOBILE TOPBAR ── -->
-
   <div class="mobile-topbar" id="mobileTopbar">
     <div class="mobile-topbar-left">
       <div style="width:28px;height:28px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;">🅿️</div>
@@ -952,7 +937,6 @@ font-size: 16px !important;
   </div>
 
   <!-- ── MOBILE BOTTOM NAV ── -->
-
   <nav class="mobile-nav" id="mobileNav">
     <div class="mobile-nav-inner" id="mobileNavInner">
       <!-- filled by JS -->
@@ -960,7 +944,6 @@ font-size: 16px !important;
   </nav>
 
   <!-- SIDEBAR -->
-
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="sidebar-logo">
@@ -969,30 +952,26 @@ font-size: 16px !important;
       </div>
     </div>
 
-```
-<div class="sidebar-user">
-  <div class="user-avatar" id="sidebarAvatar">A</div>
-  <div class="user-info">
-    <div class="user-name" id="sidebarName">Admin</div>
-    <div class="user-role" id="sidebarRole">Quản trị viên</div>
-  </div>
-</div>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebarAvatar">A</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarName">Admin</div>
+        <div class="user-role" id="sidebarRole">Quản trị viên</div>
+      </div>
+    </div>
 
-<nav class="sidebar-nav" id="sidebarNav">
-  <!-- Filled by JS -->
-</nav>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <!-- Filled by JS -->
+    </nav>
 
-<div class="sidebar-footer">
-  <button class="btn-logout" onclick="doLogout()">
-    <span>🚪</span> Đăng xuất
-  </button>
-</div>
-```
-
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="doLogout()">
+        <span>🚪</span> Đăng xuất
+      </button>
+    </div>
   </aside>
 
   <!-- MAIN -->
-
   <main class="main">
     <div class="topbar">
       <div class="topbar-title" id="topbarTitle">Dashboard</div>
@@ -1005,333 +984,327 @@ font-size: 16px !important;
       </div>
     </div>
 
-```
-<div class="content">
+    <div class="content">
 
-  <!-- ── PAGE: DASHBOARD ── -->
-  <div class="page active" id="page-dashboard">
-    <div class="page-title">Trang chủ</div>
-    <div class="page-subtitle">Tổng quan bãi xe thời gian thực</div>
+      <!-- ── PAGE: DASHBOARD ── -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-title">Trang chủ</div>
+        <div class="page-subtitle">Tổng quan bãi xe thời gian thực</div>
 
-    <div class="section-gap">
-      <!-- Stats -->
-      <div class="grid-4">
-        <div class="stat-card">
-          <div class="stat-icon green">🚗</div>
-          <div>
-            <div class="stat-value" id="statOccupied">2</div>
-            <div class="stat-label">Chỗ đang đỗ</div>
-            <div class="stat-change up">▲ 1 so với sáng</div>
+        <div class="section-gap">
+          <!-- Stats -->
+          <div class="grid-4">
+            <div class="stat-card">
+              <div class="stat-icon green">🚗</div>
+              <div>
+                <div class="stat-value" id="statOccupied">2</div>
+                <div class="stat-label">Chỗ đang đỗ</div>
+                <div class="stat-change up">▲ 1 so với sáng</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon blue">🅿️</div>
+              <div>
+                <div class="stat-value" id="statFree">2</div>
+                <div class="stat-label">Chỗ còn trống</div>
+                <div class="stat-change">Tổng 4 chỗ</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon orange">📋</div>
+              <div>
+                <div class="stat-value" id="statTodayTrips">0</div>
+                <div class="stat-label">Lượt hôm nay</div>
+                <div class="stat-change up">Từ Firebase</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon purple">💰</div>
+              <div>
+                <div class="stat-value" id="statTodayRevenue">0k</div>
+                <div class="stat-label">Doanh thu hôm nay</div>
+                <div class="stat-change up">Từ Firebase</div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon blue">🅿️</div>
-          <div>
-            <div class="stat-value" id="statFree">2</div>
-            <div class="stat-label">Chỗ còn trống</div>
-            <div class="stat-change">Tổng 4 chỗ</div>
+
+          <!-- Slots + Gate -->
+          <div class="row-gap">
+            <div class="card" style="flex:2">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Trạng thái chỗ đỗ</div>
+                  <div class="card-subtitle">Cập nhật realtime từ cảm biến IR</div>
+                </div>
+                <button class="btn-sm primary" onclick="refreshSlots()">🔄 Refresh</button>
+              </div>
+              <div class="slots-grid" id="slotsGrid"></div>
+            </div>
+
+            <div class="card" style="flex:1">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Điều khiển cổng</div>
+                  <div class="card-subtitle">Mở / đóng thủ công</div>
+                </div>
+              </div>
+              <div class="gate-controls">
+                <div class="gate-card">
+                  <div class="gate-icon">🚧</div>
+                  <div class="gate-name">Cổng Vào</div>
+                  <div class="gate-state closed" id="entryState">● Đóng</div>
+                  <button id="btn-gate-entry" class="btn-gate open-btn" onclick="toggleGate('entry')">▲ Mở cổng</button>
+                </div>
+                <div class="gate-card">
+                  <div class="gate-icon">🚦</div>
+                  <div class="gate-name">Cổng Ra</div>
+                  <div class="gate-state closed" id="exitState">● Đóng</div>
+                  <button id="btn-gate-exit" class="btn-gate open-btn" onclick="toggleGate('exit')">▲ Mở cổng</button>
+                </div>
+              </div>
+            </div>
           </div>
+
         </div>
-        <div class="stat-card">
-          <div class="stat-icon orange">📋</div>
-          <div>
-            <div class="stat-value" id="statTodayTrips">0</div>
-            <div class="stat-label">Lượt hôm nay</div>
-            <div class="stat-change up">Từ Firebase</div>
+      </div>
+
+      <!-- ── PAGE: LỊCH SỬ ── -->
+      <div class="page" id="page-history">
+        <div class="page-title">Lịch sử xe vào/ra</div>
+        <div class="page-subtitle">Toàn bộ lịch sử quét thẻ</div>
+
+        <div class="card">
+          <div class="filter-row">
+            <input class="filter-input" type="date" id="historyDate" style="width:160px">
+            <select class="filter-input" style="width:140px">
+              <option>Tất cả loại thẻ</option>
+              <option>Thẻ thường</option>
+              <option>Thẻ tháng</option>
+            </select>
+            <select class="filter-input" style="width:120px">
+              <option>Tất cả sự kiện</option>
+              <option>Vào</option>
+              <option>Ra</option>
+            </select>
+            <button class="btn-sm primary">🔍 Lọc</button>
           </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon purple">💰</div>
-          <div>
-            <div class="stat-value" id="statTodayRevenue">0k</div>
-            <div class="stat-label">Doanh thu hôm nay</div>
-            <div class="stat-change up">Từ Firebase</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Thời gian vào</th>
+                  <th>Thời gian ra</th>
+                  <th>Thời gian đỗ</th>
+                  <th>UID Thẻ</th>
+                  <th>Tên chủ xe</th>
+                  <th>Loại thẻ</th>
+                  <th>Phí</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody id="historyTable"></tbody>
+            </table>
           </div>
         </div>
       </div>
 
-      <!-- Slots + Gate -->
-      <div class="row-gap">
-        <div class="card" style="flex:2">
-          <div class="card-header">
+      <!-- ── PAGE: DOANH THU ── -->
+      <div class="page" id="page-revenue">
+        <div class="page-title">Doanh thu</div>
+        <div class="page-subtitle">Thống kê tài chính bãi xe</div>
+
+        <div class="section-gap">
+          <div class="grid-4">
+            <div class="stat-card">
+              <div class="stat-icon green">📅</div>
+              <div>
+                <div class="stat-value">0k</div>
+                <div class="stat-label">Hôm nay</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon blue">📆</div>
+              <div>
+                <div class="stat-value">0k</div>
+                <div class="stat-label">Tuần này</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon orange">🗓️</div>
+              <div>
+                <div class="stat-value">0k</div>
+                <div class="stat-label">Tháng này</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon purple">📊</div>
+              <div>
+                <div class="stat-value">0k</div>
+                <div class="stat-label">Năm nay</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-gap">
+            <div class="card">
+              <div style="margin-bottom:12px;">
+                <div class="card-title" style="margin-bottom:10px;">Biểu đồ doanh thu</div>
+                <div class="rev-tabs">
+                  <button class="rev-tab active" onclick="switchRevTab(this,'day')">Ngày</button>
+                  <button class="rev-tab" onclick="switchRevTab(this,'week')">Tuần</button>
+                  <button class="rev-tab" onclick="switchRevTab(this,'month')">Tháng</button>
+                  <button class="rev-tab" onclick="switchRevTab(this,'year')">Năm</button>
+                </div>
+              </div>
+              <div class="chart-bar-wrap" id="revenueChart" style="height:180px;"></div>
+            </div>
+            <div class="card">
+              <div class="card-title" style="margin-bottom:16px">Phân loại doanh thu</div>
+              <div class="section-gap" style="gap:10px">
+                <div class="info-item">
+                  <div class="info-label">Thẻ thường (2k/lượt)</div>
+                  <div class="info-value" style="color:var(--primary)">0đ <span style="font-size:12px;color:var(--text3)">0 lượt</span></div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Thẻ tháng</div>
+                  <div class="info-value" style="color:var(--accent)">0đ <span style="font-size:12px;color:var(--text3)">0 thẻ</span></div>
+                </div>
+                <div class="info-item" style="background:var(--primary-light);border-color:#bfdbfe">
+                  <div class="info-label">Tổng tháng này</div>
+                  <div class="info-value" style="color:var(--primary)">0đ</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PAGE: QUẢN LÝ TÀI KHOẢN ── -->
+      <div class="page" id="page-cards">
+        <div class="page-title">Quản lý tài khoản</div>
+        <div class="page-subtitle">Thành viên và thẻ RFID đăng ký</div>
+
+        <div class="card">
+          <div class="filter-row">
+            <input class="filter-input" id="accountSearch" placeholder="🔍 Tìm theo tên, SĐT, UID..." style="flex:1" oninput="renderAccountsTable()">
+            <button class="btn-sm primary" onclick="openAddMemberModal()">+ Thêm</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tên đăng nhập</th>
+                  <th>Họ tên</th>
+                  <th>SĐT</th>
+                  <th>Thẻ RFID</th>
+                  <th>Hết hạn</th>
+                  <th>Trạng thái</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="accountsTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PAGE: HỒ SƠ THÀNH VIÊN ── -->
+      <div class="page" id="page-profile">
+        <div class="page-title">Hồ sơ của tôi</div>
+        <div class="page-subtitle">Thông tin thẻ và lịch sử xe của bạn</div>
+
+        <div class="section-gap">
+          <div class="profile-hero">
+            <div class="profile-avatar-big" id="profileAvatar">M</div>
             <div>
-              <div class="card-title">Trạng thái chỗ đỗ</div>
-              <div class="card-subtitle">Cập nhật realtime từ cảm biến IR</div>
+              <div class="profile-name" id="profileName">Nguyễn Văn A</div>
+              <div class="profile-sub" id="profileSub">Thành viên thẻ tháng • Đang hoạt động</div>
             </div>
-            <button class="btn-sm primary" onclick="refreshSlots()">🔄 Refresh</button>
-          </div>
-          <div class="slots-grid" id="slotsGrid"></div>
-        </div>
-
-        <div class="card" style="flex:1">
-          <div class="card-header">
-            <div>
-              <div class="card-title">Điều khiển cổng</div>
-              <div class="card-subtitle">Mở / đóng thủ công</div>
+            <div class="profile-card-badge">
+              <div class="profile-card-uid" id="profileUID">11:22:33:44</div>
+              <div class="profile-card-type">Thẻ tháng</div>
             </div>
           </div>
-          <div class="gate-controls">
-            <div class="gate-card">
-              <div class="gate-icon">🚧</div>
-              <div class="gate-name">Cổng Vào</div>
-              <div class="gate-state closed" id="entryState">● Đóng</div>
-              <button id="btn-gate-entry" class="btn-gate open-btn" onclick="toggleGate('entry')">▲ Mở cổng</button>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-title" style="margin-bottom:14px">Thông tin thẻ</div>
+              <div class="info-grid">
+                <div class="info-item">
+                  <div class="info-label">Ngày đăng ký</div>
+                  <div class="info-value">01/03/2026</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Hết hạn</div>
+                  <div class="info-value" style="color:var(--success)">01/04/2026</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Phí tháng</div>
+                  <div class="info-value" style="color:var(--primary)">120,000đ</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Lượt tháng này</div>
+                  <div class="info-value">23 lượt</div>
+                </div>
+              </div>
             </div>
-            <div class="gate-card">
-              <div class="gate-icon">🚦</div>
-              <div class="gate-name">Cổng Ra</div>
-              <div class="gate-state closed" id="exitState">● Đóng</div>
-              <button id="btn-gate-exit" class="btn-gate open-btn" onclick="toggleGate('exit')">▲ Mở cổng</button>
+
+            <div class="card">
+              <div class="card-title" style="margin-bottom:14px">Thống kê sử dụng</div>
+              <div class="info-grid">
+                <div class="info-item">
+                  <div class="info-label">Tổng thời gian đỗ</div>
+                  <div class="info-value">47 giờ</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Lượt hôm nay</div>
+                  <div class="info-value">1 lượt</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">TB mỗi ngày</div>
+                  <div class="info-value">2.1 giờ</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Tổng tháng</div>
+                  <div class="info-value">23 lượt</div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-    </div>
-  </div>
-
-  <!-- ── PAGE: LỊCH SỬ ── -->
-  <div class="page" id="page-history">
-    <div class="page-title">Lịch sử xe vào/ra</div>
-    <div class="page-subtitle">Toàn bộ lịch sử quét thẻ</div>
-
-    <div class="card">
-      <div class="filter-row">
-        <input class="filter-input" type="date" id="historyDate" style="width:160px">
-        <select class="filter-input" style="width:140px">
-          <option>Tất cả loại thẻ</option>
-          <option>Thẻ thường</option>
-          <option>Thẻ tháng</option>
-        </select>
-        <select class="filter-input" style="width:120px">
-          <option>Tất cả sự kiện</option>
-          <option>Vào</option>
-          <option>Ra</option>
-        </select>
-        <button class="btn-sm primary">🔍 Lọc</button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Thời gian vào</th>
-              <th>Thời gian ra</th>
-              <th>Thời gian đỗ</th>
-              <th>UID Thẻ</th>
-              <th>Tên chủ xe</th>
-              <th>Loại thẻ</th>
-              <th>Phí</th>
-              <th>Trạng thái</th>
-            </tr>
-          </thead>
-          <tbody id="historyTable"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── PAGE: DOANH THU ── -->
-  <div class="page" id="page-revenue">
-    <div class="page-title">Doanh thu</div>
-    <div class="page-subtitle">Thống kê tài chính bãi xe</div>
-
-    <div class="section-gap">
-      <div class="grid-4">
-        <div class="stat-card">
-          <div class="stat-icon green">📅</div>
-          <div>
-            <div class="stat-value">24k</div>
-            <div class="stat-label">Hôm nay</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon blue">📆</div>
-          <div>
-            <div class="stat-value">168k</div>
-            <div class="stat-label">Tuần này</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon orange">🗓️</div>
-          <div>
-            <div class="stat-value">720k</div>
-            <div class="stat-label">Tháng này</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon purple">📊</div>
-          <div>
-            <div class="stat-value">8.6M</div>
-            <div class="stat-label">Năm nay</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="section-gap">
-        <div class="card">
-          <div style="margin-bottom:12px;">
-            <div class="card-title" style="margin-bottom:10px;">Biểu đồ doanh thu</div>
-            <div class="rev-tabs">
-              <button class="rev-tab active" onclick="switchRevTab(this,'day')">Ngày</button>
-              <button class="rev-tab" onclick="switchRevTab(this,'week')">Tuần</button>
-              <button class="rev-tab" onclick="switchRevTab(this,'month')">Tháng</button>
-              <button class="rev-tab" onclick="switchRevTab(this,'year')">Năm</button>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Lịch sử xe của tôi</div>
             </div>
-          </div>
-          <div class="chart-bar-wrap" id="revenueChart" style="height:180px;"></div>
-        </div>
-        <div class="card">
-          <div class="card-title" style="margin-bottom:16px">Phân loại doanh thu</div>
-          <div class="section-gap" style="gap:10px">
-            <div class="info-item">
-              <div class="info-label">Thẻ thường (2k/lượt)</div>
-              <div class="info-value" style="color:var(--primary)">360k <span style="font-size:12px;color:var(--text3)">180 lượt</span></div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Thẻ tháng</div>
-              <div class="info-value" style="color:var(--accent)">360k <span style="font-size:12px;color:var(--text3)">3 thẻ</span></div>
-            </div>
-            <div class="info-item" style="background:var(--primary-light);border-color:#bfdbfe">
-              <div class="info-label">Tổng tháng này</div>
-              <div class="info-value" style="color:var(--primary)">720,000đ</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── PAGE: QUẢN LÝ TÀI KHOẢN ── -->
-  <div class="page" id="page-cards">
-    <div class="page-title">Quản lý tài khoản</div>
-    <div class="page-subtitle">Thành viên và thẻ RFID đăng ký</div>
-
-    <div class="card">
-      <div class="filter-row">
-        <input class="filter-input" id="accountSearch" placeholder="🔍 Tìm theo tên, SĐT, UID..." style="flex:1" oninput="renderAccountsTable()">
-        <button class="btn-sm primary" onclick="openAddMemberModal()">+ Thêm</button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Tên đăng nhập</th>
-              <th>Họ tên</th>
-              <th>SĐT</th>
-              <th>Thẻ RFID</th>
-              <th>Hết hạn</th>
-              <th>Trạng thái</th>
-              <th>Thao tác</th>
-            </tr>
-          </thead>
-          <tbody id="accountsTable"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── PAGE: HỒ SƠ THÀNH VIÊN ── -->
-  <div class="page" id="page-profile">
-    <div class="page-title">Hồ sơ của tôi</div>
-    <div class="page-subtitle">Thông tin thẻ và lịch sử xe của bạn</div>
-
-    <div class="section-gap">
-      <div class="profile-hero">
-        <div class="profile-avatar-big" id="profileAvatar">M</div>
-        <div>
-          <div class="profile-name" id="profileName">Nguyễn Văn A</div>
-          <div class="profile-sub" id="profileSub">Thành viên thẻ tháng • Đang hoạt động</div>
-        </div>
-        <div class="profile-card-badge">
-          <div class="profile-card-uid" id="profileUID">11:22:33:44</div>
-          <div class="profile-card-type">Thẻ tháng</div>
-        </div>
-      </div>
-
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-title" style="margin-bottom:14px">Thông tin thẻ</div>
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">Ngày đăng ký</div>
-              <div class="info-value">01/03/2026</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Hết hạn</div>
-              <div class="info-value" style="color:var(--success)">01/04/2026</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Phí tháng</div>
-              <div class="info-value" style="color:var(--primary)">120,000đ</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Lượt tháng này</div>
-              <div class="info-value">23 lượt</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-title" style="margin-bottom:14px">Thống kê sử dụng</div>
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">Tổng thời gian đỗ</div>
-              <div class="info-value">47 giờ</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Lượt hôm nay</div>
-              <div class="info-value">1 lượt</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">TB mỗi ngày</div>
-              <div class="info-value">2.1 giờ</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Tổng tháng</div>
-              <div class="info-value">23 lượt</div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Giờ vào</th>
+                    <th>Giờ ra</th>
+                    <th>Thời gian đỗ</th>
+                    <th>Ngày</th>
+                    <th>Trạng thái</th>
+                  </tr>
+                </thead>
+                <tbody id="memberHistoryTable"></tbody>
+              </table>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">Lịch sử xe của tôi</div>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Giờ vào</th>
-                <th>Giờ ra</th>
-                <th>Thời gian đỗ</th>
-                <th>Ngày</th>
-                <th>Trạng thái</th>
-              </tr>
-            </thead>
-            <tbody id="memberHistoryTable"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</div><!-- /content -->
-```
-
+    </div><!-- /content -->
   </main>
 </div><!-- /app -->
 
 <!-- ══════════════════════════════════════════ -->
-
 <!--  MODALS                                    -->
-
 <!-- ══════════════════════════════════════════ -->
 
 <!-- Modal thêm thành viên (gộp thẻ + tài khoản) -->
-
 <div class="modal-overlay" id="modalAddMember">
   <div class="modal">
     <div class="modal-header">
@@ -1372,15 +1345,11 @@ font-size: 16px !important;
 </div>
 
 <!-- Toast container -->
-
 <div class="toast-container" id="toastContainer"></div>
 
 <!-- ══════════════════════════════════════════ -->
-
 <!--  JAVASCRIPT                               -->
-
 <!-- ══════════════════════════════════════════ -->
-
 <script>
 // ── DATA ──────────────────────────────────────
 // Admin cứng — không lưu trên Firebase
@@ -1788,10 +1757,10 @@ function renderMemberHistory() {
 
 // ── REVENUE CHART ─────────────────────────────
 const chartData = {
-  day:   { labels:['T2','T3','T4','T5','T6','T7','CN'], vals:[18,24,16,30,22,28,12] },
-  week:  { labels:['T1','T2','T3','T4','T5','T6','T7','T8'], vals:[120,168,145,200,180,220,160,168] },
-  month: { labels:['Th1','Th2','Th3','Th4','Th5','Th6'], vals:[580,620,720,690,750,700] },
-  year:  { labels:['2021','2022','2023','2024','2025','2026'], vals:[5200,6800,7400,7900,8200,8600] },
+  day:   { labels:['T2','T3','T4','T5','T6','T7','CN'], vals:[0,0,0,0,0,0,0] },
+  week:  { labels:['T1','T2','T3','T4','T5','T6','T7','T8'], vals:[0,0,0,0,0,0,0,0] },
+  month: { labels:['Th1','Th2','Th3','Th4','Th5','Th6'], vals:[0,0,0,0,0,0] },
+  year:  { labels:['2021','2022','2023','2024','2025','2026'], vals:[0,0,0,0,0,0] },
 };
 
 function renderRevenueChart(type) {
@@ -2107,20 +2076,16 @@ async function toggleGate(gate) {
   const isOpen = gateOpenState[gate];
 
   if (!isOpen) {
-    // Mở cổng
     gateOpenState[gate] = true;
     el.textContent  = '● Đang mở';
     el.className    = 'gate-state open';
     if (btn) { btn.textContent = '▼ Đóng cổng'; btn.className = 'btn-gate close-btn'; }
-    showToast(`🚧 Đã mở cổng ${gate==='entry'?'vào':'ra'}!`, 'success');
     await fbPut(`/gates/${gate}`, 'open');
   } else {
-    // Đóng cổng
     gateOpenState[gate] = false;
     el.textContent  = '● Đóng';
     el.className    = 'gate-state closed';
     if (btn) { btn.textContent = '▲ Mở cổng'; btn.className = 'btn-gate open-btn'; }
-    showToast(`🔒 Đã đóng cổng ${gate==='entry'?'vào':'ra'}!`, 'info');
     await fbPut(`/gates/${gate}`, 'closed');
   }
 }
@@ -2223,6 +2188,5 @@ window.initApp = async function() {
   startESP32Monitor();
 };
 </script>
-
 </body>
 </html>
