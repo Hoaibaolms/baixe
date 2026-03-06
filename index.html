@@ -1598,6 +1598,17 @@ function navigateTo(pageId) {
   };
   const titleEl = document.getElementById('topbarTitle');
   if (titleEl) titleEl.textContent = titles[pageId] || pageId;
+
+  // Auto reload dữ liệu khi chuyển trang
+  if (pageId === 'cards' || pageId === 'accounts') {
+    loadMembersFromFirebase();
+  }
+  if (pageId === 'normalcards') {
+    loadNormalCardsFromFirebase();
+  }
+  if (pageId === 'profile' && currentUser?.role === 'member') {
+    loadMemberProfile();
+  }
 }
 
 function navTo(pageId) { navigateTo(pageId); }
@@ -1978,7 +1989,7 @@ async function setManualMode(enabled) {
     desc.textContent = 'Tắt — RFID hoạt động bình thường';
   }
   // Ghi lên Firebase để ESP32 đọc
-  await fbPut('/settings/manualMode', enabled ? 'true' : 'false');
+  await fbPut('/settings/manualMode', enabled);
 }
 
 // Khởi tạo: buttons bị disable cho đến khi bật manual mode
@@ -2138,6 +2149,60 @@ function showToast(msg, type='info') {
   setTimeout(() => toast.remove(), 3000);
 }
 
+// ── MEMBER PROFILE LOADER ────────────────────
+async function loadMemberProfile() {
+  if (!currentUser || currentUser.role !== 'member') return;
+  const myUID = currentUser.uid;
+  if (!myUID) return;
+
+  // Load lịch sử của riêng member từ Firebase
+  const data = await fbGet('/history');
+  if (!data) return;
+
+  const myRows = Object.entries(data)
+    .filter(([k, h]) => h.uid && h.uid.toUpperCase() === myUID.toUpperCase())
+    .reverse()
+    .slice(0, 30);
+
+  const tbody = document.getElementById('memberHistoryTable');
+  if (!tbody) return;
+
+  if (myRows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text3)">Chưa có lịch sử vào/ra</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = myRows.map(([key, h], i) => {
+    // Tính thời gian đỗ nếu có cả vào và ra
+    let duration = '—';
+    if (h.timeIn && h.timeOut && h.timeOut !== '') {
+      try {
+        const [ih, im, is_] = h.timeIn.split(':').map(Number);
+        const [oh, om, os_] = h.timeOut.split(':').map(Number);
+        const diffMin = (oh*60+om) - (ih*60+im);
+        if (diffMin > 0) duration = diffMin >= 60
+          ? `${Math.floor(diffMin/60)}g ${diffMin%60}p`
+          : `${diffMin}p`;
+      } catch(e) {}
+    }
+    return `<tr>
+      <td>${i+1}</td>
+      <td class="mono">${h.timeIn || '—'}</td>
+      <td class="mono">${h.timeOut || '—'}</td>
+      <td>${duration}</td>
+      <td>${h.date || '—'}</td>
+      <td>${h.status === 'inside'
+        ? '<span class="badge green">Đang trong bãi</span>'
+        : '<span class="badge orange">Đã ra</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  // Cập nhật stats profile
+  document.getElementById('profileUID').textContent = myUID;
+  const totalTrips = myRows.length;
+  const thisMonth  = myRows.filter(([k,h]) => h.date && h.date.includes('/' + new Date().getMonth()+1 + '/')).length;
+}
+
 // ── CLOCK ─────────────────────────────────────
 function startClock() {
   function tick() {
@@ -2247,6 +2312,14 @@ async function syncFromFirebase() {
     document.getElementById('statTodayTrips').textContent = data.stats.totalToday || 0;
     const rev = (data.stats.revenueToday || 0);
     document.getElementById('statTodayRevenue').textContent = (rev/1000).toFixed(0) + 'k';
+  }
+
+  // Tự động cập nhật profile member
+  if (currentUser?.role === 'member') {
+    const profilePage = document.getElementById('page-profile');
+    if (profilePage && profilePage.classList.contains('active')) {
+      loadMemberProfile();
+    }
   }
 }
 
