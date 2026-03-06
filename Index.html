@@ -1,1 +1,2228 @@
+<!DOCTYPE html>
 
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bãi Đỗ Xe Thông Minh</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f2f5;
+    --surface: #ffffff;
+    --surface2: #f7f8fa;
+    --border: #e4e7ec;
+    --text: #0f1c2e;
+    --text2: #5a6a7e;
+    --text3: #9aa5b4;
+    --primary: #1a56db;
+    --primary-light: #e8effd;
+    --primary-dark: #1240a8;
+    --success: #0d9488;
+    --success-light: #e6f7f5;
+    --danger: #e53e3e;
+    --danger-light: #fde8e8;
+    --warning: #d97706;
+    --warning-light: #fef3c7;
+    --accent: #7c3aed;
+    --accent-light: #ede9fe;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+    --shadow: 0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.07);
+    --radius: 14px;
+    --radius-sm: 8px;
+    --radius-lg: 20px;
+  }
+
+- { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { overflow-x: hidden; width: 100%; }
+
+body {
+font-family: ‘Be Vietnam Pro’, sans-serif;
+background: var(–bg);
+color: var(–text);
+min-height: 100vh;
+font-size: 14px;
+}
+
+/* ── LOGIN ── */
+.login-screen {
+min-height: 100vh;
+display: flex;
+align-items: center;
+justify-content: center;
+background: linear-gradient(135deg, #e8effd 0%, #f0f2f5 50%, #ede9fe 100%);
+position: relative;
+overflow: hidden;
+}
+.login-screen::before {
+content: ‘’;
+position: absolute;
+width: 600px; height: 600px;
+background: radial-gradient(circle, rgba(26,86,219,0.08) 0%, transparent 70%);
+top: -200px; right: -200px;
+border-radius: 50%;
+}
+.login-screen::after {
+content: ‘’;
+position: absolute;
+width: 400px; height: 400px;
+background: radial-gradient(circle, rgba(124,58,237,0.07) 0%, transparent 70%);
+bottom: -100px; left: -100px;
+border-radius: 50%;
+}
+.login-card {
+background: var(–surface);
+border-radius: var(–radius-lg);
+padding: 48px 44px;
+width: 420px;
+box-shadow: var(–shadow-lg);
+position: relative;
+z-index: 1;
+animation: slideUp 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes slideUp {
+from { opacity: 0; transform: translateY(24px) scale(0.97); }
+to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.login-logo {
+display: flex; align-items: center; gap: 12px;
+margin-bottom: 32px;
+}
+.login-logo-icon {
+width: 48px; height: 48px;
+background: linear-gradient(135deg, var(–primary), var(–accent));
+border-radius: 14px;
+display: flex; align-items: center; justify-content: center;
+font-size: 22px;
+}
+.login-logo h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+.login-logo span { color: var(–primary); }
+.login-subtitle { color: var(–text2); margin-bottom: 32px; line-height: 1.5; }
+
+.tab-switch {
+display: flex; gap: 4px;
+background: var(–surface2);
+border-radius: var(–radius-sm);
+padding: 4px;
+margin-bottom: 28px;
+}
+.tab-btn {
+flex: 1; padding: 8px;
+border: none; background: none; cursor: pointer;
+border-radius: 6px;
+font-family: inherit; font-size: 13px; font-weight: 600;
+color: var(–text2);
+transition: all 0.2s;
+}
+.tab-btn.active {
+background: var(–surface);
+color: var(–primary);
+box-shadow: var(–shadow-sm);
+}
+
+.form-group { margin-bottom: 18px; }
+.form-label {
+display: block; font-size: 13px; font-weight: 600;
+color: var(–text2); margin-bottom: 7px;
+}
+.form-input {
+width: 100%; padding: 11px 14px;
+border: 1.5px solid var(–border);
+border-radius: var(–radius-sm);
+font-family: inherit; font-size: 14px;
+background: var(–surface2);
+color: var(–text);
+transition: all 0.2s;
+outline: none;
+}
+.form-input:focus {
+border-color: var(–primary);
+background: var(–surface);
+box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
+}
+.btn-primary {
+width: 100%; padding: 13px;
+background: linear-gradient(135deg, var(–primary), var(–primary-dark));
+color: white; border: none; border-radius: var(–radius-sm);
+font-family: inherit; font-size: 14px; font-weight: 700;
+cursor: pointer; transition: all 0.2s;
+letter-spacing: 0.3px;
+}
+.btn-primary:hover {
+transform: translateY(-1px);
+box-shadow: 0 6px 20px rgba(26,86,219,0.35);
+}
+.btn-primary:active { transform: translateY(0); }
+.login-hint {
+text-align: center; margin-top: 20px;
+font-size: 12px; color: var(–text3);
+}
+.login-hint b { color: var(–primary); font-weight: 600; }
+
+/* ── APP LAYOUT ── */
+.app { display: none; min-height: 100vh; width: 100%; overflow-x: hidden; }
+.app.visible { display: flex; }
+
+/* SIDEBAR */
+.sidebar {
+width: 240px; min-height: 100vh;
+background: var(–surface);
+border-right: 1px solid var(–border);
+display: flex; flex-direction: column;
+position: fixed; left: 0; top: 0; bottom: 0;
+z-index: 100;
+transition: transform 0.3s;
+}
+.sidebar-header {
+padding: 24px 20px 20px;
+border-bottom: 1px solid var(–border);
+}
+.sidebar-logo {
+display: flex; align-items: center; gap: 10px;
+}
+.sidebar-logo-icon {
+width: 36px; height: 36px;
+background: linear-gradient(135deg, var(–primary), var(–accent));
+border-radius: 10px;
+display: flex; align-items: center; justify-content: center;
+font-size: 16px;
+}
+.sidebar-logo h2 { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
+.sidebar-logo span { color: var(–primary); }
+
+.sidebar-user {
+padding: 16px 20px;
+border-bottom: 1px solid var(–border);
+display: flex; align-items: center; gap: 10px;
+}
+.user-avatar {
+width: 34px; height: 34px; border-radius: 50%;
+display: flex; align-items: center; justify-content: center;
+font-size: 13px; font-weight: 700; color: white;
+flex-shrink: 0;
+}
+.user-avatar.admin { background: linear-gradient(135deg, var(–primary), var(–accent)); }
+.user-avatar.member { background: linear-gradient(135deg, var(–success), #059669); }
+.user-info { min-width: 0; }
+.user-name { font-size: 13px; font-weight: 700; truncate: ellipsis; white-space: nowrap; overflow: hidden; }
+.user-role { font-size: 11px; color: var(–text3); font-weight: 500; }
+
+.sidebar-nav { flex: 1; padding: 12px 12px; overflow-y: auto; }
+.nav-section-title {
+font-size: 10px; font-weight: 700; text-transform: uppercase;
+letter-spacing: 1px; color: var(–text3);
+padding: 8px 8px 6px; margin-top: 8px;
+}
+.nav-item {
+display: flex; align-items: center; gap: 10px;
+padding: 9px 10px; border-radius: var(–radius-sm);
+cursor: pointer; transition: all 0.15s;
+color: var(–text2); font-weight: 500; font-size: 13.5px;
+border: none; background: none; width: 100%; text-align: left;
+}
+.nav-item:hover { background: var(–surface2); color: var(–text); }
+.nav-item.active { background: var(–primary-light); color: var(–primary); font-weight: 700; }
+.nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+.nav-badge {
+margin-left: auto; background: var(–danger);
+color: white; font-size: 10px; font-weight: 700;
+padding: 1px 6px; border-radius: 10px;
+}
+
+.sidebar-footer {
+padding: 12px;
+border-top: 1px solid var(–border);
+}
+.btn-logout {
+width: 100%; padding: 9px 10px;
+display: flex; align-items: center; gap: 10px;
+border: none; background: none; cursor: pointer;
+color: var(–danger); font-family: inherit; font-size: 13px; font-weight: 600;
+border-radius: var(–radius-sm); transition: all 0.15s;
+}
+.btn-logout:hover { background: var(–danger-light); }
+
+/* MAIN CONTENT */
+.main {
+margin-left: 240px;
+flex: 1;
+display: flex; flex-direction: column;
+min-height: 100vh;
+min-width: 0;
+overflow-x: hidden;
+}
+.topbar {
+background: var(–surface);
+border-bottom: 1px solid var(–border);
+padding: 0 28px;
+height: 60px;
+display: flex; align-items: center; justify-content: space-between;
+position: sticky; top: 0; z-index: 50;
+}
+.topbar-title { font-size: 16px; font-weight: 700; }
+.topbar-actions { display: flex; align-items: center; gap: 12px; }
+.topbar-time {
+font-family: ‘JetBrains Mono’, monospace;
+font-size: 13px; color: var(–text2); font-weight: 600;
+}
+.status-dot {
+width: 8px; height: 8px; border-radius: 50%;
+background: var(–success);
+box-shadow: 0 0 0 3px rgba(13,148,136,0.2);
+animation: pulse 2s infinite;
+}
+@keyframes pulse {
+0%,100% { box-shadow: 0 0 0 3px rgba(13,148,136,0.2); }
+50% { box-shadow: 0 0 0 6px rgba(13,148,136,0.1); }
+}
+
+/* ESP32 Status Badge */
+.esp32-badge {
+display: flex; align-items: center; gap: 7px;
+padding: 5px 12px 5px 8px;
+border-radius: 20px;
+font-size: 12px; font-weight: 700;
+border: 1.5px solid;
+transition: all 0.4s;
+cursor: default;
+}
+.esp32-badge .esp32-dot {
+width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.esp32-badge.connected {
+background: var(–success-light);
+color: var(–success);
+border-color: #99f6e4;
+}
+.esp32-badge.connected .esp32-dot {
+background: var(–success);
+box-shadow: 0 0 0 3px rgba(13,148,136,0.25);
+animation: pulse 2s infinite;
+}
+.esp32-badge.disconnected {
+background: var(–danger-light);
+color: var(–danger);
+border-color: #fca5a5;
+}
+.esp32-badge.disconnected .esp32-dot {
+background: var(–danger);
+animation: none;
+}
+.esp32-badge.connecting {
+background: var(–warning-light);
+color: var(–warning);
+border-color: #fcd34d;
+}
+.esp32-badge.connecting .esp32-dot {
+background: var(–warning);
+animation: pulse-orange 1s infinite;
+}
+@keyframes pulse-orange {
+0%,100% { box-shadow: 0 0 0 3px rgba(217,119,6,0.25); }
+50% { box-shadow: 0 0 0 6px rgba(217,119,6,0.1); }
+}
+
+.content { padding: 24px 28px; flex: 1; }
+
+/* PAGE */
+.page { display: none; }
+.page.active { display: block; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.page-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.3px; }
+.page-subtitle { color: var(–text2); font-size: 13px; margin-bottom: 24px; }
+
+/* CARDS */
+.card {
+background: var(–surface);
+border-radius: var(–radius);
+border: 1px solid var(–border);
+padding: 20px;
+box-shadow: var(–shadow-sm);
+}
+.card-header {
+display: flex; align-items: center; justify-content: space-between;
+margin-bottom: 16px;
+}
+.card-title { font-size: 14px; font-weight: 700; }
+.card-subtitle { font-size: 12px; color: var(–text3); margin-top: 2px; }
+
+/* GRID */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+/* STAT CARD */
+.stat-card {
+background: var(–surface);
+border-radius: var(–radius);
+border: 1px solid var(–border);
+padding: 18px 20px;
+box-shadow: var(–shadow-sm);
+display: flex; align-items: flex-start; gap: 14px;
+}
+.stat-icon {
+width: 44px; height: 44px; border-radius: 12px;
+display: flex; align-items: center; justify-content: center;
+font-size: 20px; flex-shrink: 0;
+}
+.stat-icon.blue { background: var(–primary-light); }
+.stat-icon.green { background: var(–success-light); }
+.stat-icon.orange { background: var(–warning-light); }
+.stat-icon.purple { background: var(–accent-light); }
+.stat-value { font-size: 26px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
+.stat-label { font-size: 12px; color: var(–text2); margin-top: 4px; font-weight: 500; }
+.stat-change { font-size: 11px; margin-top: 6px; font-weight: 600; }
+.stat-change.up { color: var(–success); }
+.stat-change.down { color: var(–danger); }
+
+/* PARKING SLOTS */
+.slots-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.slot-card {
+border-radius: var(–radius);
+border: 2px solid var(–border);
+padding: 18px 14px;
+text-align: center;
+transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+cursor: default;
+position: relative;
+overflow: hidden;
+}
+.slot-card::before {
+content: ‘’;
+position: absolute; inset: 0;
+opacity: 0; transition: opacity 0.3s;
+}
+.slot-card.empty {
+background: var(–success-light);
+border-color: #99f6e4;
+}
+.slot-card.occupied {
+background: var(–danger-light);
+border-color: #fca5a5;
+}
+.slot-icon { font-size: 32px; margin-bottom: 8px; }
+.slot-number { font-size: 11px; font-weight: 700; color: var(–text2); text-transform: uppercase; letter-spacing: 0.5px; }
+.slot-status {
+font-size: 12px; font-weight: 700; margin-top: 4px;
+}
+.slot-card.empty .slot-status { color: var(–success); }
+.slot-card.occupied .slot-status { color: var(–danger); }
+.slot-card.empty .slot-icon::after { content: ‘🟢’; font-size: 10px; }
+
+/* GATE CONTROLS */
+.gate-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.gate-card {
+border-radius: var(–radius);
+border: 1px solid var(–border);
+padding: 18px;
+background: var(–surface);
+text-align: center;
+}
+.gate-icon { font-size: 36px; margin-bottom: 8px; }
+.gate-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.gate-state {
+display: inline-block; padding: 3px 10px;
+border-radius: 20px; font-size: 11px; font-weight: 700;
+margin-bottom: 14px;
+}
+.gate-state.closed { background: var(–danger-light); color: var(–danger); }
+.gate-state.open { background: var(–success-light); color: var(–success); }
+.btn-gate {
+width: 100%; padding: 10px;
+border: none; border-radius: var(–radius-sm);
+font-family: inherit; font-size: 13px; font-weight: 700;
+cursor: pointer; transition: all 0.2s;
+}
+.btn-gate.open-btn {
+background: var(–success-light); color: var(–success);
+border: 1.5px solid #99f6e4;
+}
+.btn-gate.open-btn:hover { background: var(–success); color: white; }
+.btn-gate.close-btn {
+background: var(–danger-light); color: var(–danger);
+border: 1.5px solid #fca5a5;
+}
+.btn-gate.close-btn:hover { background: var(–danger); color: white; }
+
+/* TABLE */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th {
+font-size: 11px; font-weight: 700; text-transform: uppercase;
+letter-spacing: 0.5px; color: var(–text3);
+padding: 10px 14px; text-align: left;
+border-bottom: 1px solid var(–border);
+background: var(–surface2);
+}
+th:first-child { border-radius: 8px 0 0 0; }
+th:last-child { border-radius: 0 8px 0 0; }
+td {
+padding: 12px 14px; border-bottom: 1px solid var(–border);
+font-size: 13px; vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(–surface2); }
+
+.badge {
+display: inline-flex; align-items: center; gap: 4px;
+padding: 3px 9px; border-radius: 20px;
+font-size: 11px; font-weight: 700;
+}
+.badge.green { background: var(–success-light); color: var(–success); }
+.badge.red { background: var(–danger-light); color: var(–danger); }
+.badge.blue { background: var(–primary-light); color: var(–primary); }
+.badge.purple { background: var(–accent-light); color: var(–accent); }
+.badge.orange { background: var(–warning-light); color: var(–warning); }
+
+.mono { font-family: ‘JetBrains Mono’, monospace; font-size: 12px; font-weight: 600; }
+
+/* CHART AREA */
+.chart-bar-wrap { display: flex; align-items: flex-end; gap: 6px; height: 120px; padding: 0 4px; }
+.chart-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.chart-bar {
+width: 100%; border-radius: 6px 6px 0 0;
+background: linear-gradient(180deg, var(–primary), #3b82f6);
+transition: height 0.5s cubic-bezier(0.34,1.56,0.64,1);
+min-height: 4px;
+position: relative;
+}
+.chart-bar:hover { filter: brightness(1.1); }
+.chart-label { font-size: 10px; color: var(–text3); font-weight: 600; }
+.chart-val { font-size: 10px; color: var(–primary); font-weight: 700; }
+
+/* REVENUE TABS */
+.rev-tabs { display: flex; gap: 4px; }
+.rev-tab {
+padding: 5px 12px; border-radius: 20px;
+font-size: 12px; font-weight: 600;
+border: none; cursor: pointer; font-family: inherit;
+background: none; color: var(–text2);
+transition: all 0.15s;
+}
+.rev-tab.active { background: var(–primary); color: white; }
+.rev-tab:hover:not(.active) { background: var(–surface2); }
+
+/* FILTERS */
+.filter-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+.filter-input {
+padding: 8px 12px; border: 1.5px solid var(–border);
+border-radius: var(–radius-sm); font-family: inherit; font-size: 13px;
+background: var(–surface2); color: var(–text);
+outline: none; transition: border-color 0.2s;
+}
+.filter-input:focus { border-color: var(–primary); }
+.btn-sm {
+padding: 8px 14px; border-radius: var(–radius-sm);
+font-family: inherit; font-size: 12px; font-weight: 700;
+cursor: pointer; transition: all 0.2s; border: none;
+}
+.btn-sm.primary { background: var(–primary); color: white; }
+.btn-sm.primary:hover { background: var(–primary-dark); }
+.btn-sm.outline {
+background: none; color: var(–primary);
+border: 1.5px solid var(–primary);
+}
+.btn-sm.outline:hover { background: var(–primary-light); }
+.btn-sm.danger { background: var(–danger-light); color: var(–danger); }
+.btn-sm.danger:hover { background: var(–danger); color: white; }
+.btn-sm.success { background: var(–success-light); color: var(–success); }
+.btn-sm.success:hover { background: var(–success); color: white; }
+
+/* MODAL */
+.modal-overlay {
+display: none; position: fixed; inset: 0;
+background: rgba(15,28,46,0.4); backdrop-filter: blur(4px);
+z-index: 200; align-items: center; justify-content: center;
+}
+.modal-overlay.show { display: flex; animation: fadeIn 0.2s; }
+.modal {
+background: var(–surface);
+border-radius: var(–radius-lg);
+padding: 28px;
+width: 480px; max-width: 95vw;
+box-shadow: var(–shadow-lg);
+animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.modal-header {
+display: flex; align-items: center; justify-content: space-between;
+margin-bottom: 20px;
+}
+.modal-title { font-size: 17px; font-weight: 800; }
+.modal-close {
+width: 32px; height: 32px; border-radius: 8px;
+border: none; background: var(–surface2); cursor: pointer;
+font-size: 16px; display: flex; align-items: center; justify-content: center;
+transition: background 0.15s;
+}
+.modal-close:hover { background: var(–border); }
+.modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+/* PROFILE */
+.profile-hero {
+background: linear-gradient(135deg, var(–primary) 0%, var(–accent) 100%);
+border-radius: var(–radius-lg);
+padding: 28px;
+color: white; margin-bottom: 20px;
+display: flex; align-items: center; gap: 20px;
+}
+.profile-avatar-big {
+width: 64px; height: 64px; border-radius: 50%;
+background: rgba(255,255,255,0.25);
+display: flex; align-items: center; justify-content: center;
+font-size: 24px; font-weight: 800; flex-shrink: 0;
+border: 3px solid rgba(255,255,255,0.4);
+}
+.profile-name { font-size: 20px; font-weight: 800; }
+.profile-sub { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+.profile-card-badge {
+margin-left: auto; background: rgba(255,255,255,0.2);
+border: 1px solid rgba(255,255,255,0.3);
+border-radius: 10px; padding: 10px 16px; text-align: center;
+min-width: 130px;
+}
+.profile-card-uid { font-family: ‘JetBrains Mono’, monospace; font-size: 13px; font-weight: 700; }
+.profile-card-type { font-size: 11px; opacity: 0.8; margin-top: 3px; }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.info-item { padding: 14px 16px; background: var(–surface2); border-radius: var(–radius-sm); border: 1px solid var(–border); }
+.info-label { font-size: 11px; color: var(–text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.info-value { font-size: 15px; font-weight: 700; margin-top: 4px; }
+
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 40px 20px; color: var(–text3); }
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state p { font-size: 13px; }
+
+/* TOAST */
+.toast-container { position: fixed; top: 16px; right: 16px; z-index: 999; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+background: var(–text); color: white;
+padding: 12px 18px; border-radius: var(–radius-sm);
+font-size: 13px; font-weight: 600;
+box-shadow: var(–shadow-lg);
+animation: slideIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+display: flex; align-items: center; gap: 8px;
+}
+@keyframes slideIn { from { opacity:0; transform: translateX(20px); } to { opacity:1; transform:translateX(0); } }
+.toast.success { background: var(–success); }
+.toast.danger { background: var(–danger); }
+.toast.info { background: var(–primary); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(–border); border-radius: 10px; }
+
+/* Section spacing */
+.section-gap { display: flex; flex-direction: column; gap: 20px; }
+.row-gap { display: flex; gap: 16px; }
+.row-gap > * { flex: 1; }
+
+select.form-input { appearance: none; }
+
+/* ══════════════════════════════════════════════
+MOBILE RESPONSIVE — Tối ưu điện thoại
+══════════════════════════════════════════════ */
+
+/* Bottom nav bar cho mobile */
+.mobile-nav {
+display: none;
+position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+background: var(–surface);
+border-top: 1px solid var(–border);
+box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+padding: 0 4px;
+padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.mobile-nav-inner {
+display: flex; align-items: stretch;
+height: 56px;
+}
+.mobile-nav-item {
+flex: 1; display: flex; flex-direction: column;
+align-items: center; justify-content: center; gap: 2px;
+border: none; background: none; cursor: pointer;
+color: var(–text3); font-family: inherit;
+font-size: 9px; font-weight: 600;
+letter-spacing: 0.2px;
+padding: 6px 2px;
+border-radius: 10px;
+transition: color 0.15s, background 0.15s;
+position: relative;
+}
+.mobile-nav-item .mnav-icon { font-size: 20px; line-height: 1; }
+.mobile-nav-item.active {
+color: var(–primary);
+}
+.mobile-nav-item.active .mnav-icon {
+background: var(–primary-light);
+border-radius: 10px;
+padding: 3px 10px;
+display: block;
+}
+.mobile-nav-badge {
+position: absolute; top: 4px; right: calc(50% - 18px);
+background: var(–danger); color: white;
+font-size: 9px; font-weight: 700;
+width: 16px; height: 16px; border-radius: 50%;
+display: flex; align-items: center; justify-content: center;
+}
+
+/* Mobile topbar */
+.mobile-topbar {
+display: none;
+position: fixed; top: 0; left: 0; right: 0; z-index: 150;
+background: var(–surface);
+border-bottom: 1px solid var(–border);
+padding: 0 16px;
+padding-top: env(safe-area-inset-top, 0px);
+height: calc(52px + env(safe-area-inset-top, 0px));
+align-items: flex-end; justify-content: space-between;
+padding-bottom: 10px;
+box-shadow: var(–shadow-sm);
+}
+.mobile-topbar-left { display: flex; align-items: center; gap: 10px; }
+.mobile-topbar-logo { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+.mobile-topbar-logo span { color: var(–primary); }
+.mobile-topbar-right { display: flex; align-items: center; gap: 8px; }
+
+.mobile-logout-btn {
+width: 32px; height: 32px;
+border: none; background: var(–danger-light);
+color: var(–danger); border-radius: 8px;
+font-size: 15px; cursor: pointer;
+display: flex; align-items: center; justify-content: center;
+transition: background 0.15s;
+flex-shrink: 0;
+}
+.mobile-logout-btn:hover { background: var(–danger); color: white; }
+
+@media (max-width: 768px) {
+/* Ẩn sidebar, topbar desktop */
+.sidebar { display: none !important; }
+.topbar { display: none !important; }
+
+```
+/* App full width, block layout */
+.app, .app.visible {
+  display: block !important;
+  width: 100vw !important;
+  overflow-x: hidden !important;
+}
+
+/* Main full width, no offset */
+.main {
+  margin-left: 0 !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+}
+
+/* Hiện mobile nav + topbar */
+.mobile-nav { display: block; }
+.mobile-topbar { display: flex; }
+
+/* Nội dung main: padding cho topbar + bottom nav */
+.content {
+  padding: 16px 14px !important;
+  padding-top: calc(52px + env(safe-area-inset-top, 0px) + 12px) !important;
+  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 16px) !important;
+}
+
+/* Login card */
+.login-card {
+  width: 100% !important;
+  max-width: 100vw;
+  min-height: 100vh;
+  border-radius: 0 !important;
+  padding: 40px 24px !important;
+  display: flex; flex-direction: column; justify-content: center;
+}
+
+/* Page title */
+.page-title { font-size: 18px !important; }
+.page-subtitle { font-size: 12px !important; margin-bottom: 16px !important; }
+
+/* Grid responsive */
+.grid-4 { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+.grid-3 { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+.grid-2 { grid-template-columns: 1fr !important; gap: 10px !important; }
+
+/* Stat cards nhỏ lại */
+.stat-card { padding: 14px 12px !important; gap: 10px !important; }
+.stat-icon { width: 36px !important; height: 36px !important; font-size: 16px !important; border-radius: 10px !important; }
+.stat-value { font-size: 20px !important; }
+.stat-label { font-size: 11px !important; }
+.stat-change { display: none; }
+
+/* Slots */
+.slots-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+.slot-card { padding: 14px 10px !important; }
+.slot-icon { font-size: 26px !important; }
+
+/* Row-gap stack vertically */
+.row-gap { flex-direction: column !important; gap: 12px !important; }
+
+/* Gate controls */
+.gate-controls { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+.gate-card { padding: 14px 10px !important; }
+.gate-icon { font-size: 28px !important; }
+
+/* Cards */
+.card { padding: 16px 14px !important; border-radius: 12px !important; }
+.card-header { margin-bottom: 12px !important; }
+
+/* Bảng → card list trên mobile */
+.table-wrap { margin: 0 -14px; }
+table thead { display: none; }
+table, tbody, tr, td { display: block; width: 100%; }
+tr {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 14px;
+  position: relative;
+}
+tr:last-child { border-bottom: none; }
+tr:hover td { background: transparent !important; }
+td {
+  padding: 2px 0 !important;
+  border: none !important;
+  font-size: 13px !important;
+}
+td[data-label]::before {
+  content: attr(data-label) ': ';
+  font-size: 10px; font-weight: 700;
+  color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px;
+  display: block; margin-bottom: 1px;
+}
+
+/* Filter row */
+.filter-row {
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+.filter-row .filter-input,
+.filter-row input,
+.filter-row select {
+  flex: 1 1 calc(50% - 4px) !important;
+  min-width: 120px !important;
+  width: auto !important;
+  font-size: 13px !important;
+}
+.filter-row .btn-sm {
+  flex: 1 1 calc(50% - 4px) !important;
+}
+
+/* Charts */
+.chart-bar-wrap { height: 180px !important; gap: 4px !important; }
+.chart-val { font-size: 9px !important; }
+.chart-label { font-size: 9px !important; }
+
+/* Revenue tabs */
+.rev-tabs { gap: 2px !important; }
+.rev-tab { padding: 4px 8px !important; font-size: 11px !important; }
+
+/* Card-header flex on mobile */
+.card-header { flex-wrap: wrap !important; gap: 8px !important; }
+
+/* Modals full screen */
+.modal-overlay { align-items: flex-end !important; padding: 0 !important; }
+.modal {
+  width: 100% !important; max-width: 100% !important;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+  padding: 24px 20px !important;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+/* Profile hero */
+.profile-hero {
+  flex-direction: column !important;
+  text-align: center !important;
+  gap: 12px !important;
+  padding: 20px 16px !important;
+}
+.profile-card-badge { margin-left: 0 !important; width: 100% !important; }
+
+/* Info grid */
+.info-grid { grid-template-columns: 1fr 1fr !important; }
+
+/* Section gap */
+.section-gap { gap: 14px !important; }
+
+/* ESP32 badge compact */
+.esp32-badge {
+  padding: 4px 8px 4px 6px !important;
+  font-size: 10px !important;
+}
+
+/* Toast position */
+.toast-container {
+  top: auto !important;
+  bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+  right: 12px !important; left: 12px !important;
+}
+.toast { font-size: 12px !important; padding: 10px 14px !important; }
+
+/* Buttons bigger touch targets */
+.btn-gate { padding: 12px !important; font-size: 13px !important; }
+.btn-sm { padding: 10px 14px !important; }
+```
+
+}
+
+/* Chống zoom input trên iOS — font-size >= 16px */
+@media (max-width: 768px) {
+.form-input, .filter-input, input, select, textarea {
+font-size: 16px !important;
+}
+}
+
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+.sidebar { width: 200px !important; }
+.main { margin-left: 200px !important; }
+.grid-4 { grid-template-columns: 1fr 1fr !important; }
+.grid-3 { grid-template-columns: 1fr 1fr !important; }
+}
+</style>
+
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════ -->
+
+<!--  LOGIN SCREEN                             -->
+
+<!-- ══════════════════════════════════════════ -->
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">🅿️</div>
+      <h1>Bãi Đỗ Xe <span>Thông Minh</span></h1>
+    </div>
+    <p class="login-subtitle">Hệ thống quản lý bãi xe thông minh.<br>Đăng nhập để tiếp tục.</p>
+
+```
+<div class="tab-switch">
+  <button class="tab-btn active" onclick="switchLoginTab('admin')">🔑 Admin</button>
+  <button class="tab-btn" onclick="switchLoginTab('member')">👤 Thành viên</button>
+</div>
+
+<div class="form-group">
+  <label class="form-label">Tên đăng nhập</label>
+  <input class="form-input" id="loginUser" placeholder="admin / member01..." value="admin">
+</div>
+<div class="form-group">
+  <label class="form-label">Mật khẩu</label>
+  <input class="form-input" type="password" id="loginPass" placeholder="••••••••" value="123456">
+</div>
+<button class="btn-primary" onclick="doLogin()">Đăng nhập →</button>
+<p class="login-hint">Demo: admin/<b>123456</b> &nbsp;|&nbsp; member01/<b>123456</b></p>
+```
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+
+<!--  MAIN APP                                  -->
+
+<!-- ══════════════════════════════════════════ -->
+
+<div class="app" id="app">
+
+  <!-- ── MOBILE TOPBAR ── -->
+
+  <div class="mobile-topbar" id="mobileTopbar">
+    <div class="mobile-topbar-left">
+      <div style="width:28px;height:28px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;">🅿️</div>
+      <div class="mobile-topbar-logo">Bãi Đỗ Xe <span>Thông Minh</span></div>
+    </div>
+    <div class="mobile-topbar-right">
+      <div class="esp32-badge connecting" id="esp32Badge" title="Trạng thái ESP32">
+        <div class="esp32-dot"></div>
+        <span id="esp32BadgeText">ESP32…</span>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);font-weight:600;" id="clockDisplayMobile">--:--</div>
+      <button class="mobile-logout-btn" onclick="doLogout()" title="Đăng xuất">🚪</button>
+    </div>
+  </div>
+
+  <!-- ── MOBILE BOTTOM NAV ── -->
+
+  <nav class="mobile-nav" id="mobileNav">
+    <div class="mobile-nav-inner" id="mobileNavInner">
+      <!-- filled by JS -->
+    </div>
+  </nav>
+
+  <!-- SIDEBAR -->
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">🅿️</div>
+        <h2>Bãi Đỗ Xe <span>Thông Minh</span></h2>
+      </div>
+    </div>
+
+```
+<div class="sidebar-user">
+  <div class="user-avatar" id="sidebarAvatar">A</div>
+  <div class="user-info">
+    <div class="user-name" id="sidebarName">Admin</div>
+    <div class="user-role" id="sidebarRole">Quản trị viên</div>
+  </div>
+</div>
+
+<nav class="sidebar-nav" id="sidebarNav">
+  <!-- Filled by JS -->
+</nav>
+
+<div class="sidebar-footer">
+  <button class="btn-logout" onclick="doLogout()">
+    <span>🚪</span> Đăng xuất
+  </button>
+</div>
+```
+
+  </aside>
+
+  <!-- MAIN -->
+
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-actions">
+        <div class="esp32-badge connecting" id="esp32BadgeDesktop" title="Trạng thái kết nối ESP32">
+          <div class="esp32-dot"></div>
+          <span id="esp32BadgeTextDesktop">ESP32 — Đang kiểm tra…</span>
+        </div>
+        <div class="topbar-time" id="clockDisplay">--:--:--</div>
+      </div>
+    </div>
+
+```
+<div class="content">
+
+  <!-- ── PAGE: DASHBOARD ── -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-title">Trang chủ</div>
+    <div class="page-subtitle">Tổng quan bãi xe thời gian thực</div>
+
+    <div class="section-gap">
+      <!-- Stats -->
+      <div class="grid-4">
+        <div class="stat-card">
+          <div class="stat-icon green">🚗</div>
+          <div>
+            <div class="stat-value" id="statOccupied">2</div>
+            <div class="stat-label">Chỗ đang đỗ</div>
+            <div class="stat-change up">▲ 1 so với sáng</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">🅿️</div>
+          <div>
+            <div class="stat-value" id="statFree">2</div>
+            <div class="stat-label">Chỗ còn trống</div>
+            <div class="stat-change">Tổng 4 chỗ</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange">📋</div>
+          <div>
+            <div class="stat-value" id="statTodayTrips">0</div>
+            <div class="stat-label">Lượt hôm nay</div>
+            <div class="stat-change up">Từ Firebase</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon purple">💰</div>
+          <div>
+            <div class="stat-value" id="statTodayRevenue">0k</div>
+            <div class="stat-label">Doanh thu hôm nay</div>
+            <div class="stat-change up">Từ Firebase</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slots + Gate -->
+      <div class="row-gap">
+        <div class="card" style="flex:2">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Trạng thái chỗ đỗ</div>
+              <div class="card-subtitle">Cập nhật realtime từ cảm biến IR</div>
+            </div>
+            <button class="btn-sm primary" onclick="refreshSlots()">🔄 Refresh</button>
+          </div>
+          <div class="slots-grid" id="slotsGrid"></div>
+        </div>
+
+        <div class="card" style="flex:1">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Điều khiển cổng</div>
+              <div class="card-subtitle">Mở / đóng thủ công</div>
+            </div>
+          </div>
+          <div class="gate-controls">
+            <div class="gate-card">
+              <div class="gate-icon">🚧</div>
+              <div class="gate-name">Cổng Vào</div>
+              <div class="gate-state closed" id="entryState">● Đóng</div>
+              <button id="btn-gate-entry" class="btn-gate open-btn" onclick="toggleGate('entry')">▲ Mở cổng</button>
+            </div>
+            <div class="gate-card">
+              <div class="gate-icon">🚦</div>
+              <div class="gate-name">Cổng Ra</div>
+              <div class="gate-state closed" id="exitState">● Đóng</div>
+              <button id="btn-gate-exit" class="btn-gate open-btn" onclick="toggleGate('exit')">▲ Mở cổng</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── PAGE: LỊCH SỬ ── -->
+  <div class="page" id="page-history">
+    <div class="page-title">Lịch sử xe vào/ra</div>
+    <div class="page-subtitle">Toàn bộ lịch sử quét thẻ</div>
+
+    <div class="card">
+      <div class="filter-row">
+        <input class="filter-input" type="date" id="historyDate" style="width:160px">
+        <select class="filter-input" style="width:140px">
+          <option>Tất cả loại thẻ</option>
+          <option>Thẻ thường</option>
+          <option>Thẻ tháng</option>
+        </select>
+        <select class="filter-input" style="width:120px">
+          <option>Tất cả sự kiện</option>
+          <option>Vào</option>
+          <option>Ra</option>
+        </select>
+        <button class="btn-sm primary">🔍 Lọc</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Thời gian vào</th>
+              <th>Thời gian ra</th>
+              <th>Thời gian đỗ</th>
+              <th>UID Thẻ</th>
+              <th>Tên chủ xe</th>
+              <th>Loại thẻ</th>
+              <th>Phí</th>
+              <th>Trạng thái</th>
+            </tr>
+          </thead>
+          <tbody id="historyTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PAGE: DOANH THU ── -->
+  <div class="page" id="page-revenue">
+    <div class="page-title">Doanh thu</div>
+    <div class="page-subtitle">Thống kê tài chính bãi xe</div>
+
+    <div class="section-gap">
+      <div class="grid-4">
+        <div class="stat-card">
+          <div class="stat-icon green">📅</div>
+          <div>
+            <div class="stat-value">24k</div>
+            <div class="stat-label">Hôm nay</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">📆</div>
+          <div>
+            <div class="stat-value">168k</div>
+            <div class="stat-label">Tuần này</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange">🗓️</div>
+          <div>
+            <div class="stat-value">720k</div>
+            <div class="stat-label">Tháng này</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon purple">📊</div>
+          <div>
+            <div class="stat-value">8.6M</div>
+            <div class="stat-label">Năm nay</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="card">
+          <div style="margin-bottom:12px;">
+            <div class="card-title" style="margin-bottom:10px;">Biểu đồ doanh thu</div>
+            <div class="rev-tabs">
+              <button class="rev-tab active" onclick="switchRevTab(this,'day')">Ngày</button>
+              <button class="rev-tab" onclick="switchRevTab(this,'week')">Tuần</button>
+              <button class="rev-tab" onclick="switchRevTab(this,'month')">Tháng</button>
+              <button class="rev-tab" onclick="switchRevTab(this,'year')">Năm</button>
+            </div>
+          </div>
+          <div class="chart-bar-wrap" id="revenueChart" style="height:180px;"></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:16px">Phân loại doanh thu</div>
+          <div class="section-gap" style="gap:10px">
+            <div class="info-item">
+              <div class="info-label">Thẻ thường (2k/lượt)</div>
+              <div class="info-value" style="color:var(--primary)">360k <span style="font-size:12px;color:var(--text3)">180 lượt</span></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Thẻ tháng</div>
+              <div class="info-value" style="color:var(--accent)">360k <span style="font-size:12px;color:var(--text3)">3 thẻ</span></div>
+            </div>
+            <div class="info-item" style="background:var(--primary-light);border-color:#bfdbfe">
+              <div class="info-label">Tổng tháng này</div>
+              <div class="info-value" style="color:var(--primary)">720,000đ</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PAGE: QUẢN LÝ TÀI KHOẢN ── -->
+  <div class="page" id="page-cards">
+    <div class="page-title">Quản lý tài khoản</div>
+    <div class="page-subtitle">Thành viên và thẻ RFID đăng ký</div>
+
+    <div class="card">
+      <div class="filter-row">
+        <input class="filter-input" id="accountSearch" placeholder="🔍 Tìm theo tên, SĐT, UID..." style="flex:1" oninput="renderAccountsTable()">
+        <button class="btn-sm primary" onclick="openAddMemberModal()">+ Thêm</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tên đăng nhập</th>
+              <th>Họ tên</th>
+              <th>SĐT</th>
+              <th>Thẻ RFID</th>
+              <th>Hết hạn</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="accountsTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PAGE: HỒ SƠ THÀNH VIÊN ── -->
+  <div class="page" id="page-profile">
+    <div class="page-title">Hồ sơ của tôi</div>
+    <div class="page-subtitle">Thông tin thẻ và lịch sử xe của bạn</div>
+
+    <div class="section-gap">
+      <div class="profile-hero">
+        <div class="profile-avatar-big" id="profileAvatar">M</div>
+        <div>
+          <div class="profile-name" id="profileName">Nguyễn Văn A</div>
+          <div class="profile-sub" id="profileSub">Thành viên thẻ tháng • Đang hoạt động</div>
+        </div>
+        <div class="profile-card-badge">
+          <div class="profile-card-uid" id="profileUID">11:22:33:44</div>
+          <div class="profile-card-type">Thẻ tháng</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px">Thông tin thẻ</div>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Ngày đăng ký</div>
+              <div class="info-value">01/03/2026</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Hết hạn</div>
+              <div class="info-value" style="color:var(--success)">01/04/2026</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Phí tháng</div>
+              <div class="info-value" style="color:var(--primary)">120,000đ</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Lượt tháng này</div>
+              <div class="info-value">23 lượt</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px">Thống kê sử dụng</div>
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Tổng thời gian đỗ</div>
+              <div class="info-value">47 giờ</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Lượt hôm nay</div>
+              <div class="info-value">1 lượt</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">TB mỗi ngày</div>
+              <div class="info-value">2.1 giờ</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Tổng tháng</div>
+              <div class="info-value">23 lượt</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Lịch sử xe của tôi</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Giờ vào</th>
+                <th>Giờ ra</th>
+                <th>Thời gian đỗ</th>
+                <th>Ngày</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody id="memberHistoryTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+```
+
+  </main>
+</div><!-- /app -->
+
+<!-- ══════════════════════════════════════════ -->
+
+<!--  MODALS                                    -->
+
+<!-- ══════════════════════════════════════════ -->
+
+<!-- Modal thêm thành viên (gộp thẻ + tài khoản) -->
+
+<div class="modal-overlay" id="modalAddMember">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">➕ Thêm thành viên mới</div>
+      <button class="modal-close" onclick="closeModal('modalAddMember')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tên đăng nhập <span style="color:var(--danger)">*</span></label>
+      <input class="form-input" placeholder="VD: member04" id="newUsername">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Mật khẩu <span style="color:var(--danger)">*</span></label>
+      <input class="form-input" type="password" placeholder="••••••••" id="newPassword">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Họ và tên <span style="color:var(--danger)">*</span></label>
+      <input class="form-input" placeholder="VD: Nguyễn Văn A" id="newFullname">
+    </div>
+    <div class="form-group">
+      <label class="form-label">ID thẻ RFID <span style="color:var(--danger)">*</span></label>
+      <input class="form-input" placeholder="VD: AA:BB:CC:DD" id="newMemberUID">
+    </div>
+    <div class="grid-2" style="gap:12px">
+      <div class="form-group">
+        <label class="form-label">Phí / tháng (đ)</label>
+        <input class="form-input" type="number" placeholder="120000" id="newMemberFee">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Số điện thoại</label>
+        <input class="form-input" placeholder="0912345678" id="newMemberPhone">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm outline" onclick="closeModal('modalAddMember')">Hủy</button>
+      <button class="btn-sm primary" onclick="submitAddMember()">✅ Tạo thành viên</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ══════════════════════════════════════════ -->
+
+<!--  JAVASCRIPT                               -->
+
+<!-- ══════════════════════════════════════════ -->
+
+<script>
+// ── DATA ──────────────────────────────────────
+// Admin cứng — không lưu trên Firebase
+const ADMIN_USER = { pass:'123456', role:'admin', name:'Admin Tổng' };
+
+// Dữ liệu thành viên — load từ Firebase, ban đầu rỗng
+let USERS = {
+  admin: ADMIN_USER,
+};
+
+let currentUser = null;
+let currentTab  = 'admin';
+
+const slotData = [
+  { id:1, occupied:false, label:'Chỗ 1' },
+  { id:2, occupied:false, label:'Chỗ 2' },
+  { id:3, occupied:false, label:'Chỗ 3' },
+  { id:4, occupied:false, label:'Chỗ 4' },
+];
+
+const historyData = [];
+let cardsData    = [];
+let accountsData = [];
+
+const memberHistory = [];
+const gateState = { entry: false, exit: false };
+
+// ── ADMIN NAV ─────────────────────────────────
+const adminNav = [
+  { id:'dashboard', icon:'📊', label:'Trang chủ' },
+  { id:'history',   icon:'📋', label:'Lịch sử vào/ra' },
+  { id:'revenue',   icon:'💰', label:'Doanh thu',     section:'Tài chính' },
+  { id:'cards', icon:'👥', label:'Tài khoản', section:'Quản lý' },
+];
+
+const memberNav = [
+  { id:'profile', icon:'👤', label:'Hồ sơ của tôi' },
+  { id:'history', icon:'📋', label:'Lịch sử xe tôi' },
+];
+
+// ── LOGIN ─────────────────────────────────────
+function switchLoginTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', (i===0 && tab==='admin') || (i===1 && tab==='member'));
+  });
+  document.getElementById('loginUser').value = tab === 'admin' ? 'admin' : '';
+}
+
+async function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value.trim();
+  if (!u || !p) { showToast('❌ Vui lòng nhập đầy đủ!', 'danger'); return; }
+
+  const btn = document.querySelector('.btn-primary');
+  if (btn) { btn.textContent = 'Đang đăng nhập...'; btn.disabled = true; }
+
+  try {
+    // Admin check (cứng, không cần Firebase)
+    if (u === 'admin') {
+      if (p !== ADMIN_USER.pass) throw new Error('wrong');
+      currentUser = { ...ADMIN_USER, username: 'admin' };
+    } else {
+      // Member check từ Firebase
+      const fbUser = await fbGet('/members/' + u);
+      if (!fbUser || fbUser.pass !== p) throw new Error('wrong');
+      currentUser = {
+        role: 'member',
+        username: u,
+        name: fbUser.fullname,
+        uid:  fbUser.uid,
+        fee:  fbUser.fee || 0,
+        expiry: fbUser.expiry || '—',
+        pass: fbUser.pass,
+      };
+    }
+  } catch(e) {
+    showToast('❌ Sai tên đăng nhập hoặc mật khẩu!', 'danger');
+    if (btn) { btn.textContent = 'Đăng nhập →'; btn.disabled = false; }
+    return;
+  }
+
+  if (btn) { btn.textContent = 'Đăng nhập →'; btn.disabled = false; }
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  initApp();
+}
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('app').classList.remove('visible');
+}
+
+// ── INIT APP ──────────────────────────────────
+function initApp() {
+  const isAdmin = currentUser.role === 'admin';
+
+  // Sidebar user
+  const av = document.getElementById('sidebarAvatar');
+  av.textContent = currentUser.name[0];
+  av.className = 'user-avatar ' + (isAdmin ? 'admin' : 'member');
+  document.getElementById('sidebarName').textContent = currentUser.name;
+  document.getElementById('sidebarRole').textContent = isAdmin ? 'Quản trị viên' : 'Thành viên thẻ tháng';
+
+  // Build nav
+  const nav = isAdmin ? adminNav : memberNav;
+  const navEl = document.getElementById('sidebarNav');
+  let html = '';
+  let lastSection = '';
+  nav.forEach(item => {
+    if (item.section && item.section !== lastSection) {
+      html += `<div class="nav-section-title">${item.section}</div>`;
+      lastSection = item.section;
+    }
+    html += `<button class="nav-item" onclick="navigateTo('${item.id}')" id="nav-${item.id}">
+      <span class="nav-icon">${item.icon}</span> ${item.label}
+    </button>`;
+  });
+  navEl.innerHTML = html;
+
+  // Member profile
+  if (!isAdmin) {
+    document.getElementById('profileName').textContent = currentUser.name;
+    document.getElementById('profileAvatar').textContent = currentUser.name[0];
+    document.getElementById('profileUID').textContent = currentUser.uid || '—';
+  }
+
+  // Mobile nav
+  renderMobileNav();
+
+  const firstPage = isAdmin ? 'dashboard' : 'profile';
+  navigateTo(firstPage);
+  renderAll();
+  startClock();
+}
+
+function navigateTo(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const page = document.getElementById('page-' + pageId);
+  const navBtn = document.getElementById('nav-' + pageId);
+  if (page) page.classList.add('active');
+  if (navBtn) navBtn.classList.add('active');
+
+  // Mobile nav active
+  updateMobileNavActive(pageId);
+
+  // Scroll to top on mobile
+  window.scrollTo(0, 0);
+
+  const titles = {
+    dashboard:'Trang chủ', history:'Lịch sử vào/ra',
+    revenue:'Doanh thu', cards:'Quản lý tài khoản',
+    profile:'Hồ sơ của tôi'
+  };
+  const titleEl = document.getElementById('topbarTitle');
+  if (titleEl) titleEl.textContent = titles[pageId] || pageId;
+}
+
+function navTo(pageId) { navigateTo(pageId); }
+
+// ── RENDER ────────────────────────────────────
+function renderAll() {
+  renderSlots();
+  renderRecentTable();
+  renderHistoryTable();
+  renderCardsTable();
+  renderAccountsTable();
+  renderMemberHistory();
+  renderRevenueChart('day');
+  updateStatCards();
+}
+
+function renderSlots() {
+  const occupied = slotData.filter(s => s.occupied).length;
+  document.getElementById('statOccupied').textContent = occupied;
+  document.getElementById('statFree').textContent = 4 - occupied;
+
+  const grid = document.getElementById('slotsGrid');
+  grid.innerHTML = slotData.map(s => `
+    <div class="slot-card ${s.occupied ? 'occupied' : 'empty'}" onclick="toggleSlot(${s.id})">
+      <div class="slot-icon">${s.occupied ? '🚗' : '🅿️'}</div>
+      <div class="slot-number">${s.label}</div>
+      <div class="slot-status">${s.occupied ? 'Có xe' : 'Trống'}</div>
+    </div>
+  `).join('');
+}
+
+function toggleSlot(id) {
+  const slot = slotData.find(s => s.id === id);
+  if (slot) {
+    slot.occupied = !slot.occupied;
+    renderSlots();
+    showToast(`${slot.label}: ${slot.occupied ? '🚗 Có xe' : '✅ Trống'}`, slot.occupied ? 'danger' : 'success');
+  }
+}
+
+function refreshSlots() {
+  renderSlots();
+  showToast('🔄 Đã cập nhật trạng thái chỗ đỗ!', 'info');
+}
+
+function updateStatCards() {
+  const occupied = slotData.filter(s => s.occupied).length;
+  document.getElementById('statOccupied').textContent = occupied;
+  document.getElementById('statFree').textContent = 4 - occupied;
+}
+
+function renderRecentTable() {
+  const tbody = document.getElementById('recentTable');
+  tbody.innerHTML = historyData.slice(0,5).map(h => `
+    <tr>
+      <td data-label="Thời gian" class="mono">${h.date} ${h.timeIn}</td>
+      <td data-label="UID"><span class="mono">${h.uid}</span></td>
+      <td data-label="Loại thẻ">${h.type==='month' ? '<span class="badge purple">Thẻ tháng</span>' : '<span class="badge blue">Thẻ thường</span>'}</td>
+      <td data-label="Trạng thái">${h.status==='inside'
+        ? '<span class="badge green">● Đang trong bãi</span>'
+        : '<span class="badge orange">Đã ra</span>'}</td>
+      <td data-label="Phí"><b>${h.fee}</b></td>
+    </tr>
+  `).join('');
+}
+
+function renderHistoryTable() {
+  const tbody = document.getElementById('historyTable');
+  tbody.innerHTML = historyData.map((h,i) => `
+    <tr>
+      <td data-label="#">${i+1}</td>
+      <td data-label="Giờ vào" class="mono">${h.timeIn}</td>
+      <td data-label="Giờ ra" class="mono">${h.timeOut}</td>
+      <td data-label="Thời gian đỗ">${h.duration}</td>
+      <td data-label="UID"><span class="mono">${h.uid}</span></td>
+      <td data-label="Chủ xe">${h.owner}</td>
+      <td data-label="Loại thẻ">${h.type==='month' ? '<span class="badge purple">Thẻ tháng</span>' : '<span class="badge blue">Thẻ thường</span>'}</td>
+      <td data-label="Phí"><b>${h.fee}</b></td>
+      <td data-label="Trạng thái">${h.status==='inside'
+        ? '<span class="badge green">Đang trong bãi</span>'
+        : '<span class="badge orange">Đã ra</span>'}</td>
+    </tr>
+  `).join('');
+}
+
+// ── MGMT TABS ─────────────────────────────────
+function switchMgmtTab(tab) {
+  ['cards','accounts'].forEach(t => {
+    document.getElementById('mgmtPanel-' + t).style.display = t === tab ? '' : 'none';
+    document.getElementById('mgmtTab-' + t).classList.toggle('active', t === tab);
+  });
+}
+
+function renderCardsTable() {
+  const tbody  = document.getElementById('cardsTable');
+  if (!tbody) return;
+  const search = (document.getElementById('cardSearch')?.value || '').toLowerCase();
+  const list   = search
+    ? cardsData.filter(c => c.uid.toLowerCase().includes(search) || c.owner.toLowerCase().includes(search))
+    : cardsData;
+
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px">Không tìm thấy thẻ nào</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map((c, idx) => {
+    const realIdx = cardsData.indexOf(c);
+    const statusBadge = c.status === 'active'
+      ? '<span class="badge green">Hoạt động</span>'
+      : c.status === 'expiring'
+      ? '<span class="badge orange">Sắp hết hạn</span>'
+      : '<span class="badge red">Hết hạn</span>';
+    const typeBadge = c.type === 'month'
+      ? '<span class="badge purple">Thẻ tháng</span>'
+      : '<span class="badge blue">Thẻ thường</span>';
+    return `<tr>
+      <td data-label="UID"><span class="mono">${c.uid}</span></td>
+      <td data-label="Chủ xe">${c.owner}</td>
+      <td data-label="Loại thẻ">${typeBadge}</td>
+      <td data-label="Hết hạn">${c.expiry}</td>
+      <td data-label="Phí"><b>${c.fee}</b></td>
+      <td data-label="Trạng thái">${statusBadge}</td>
+      <td data-label="Thao tác" style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn-sm success" onclick="renewCard(${realIdx})">🔄 Gia hạn</button>
+        <button class="btn-sm danger"  onclick="deleteCard(${realIdx})">🗑️ Xóa</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renewCard(idx) {
+  const card = cardsData[idx];
+  if (!card) return;
+  // Tính hết hạn mới: 1 tháng từ ngày hết hạn cũ (hoặc từ hôm nay nếu đã hết)
+  const fmt = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  const parseFmt = s => { const [d,m,y] = s.split('/'); return new Date(+y, +m-1, +d); };
+  let base = parseFmt(card.expiry);
+  if (isNaN(base)) base = new Date();
+  if (base < new Date()) base = new Date(); // nếu đã hết hạn thì tính từ hôm nay
+  base.setMonth(base.getMonth() + 1);
+  card.expiry = fmt(base);
+  card.status = 'active';
+  renderCardsTable();
+  showToast(`✅ Đã gia hạn thẻ ${card.uid} đến ${card.expiry}`, 'success');
+}
+
+function deleteCard(idx) {
+  const card = cardsData[idx];
+  if (!card) return;
+  if (!confirm(`Xóa thẻ ${card.uid} — ${card.owner}?`)) return;
+  cardsData.splice(idx, 1);
+  renderCardsTable();
+  showToast(`🗑️ Đã xóa thẻ ${card.uid}`, 'danger');
+}
+
+function renderAccountsTable() {
+  const tbody  = document.getElementById('accountsTable');
+  if (!tbody) return;
+  const search = (document.getElementById('accountSearch')?.value || '').toLowerCase();
+  const list   = search
+    ? accountsData.filter(a =>
+        a.name.toLowerCase().includes(search) ||
+        a.phone.includes(search) ||
+        a.uid.toLowerCase().includes(search))
+    : accountsData;
+
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px">Không tìm thấy tài khoản nào</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map((a) => {
+    const realIdx = accountsData.indexOf(a);
+    // Lấy ngày hết hạn từ cardsData
+    const card   = cardsData.find(c => c.uid === a.uid);
+    const expiry = card ? card.expiry : '—';
+    const status = card
+      ? (card.status === 'active'
+          ? '<span class="badge green">Hoạt động</span>'
+          : card.status === 'expiring'
+          ? '<span class="badge orange">Sắp hết hạn</span>'
+          : '<span class="badge red">Hết hạn</span>')
+      : '<span class="badge green">Hoạt động</span>';
+    return `<tr>
+      <td data-label="Username"><b>${a.username}</b></td>
+      <td data-label="Họ tên">${a.name}</td>
+      <td data-label="SĐT">${a.phone}</td>
+      <td data-label="Thẻ RFID"><span class="mono">${a.uid}</span></td>
+      <td data-label="Hết hạn">${expiry}</td>
+      <td data-label="Trạng thái">${status}</td>
+      <td data-label="Thao tác" style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn-sm success" onclick="renewAccount(${realIdx})">🔄 Gia hạn</button>
+        <button class="btn-sm danger"  onclick="deleteAccount(${realIdx})">🗑️ Xóa</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renewAccount(idx) {
+  const acc  = accountsData[idx];
+  if (!acc) return;
+  const card = cardsData.find(c => c.uid === acc.uid);
+  if (!card) { showToast('❌ Không tìm thấy thẻ!', 'danger'); return; }
+  const fmt      = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  const parseFmt = s => { const [d,m,y] = s.split('/'); return new Date(+y,+m-1,+d); };
+  let base = parseFmt(card.expiry);
+  if (isNaN(base) || base < new Date()) base = new Date();
+  base.setMonth(base.getMonth() + 1);
+  card.expiry = fmt(base);
+  card.status = 'active';
+  // Ghi Firebase
+  fbPatch('/members/' + acc.username, { expiry: card.expiry, status: 'active' });
+  renderAccountsTable();
+  showToast(`✅ Đã gia hạn ${acc.name} đến ${card.expiry}`, 'success');
+}
+
+async function deleteAccount(idx) {
+  const acc = accountsData[idx];
+  if (!acc) return;
+  if (!confirm(`Xóa tài khoản ${acc.username} — ${acc.name}?`)) return;
+  // Xóa Firebase
+  await fetch(`${FIREBASE_URL}/members/${acc.username}.json`, { method: 'DELETE' });
+  // Xóa local
+  const cardIdx = cardsData.findIndex(c => c.uid === acc.uid);
+  if (cardIdx > -1) cardsData.splice(cardIdx, 1);
+  accountsData.splice(idx, 1);
+  renderAccountsTable();
+  showToast(`🗑️ Đã xóa tài khoản ${acc.username}`, 'danger');
+}
+
+function renderMemberHistory() {
+  const tbody = document.getElementById('memberHistoryTable');
+  tbody.innerHTML = memberHistory.map(h => `
+    <tr>
+      <td data-label="#">${h.id}</td>
+      <td data-label="Giờ vào" class="mono">${h.timeIn}</td>
+      <td data-label="Giờ ra" class="mono">${h.timeOut}</td>
+      <td data-label="Thời gian đỗ">${h.duration}</td>
+      <td data-label="Ngày">${h.date}</td>
+      <td data-label="Trạng thái">${h.status==='inside'
+        ? '<span class="badge green">Đang trong bãi</span>'
+        : '<span class="badge orange">Đã ra</span>'}</td>
+    </tr>
+  `).join('');
+}
+
+// ── REVENUE CHART ─────────────────────────────
+const chartData = {
+  day:   { labels:['T2','T3','T4','T5','T6','T7','CN'], vals:[18,24,16,30,22,28,12] },
+  week:  { labels:['T1','T2','T3','T4','T5','T6','T7','T8'], vals:[120,168,145,200,180,220,160,168] },
+  month: { labels:['Th1','Th2','Th3','Th4','Th5','Th6'], vals:[580,620,720,690,750,700] },
+  year:  { labels:['2021','2022','2023','2024','2025','2026'], vals:[5200,6800,7400,7900,8200,8600] },
+};
+
+function renderRevenueChart(type) {
+  const d = chartData[type];
+  const max = Math.max(...d.vals);
+  const chart = document.getElementById('revenueChart');
+  const maxBarH = chart ? chart.offsetHeight - 36 : 140;
+  chart.innerHTML = d.labels.map((l,i) => {
+    const h = Math.max(8, Math.round((d.vals[i]/max) * maxBarH));
+    return `<div class="chart-bar-col">
+      <div class="chart-val">${d.vals[i]}k</div>
+      <div class="chart-bar" style="height:${h}px" title="${d.vals[i]}k"></div>
+      <div class="chart-label">${l}</div>
+    </div>`;
+  }).join('');
+}
+
+function switchRevTab(btn, type) {
+  document.querySelectorAll('.rev-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderRevenueChart(type);
+}
+
+// ── GATE CONTROL ──────────────────────────────
+function toggleGate(gate) {
+  gateState[gate] = !gateState[gate];
+  const el = document.getElementById(gate + 'State');
+  if (gateState[gate]) {
+    el.textContent = '● Đang mở';
+    el.className = 'gate-state open';
+    showToast(`🚧 Cổng ${gate==='entry'?'vào':'ra'} đã MỞ!`, 'success');
+    setTimeout(() => {
+      gateState[gate] = false;
+      el.textContent = '● Đóng';
+      el.className = 'gate-state closed';
+      showToast(`🔒 Cổng ${gate==='entry'?'vào':'ra'} đã TỰ ĐÓNG`, 'info');
+    }, 3000);
+  }
+}
+
+// ── FIREBASE MEMBERS SYNC ─────────────────────
+
+async function loadMembersFromFirebase() {
+  const data = await fbGet('/members');
+  if (!data) return;
+
+  cardsData    = [];
+  accountsData = [];
+
+  Object.entries(data).forEach(([username, m]) => {
+    // Tái tạo accountsData
+    accountsData.push({
+      username,
+      name:    m.fullname || m.name || username,
+      phone:   m.phone   || '—',
+      uid:     m.uid     || '—',
+      created: m.created || '—',
+      status:  'active',
+    });
+
+    // Tái tạo cardsData
+    cardsData.push({
+      uid:     m.uid     || '—',
+      owner:   m.fullname || m.name || username,
+      type:    'month',
+      regDate: m.created || '—',
+      expiry:  m.expiry  || '—',
+      fee:     m.fee ? Number(m.fee).toLocaleString('vi-VN') + 'đ' : '—',
+      status:  m.status  || 'active',
+      account: username,
+    });
+  });
+
+  renderAccountsTable();
+  renderCardsTable();
+}
+
+// ── MODALS ────────────────────────────────────
+function openAddMemberModal() {
+  ['newUsername','newPassword','newFullname','newMemberUID','newMemberFee','newMemberPhone']
+    .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  document.getElementById('modalAddMember').classList.add('show');
+}
+function openAddCardModal()    { openAddMemberModal(); }
+function openAddAccountModal() { openAddMemberModal(); }
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+async function submitAddMember() {
+  const username = document.getElementById('newUsername').value.trim();
+  const password = document.getElementById('newPassword').value.trim();
+  const fullname = document.getElementById('newFullname').value.trim();
+  const uid      = document.getElementById('newMemberUID').value.trim().toUpperCase();
+  const fee      = document.getElementById('newMemberFee').value.trim();
+  const phone    = document.getElementById('newMemberPhone').value.trim();
+
+  if (!username) { showToast('❌ Vui lòng nhập tên đăng nhập!', 'danger'); return; }
+  if (!password) { showToast('❌ Vui lòng nhập mật khẩu!', 'danger'); return; }
+  if (!fullname) { showToast('❌ Vui lòng nhập họ và tên!', 'danger'); return; }
+  if (!uid)      { showToast('❌ Vui lòng nhập ID thẻ RFID!', 'danger'); return; }
+
+  // Kiểm tra trùng username trên Firebase
+  const existing = await fbGet('/members/' + username);
+  if (existing) { showToast('❌ Tên đăng nhập đã tồn tại!', 'danger'); return; }
+  if (cardsData.find(c => c.uid === uid)) { showToast('❌ UID thẻ đã tồn tại!', 'danger'); return; }
+
+  const today    = new Date();
+  const expiry   = new Date(today); expiry.setMonth(expiry.getMonth() + 1);
+  const fmt      = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+
+  const memberData = {
+    pass: password, fullname, uid,
+    phone: phone || '—',
+    fee: fee ? +fee : 0,
+    created: fmt(today),
+    expiry: fmt(expiry),
+    status: 'active',
+  };
+
+  // Ghi lên Firebase — đây là nguồn sự thật duy nhất
+  const btn = document.querySelector('#modalAddMember .btn-sm.primary');
+  if (btn) { btn.textContent = 'Đang lưu...'; btn.disabled = true; }
+
+  await fbPut('/members/' + username, memberData);
+
+  if (btn) { btn.textContent = '✅ Tạo thành viên'; btn.disabled = false; }
+
+  // Cập nhật local arrays
+  accountsData.unshift({ username, name: fullname, phone: phone||'—', uid, created: fmt(today), status: 'active' });
+  cardsData.unshift({
+    uid, owner: fullname, type: 'month',
+    regDate: fmt(today), expiry: fmt(expiry),
+    fee: fee ? Number(fee).toLocaleString('vi-VN') + 'đ' : '—',
+    status: 'active', account: username
+  });
+
+  renderCardsTable();
+  renderAccountsTable();
+  closeModal('modalAddMember');
+  showToast(`✅ Đã tạo thành viên: ${fullname}`, 'success');
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('show');
+  });
+});
+
+// ── TOAST ─────────────────────────────────────
+function showToast(msg, type='info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = msg;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// ── CLOCK ─────────────────────────────────────
+function startClock() {
+  function tick() {
+    const now = new Date();
+    const full = now.toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    const short = now.toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
+    const el = document.getElementById('clockDisplay');
+    const elM = document.getElementById('clockDisplayMobile');
+    if (el) el.textContent = full;
+    if (elM) elM.textContent = short;
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+// ── FIREBASE CONFIG ───────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyDn8qezGIMny7DBMnVmqIna0SgAvLaZb5k",
+  authDomain: "baidoxe-a798f.firebaseapp.com",
+  databaseURL: "https://baidoxe-a798f-default-rtdb.firebaseio.com",
+  projectId: "baidoxe-a798f",
+  storageBucket: "baidoxe-a798f.firebasestorage.app",
+  messagingSenderId: "1039524317231",
+  appId: "1:1039524317231:web:2e73c40abdd02d8b839eda"
+};
+const FIREBASE_URL = firebaseConfig.databaseURL;
+
+// Đọc dữ liệu từ Firebase
+async function fbGet(path) {
+  try {
+    const res = await fetch(`${FIREBASE_URL}${path}.json`);
+    return await res.json();
+  } catch(e) { return null; }
+}
+
+// Ghi dữ liệu lên Firebase
+async function fbPut(path, value) {
+  try {
+    await fetch(`${FIREBASE_URL}${path}.json`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(value)
+    });
+  } catch(e) { console.error('Firebase PUT error:', e); }
+}
+
+// Patch (cập nhật 1 phần)
+async function fbPatch(path, value) {
+  try {
+    await fetch(`${FIREBASE_URL}${path}.json`, {
+      method: 'PATCH',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(value)
+    });
+  } catch(e) { console.error('Firebase PATCH error:', e); }
+}
+
+// ── REALTIME SYNC ─────────────────────────────
+let fbPollingInterval = null;
+
+function startFirebaseSync() {
+  // Poll Firebase mỗi 1.5 giây để realtime
+  fbPollingInterval = setInterval(syncFromFirebase, 1500);
+  syncFromFirebase(); // Lần đầu ngay lập tức
+  showToast('🔥 Đã kết nối Firebase!', 'success');
+}
+
+async function syncFromFirebase() {
+  const data = await fbGet('');
+  if (!data) return;
+
+  // Cập nhật trạng thái ESP32 từ heartbeat
+  if (data.esp32) {
+    updateESP32Badge(data.esp32);
+  }
+
+  // Cập nhật slots
+  if (data.slots) {
+    slotData[0].occupied = data.slots.slot1 === true;
+    slotData[1].occupied = data.slots.slot2 === true;
+    slotData[2].occupied = data.slots.slot3 === true;
+    slotData[3].occupied = data.slots.slot4 === true;
+    renderSlots();
+  }
+
+  // Cập nhật trạng thái cổng
+  if (data.gates) {
+    updateGateUI('entry', data.gates.entry);
+    updateGateUI('exit',  data.gates.exit);
+  }
+
+  // Cập nhật lịch sử
+  if (data.history) {
+    const rows = Object.entries(data.history).reverse().slice(0, 50);
+    renderFirebaseHistory(rows);
+  }
+
+  // Cập nhật stats
+  if (data.stats) {
+    document.getElementById('statTodayTrips').textContent = data.stats.totalToday || 0;
+    const rev = (data.stats.revenueToday || 0);
+    document.getElementById('statTodayRevenue').textContent = (rev/1000).toFixed(0) + 'k';
+  }
+}
+
+function updateGateUI(gate, state) {
+  const el  = document.getElementById(gate + 'State');
+  const btn = document.getElementById('btn-gate-' + gate);
+  if (!el) return;
+  if (state === 'open' || state === 'opening') {
+    gateOpenState[gate] = true;
+    el.textContent = '● Đang mở';
+    el.className   = 'gate-state open';
+    if (btn) { btn.textContent = '▼ Đóng cổng'; btn.className = 'btn-gate close-btn'; }
+  } else {
+    gateOpenState[gate] = false;
+    el.textContent = '● Đóng';
+    el.className   = 'gate-state closed';
+    if (btn) { btn.textContent = '▲ Mở cổng'; btn.className = 'btn-gate open-btn'; }
+  }
+}
+
+function renderFirebaseHistory(rows) {
+  const tbody = document.getElementById('historyTable');
+  if (!tbody || rows.length === 0) return;
+  tbody.innerHTML = rows.map(([key, h], i) => `
+    <tr>
+      <td data-label="#">${i+1}</td>
+      <td data-label="Giờ vào" class="mono">${h.timeIn || '—'}</td>
+      <td data-label="Giờ ra" class="mono">${h.timeOut || '—'}</td>
+      <td data-label="Thời gian">—</td>
+      <td data-label="UID"><span class="mono">${h.uid || '—'}</span></td>
+      <td data-label="Chủ xe">${h.owner || 'Khách'}</td>
+      <td data-label="Loại thẻ">${h.type==='month'
+        ? '<span class="badge purple">Thẻ tháng</span>'
+        : '<span class="badge blue">Thẻ thường</span>'}</td>
+      <td data-label="Phí"><b>${h.fee > 0 ? h.fee/1000 + 'k' : '—'}</b></td>
+      <td data-label="Trạng thái">${h.status==='inside'
+        ? '<span class="badge green">Đang trong bãi</span>'
+        : '<span class="badge orange">Đã ra</span>'}</td>
+    </tr>
+  `).join('');
+}
+
+// Override toggleGate để gửi lệnh lên Firebase thật
+// Mỗi cổng độc lập: nhấn 1 lần = mở, nhấn lại = đóng
+const gateOpenState = { entry: false, exit: false };
+
+async function toggleGate(gate) {
+  const el  = document.getElementById(gate + 'State');
+  const btn = document.getElementById('btn-gate-' + gate);
+  const isOpen = gateOpenState[gate];
+
+  if (!isOpen) {
+    // Mở cổng
+    gateOpenState[gate] = true;
+    el.textContent  = '● Đang mở';
+    el.className    = 'gate-state open';
+    if (btn) { btn.textContent = '▼ Đóng cổng'; btn.className = 'btn-gate close-btn'; }
+    showToast(`🚧 Đã mở cổng ${gate==='entry'?'vào':'ra'}!`, 'success');
+    await fbPut(`/gates/${gate}`, 'open');
+  } else {
+    // Đóng cổng
+    gateOpenState[gate] = false;
+    el.textContent  = '● Đóng';
+    el.className    = 'gate-state closed';
+    if (btn) { btn.textContent = '▲ Mở cổng'; btn.className = 'btn-gate open-btn'; }
+    showToast(`🔒 Đã đóng cổng ${gate==='entry'?'vào':'ra'}!`, 'info');
+    await fbPut(`/gates/${gate}`, 'closed');
+  }
+}
+
+// ── ESP32 HEARTBEAT STATUS ────────────────────
+// ESP32 ghi /esp32/lastSeen (Firebase server timestamp = số ms Unix)
+// Nếu > 15 giây không thấy heartbeat → coi là mất kết nối
+
+const ESP32_TIMEOUT_MS = 15000; // 15 giây
+
+function updateESP32Badge(esp32Data) {
+  if (!esp32Data || !esp32Data.lastSeen) {
+    setBadge('disconnected', 'ESP32 — Chưa kết nối');
+    return;
+  }
+
+  const lastSeen = typeof esp32Data.lastSeen === 'number'
+    ? esp32Data.lastSeen
+    : Date.now(); // fallback
+
+  const diffMs = Date.now() - lastSeen;
+
+  if (diffMs < ESP32_TIMEOUT_MS) {
+    const secAgo = Math.floor(diffMs / 1000);
+    const ip     = esp32Data.ip ? ` · ${esp32Data.ip}` : '';
+    const uptime = esp32Data.uptime ? ` · ↑${esp32Data.uptime}s` : '';
+    setBadge('connected', `ESP32 — Online${ip}${uptime}`);
+  } else {
+    const minAgo = Math.floor(diffMs / 60000);
+    const timeStr = minAgo < 1
+      ? `${Math.floor(diffMs/1000)}s trước`
+      : `${minAgo} phút trước`;
+    setBadge('disconnected', `ESP32 — Mất kết nối (${timeStr})`);
+  }
+}
+
+async function checkESP32Status() {
+  // Được gọi riêng khi cần (standalone check)
+  try {
+    const esp32Data = await fbGet('/esp32');
+    updateESP32Badge(esp32Data);
+  } catch(e) {
+    setBadge('disconnected', 'ESP32 — Lỗi Firebase');
+  }
+}
+
+function setBadge(state, text) {
+  // Mobile badge
+  const badge = document.getElementById('esp32Badge');
+  const label = document.getElementById('esp32BadgeText');
+  if (badge && label) {
+    badge.className = `esp32-badge ${state}`;
+    label.textContent = state === 'connected' ? 'Online' : state === 'disconnected' ? 'Offline' : '…';
+  }
+  // Desktop badge
+  const badgeD = document.getElementById('esp32BadgeDesktop');
+  const labelD = document.getElementById('esp32BadgeTextDesktop');
+  if (badgeD && labelD) {
+    badgeD.className = `esp32-badge ${state}`;
+    labelD.textContent = text;
+  }
+}
+
+function startESP32Monitor() {
+  // Lần đầu check ngay
+  checkESP32Status();
+  // Sau đó syncFromFirebase sẽ tự gọi updateESP32Badge mỗi 1.5s
+}
+
+// ── MOBILE NAV ────────────────────────────────
+function renderMobileNav() {
+  const nav   = document.getElementById('mobileNavInner');
+  if (!nav) return;
+  const items = currentUser?.role === 'admin' ? adminNav : memberNav;
+  // Hiển thị tối đa 5 mục trên bottom nav
+  const visible = items.slice(0, 5);
+  nav.innerHTML = visible.map(item => `
+    <button class="mobile-nav-item" id="mnav-${item.id}" onclick="navTo('${item.id}')">
+      <span class="mnav-icon">${item.icon}</span>
+      <span>${item.label.split(' ')[0]}</span>
+    </button>
+  `).join('');
+}
+
+function updateMobileNavActive(pageId) {
+  document.querySelectorAll('.mobile-nav-item').forEach(el => {
+    el.classList.toggle('active', el.id === `mnav-${pageId}`);
+  });
+}
+
+// ── INIT ──────────────────────────────────────
+document.getElementById('historyDate').value = new Date().toISOString().split('T')[0];
+
+const _origInitApp = initApp;
+window.initApp = async function() {
+  _origInitApp();
+  // Load members từ Firebase trước khi sync realtime
+  await loadMembersFromFirebase();
+  startFirebaseSync();
+  startESP32Monitor();
+};
+</script>
+
+</body>
+</html>
