@@ -1751,13 +1751,30 @@ function renderSlots() {
   document.getElementById('statFree').textContent = 4 - occupied;
 
   const grid = document.getElementById('slotsGrid');
-  grid.innerHTML = slotData.map(s => `
-    <div class="slot-card ${s.occupied ? 'occupied' : 'empty'}" style="cursor:default">
-      <div class="slot-icon">${s.occupied ? '🚗' : '🅿️'}</div>
-      <div class="slot-number">${s.label}</div>
-      <div class="slot-status">${s.occupied ? 'Có xe' : 'Trống'}</div>
-    </div>
-  `).join('');
+
+  // Lần đầu: tạo các card nếu chưa có (tránh xoá/tạo lại gây flash)
+  if (grid.children.length !== slotData.length) {
+    grid.innerHTML = slotData.map(s => `
+      <div class="slot-card empty" data-slot="${s.id}" style="cursor:default">
+        <div class="slot-icon">🅿️</div>
+        <div class="slot-number">${s.label}</div>
+        <div class="slot-status">Trống</div>
+      </div>
+    `).join('');
+  }
+
+  // Các lần tiếp: chỉ cập nhật từng card nào thay đổi trạng thái
+  slotData.forEach(s => {
+    const card = grid.querySelector(`[data-slot="${s.id}"]`);
+    if (!card) return;
+    const isOccupied = s.occupied;
+    const wasOccupied = card.classList.contains('occupied');
+    if (isOccupied === wasOccupied) return; // không đổi → bỏ qua, tránh flash
+    card.classList.toggle('occupied', isOccupied);
+    card.classList.toggle('empty', !isOccupied);
+    card.querySelector('.slot-icon').textContent = isOccupied ? '🚗' : '🅿️';
+    card.querySelector('.slot-status').textContent = isOccupied ? 'Có xe' : 'Trống';
+  });
 }
 
 function refreshSlots() {
@@ -1999,22 +2016,7 @@ function switchRevTab(btn, type) {
   renderRevenueChart(type);
 }
 
-// ── GATE CONTROL ──────────────────────────────
-function toggleGate(gate) {
-  gateState[gate] = !gateState[gate];
-  const el = document.getElementById(gate + 'State');
-  if (gateState[gate]) {
-    el.textContent = '● Đang mở';
-    el.className = 'gate-state open';
-    showToast(`🚧 Cổng ${gate==='entry'?'vào':'ra'} đã MỞ!`, 'success');
-    setTimeout(() => {
-      gateState[gate] = false;
-      el.textContent = '● Đóng';
-      el.className = 'gate-state closed';
-      showToast(`🔒 Cổng ${gate==='entry'?'vào':'ra'} đã TỰ ĐÓNG`, 'info');
-    }, 3000);
-  }
-}
+// ── GATE CONTROL — được định nghĩa ở phần Firebase bên dưới ──
 
 // ── MANUAL MODE ───────────────────────────────
 async function setManualMode(enabled) {
@@ -2249,7 +2251,7 @@ async function loadMemberProfile() {
   // Cập nhật stats profile
   document.getElementById('profileUID').textContent = myUID;
   const totalTrips = myRows.length;
-  const thisMonth  = myRows.filter(([k,h]) => h.date && h.date.includes('/' + new Date().getMonth()+1 + '/')).length;
+  const thisMonth  = myRows.filter(([k,h]) => h.date && h.date.includes('/' + String(new Date().getMonth()+1).padStart(2,'0') + '/')).length;
 }
 
 // ── CLOCK ─────────────────────────────────────
@@ -2322,53 +2324,93 @@ async function fbPatch(path, value) {
 let fbPollingInterval = null;
 
 function startFirebaseSync() {
-  fbPollingInterval = setInterval(syncFromFirebase, 1500);
-  syncFromFirebase();
+  // Slot poll 800ms — khớp tốc độ ESP32 v5 (debounce 80ms, sync ngay sau thay đổi)
+  setInterval(syncSlotsOnly, 800);
+  // Full sync (history, stats, gates...) mỗi 3 giây
+  fbPollingInterval = setInterval(syncFromFirebase, 3000);
+  syncFromFirebase(); // gọi full sync 1 lần đầu
+}
+
+async function syncSlotsOnly() {
+  try {
+    const toBool = v => v === true || v === 'true' || v === 1 || v === '1';
+    const slotsVal = await fbGet('/slots');
+    if (slotsVal && typeof slotsVal === 'object') {
+      let changed = false;
+      [1,2,3,4].forEach((n, i) => {
+        const val = slotsVal['slot' + n];
+        const newState = val != null ? toBool(val) : false;
+        if (slotData[i].occupied !== newState) {
+          slotData[i].occupied = newState;
+          changed = true;
+        }
+      });
+      // Dùng available từ ESP32 nếu có (chính xác hơn tự đếm)
+      if (slotsVal.available != null) {
+        const avail = parseInt(slotsVal.available);
+        if (!isNaN(avail)) {
+          const el1 = document.getElementById('statFree');
+          const el2 = document.getElementById('statOccupied');
+          if (el1) el1.textContent = avail;
+          if (el2) el2.textContent = 4 - avail;
+        }
+      }
+      if (changed) renderSlots(); // chỉ render khi thực sự có thay đổi
+    }
+  } catch(e) { /* bỏ qua lỗi mạng */ }
 }
 
 async function syncFromFirebase() {
-  const data = await fbGet('');
-  if (!data) return;
+  // Fetch từng path riêng — tránh Firebase Rules chặn đọc root "/"
+  // Dùng Promise.allSettled để 1 path lỗi không block cả batch
+  const toBool = v => v === true || v === 'true' || v === 1 || v === '1';
 
-  // Cập nhật trạng thái ESP32 từ heartbeat
-  if (data.esp32) {
-    updateESP32Badge(data.esp32);
+  const [resSlots, resEsp32, resGates, resStats, resSettings, resHistory] =
+    await Promise.allSettled([
+      fbGet('/slots'),
+      fbGet('/esp32'),
+      fbGet('/gates'),
+      fbGet('/stats'),
+      fbGet('/settings'),
+      fbGet('/history'),
+    ]);
+
+  // ── Slots (handled by syncSlotsOnly, skip renderSlots here) ──
+  // Không gọi renderSlots() trong full sync để tránh flash đè lên syncSlotsOnly
+
+  // ── ESP32 heartbeat ────────────────────────
+  const esp32Val = resEsp32.status === 'fulfilled' ? resEsp32.value : null;
+  if (esp32Val) updateESP32Badge(esp32Val);
+
+  // ── Cổng ──────────────────────────────────
+  const gatesVal = resGates.status === 'fulfilled' ? resGates.value : null;
+  if (gatesVal) {
+    updateGateUI('entry', gatesVal.entry);
+    updateGateUI('exit',  gatesVal.exit);
   }
 
-  // Cập nhật slots
-  if (data.slots) {
-    slotData[0].occupied = data.slots.slot1 === true;
-    slotData[1].occupied = data.slots.slot2 === true;
-    slotData[2].occupied = data.slots.slot3 === true;
-    slotData[3].occupied = data.slots.slot4 === true;
-    renderSlots();
-  }
-
-  // Đồng bộ manual mode từ Firebase
-  if (data.settings && data.settings.manualMode !== undefined) {
-    applyManualModeUI(data.settings.manualMode === true || data.settings.manualMode === 'true');
-  }
-
-  // Cập nhật trạng thái cổng
-  if (data.gates) {
-    updateGateUI('entry', data.gates.entry);
-    updateGateUI('exit',  data.gates.exit);
-  }
-
-  // Cập nhật lịch sử
-  if (data.history) {
-    const rows = Object.entries(data.history).reverse().slice(0, 50);
-    renderFirebaseHistory(rows);
-  }
-
-  // Cập nhật stats
-  if (data.stats) {
-    document.getElementById('statTodayTrips').textContent = data.stats.totalToday || 0;
-    const rev = (data.stats.revenueToday || 0);
+  // ── Stats ──────────────────────────────────
+  const statsVal = resStats.status === 'fulfilled' ? resStats.value : null;
+  if (statsVal) {
+    document.getElementById('statTodayTrips').textContent = statsVal.totalToday || 0;
+    const rev = statsVal.revenueToday || 0;
     document.getElementById('statTodayRevenue').textContent = (rev/1000).toFixed(0) + 'k';
   }
 
-  // Tự động cập nhật profile member
+  // ── Manual mode ────────────────────────────
+  const settingsVal = resSettings.status === 'fulfilled' ? resSettings.value : null;
+  if (settingsVal && settingsVal.manualMode !== undefined) {
+    applyManualModeUI(toBool(settingsVal.manualMode));
+  }
+
+  // ── Lịch sử ────────────────────────────────
+  const historyVal = resHistory.status === 'fulfilled' ? resHistory.value : null;
+  if (historyVal) {
+    const rows = Object.entries(historyVal).reverse().slice(0, 50);
+    renderFirebaseHistory(rows);
+  }
+
+  // ── Profile member ─────────────────────────
   if (currentUser?.role === 'member') {
     const profilePage = document.getElementById('page-profile');
     if (profilePage && profilePage.classList.contains('active')) {
