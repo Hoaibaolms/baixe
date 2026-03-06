@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ParkSmart — Quản Lý Bãi Xe</title>
+<title>Bãi Đỗ Xe Thông Minh</title>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -785,9 +785,9 @@
     }
 
     /* Charts */
-    .chart-bar-wrap { height: 90px !important; gap: 4px !important; }
-    .chart-val { font-size: 8px !important; }
-    .chart-label { font-size: 8px !important; }
+    .chart-bar-wrap { height: 120px !important; gap: 4px !important; }
+    .chart-val { font-size: 9px !important; }
+    .chart-label { font-size: 9px !important; }
 
     /* Revenue tabs */
     .rev-tabs { gap: 2px !important; }
@@ -857,7 +857,7 @@
   <div class="login-card">
     <div class="login-logo">
       <div class="login-logo-icon">🅿️</div>
-      <h1>Park<span>Smart</span></h1>
+      <h1>Bãi Đỗ Xe <span>Thông Minh</span></h1>
     </div>
     <p class="login-subtitle">Hệ thống quản lý bãi xe thông minh.<br>Đăng nhập để tiếp tục.</p>
 
@@ -888,7 +888,7 @@
   <div class="mobile-topbar" id="mobileTopbar">
     <div class="mobile-topbar-left">
       <div style="width:28px;height:28px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;">🅿️</div>
-      <div class="mobile-topbar-logo">Park<span>Smart</span></div>
+      <div class="mobile-topbar-logo">Bãi Đỗ Xe <span>Thông Minh</span></div>
     </div>
     <div class="mobile-topbar-right">
       <div class="esp32-badge connecting" id="esp32Badge" title="Trạng thái ESP32">
@@ -911,7 +911,7 @@
     <div class="sidebar-header">
       <div class="sidebar-logo">
         <div class="sidebar-logo-icon">🅿️</div>
-        <h2>Park<span>Smart</span></h2>
+        <h2>Bãi Đỗ Xe <span>Thông Minh</span></h2>
       </div>
     </div>
 
@@ -1109,9 +1109,9 @@
             </div>
           </div>
 
-          <div class="row-gap">
-            <div class="card" style="flex:2">
-              <div class="card-header">
+          <div class="section-gap">
+            <div class="card">
+              <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
                 <div class="card-title">Biểu đồ doanh thu</div>
                 <div class="rev-tabs">
                   <button class="rev-tab active" onclick="switchRevTab(this,'day')">Ngày</button>
@@ -1122,7 +1122,7 @@
               </div>
               <div class="chart-bar-wrap" id="revenueChart"></div>
             </div>
-            <div class="card" style="flex:1">
+            <div class="card">
               <div class="card-title" style="margin-bottom:16px">Phân loại doanh thu</div>
               <div class="section-gap" style="gap:10px">
                 <div class="info-item">
@@ -1143,66 +1143,31 @@
         </div>
       </div>
 
-      <!-- ── PAGE: QUẢN LÝ THẺ & TÀI KHOẢN (GỘP) ── -->
+      <!-- ── PAGE: QUẢN LÝ TÀI KHOẢN ── -->
       <div class="page" id="page-cards">
-        <div class="page-title">Quản lý thẻ & tài khoản</div>
-        <div class="page-subtitle">Thẻ RFID và thành viên đăng ký</div>
+        <div class="page-title">Quản lý tài khoản</div>
+        <div class="page-subtitle">Thành viên và thẻ RFID đăng ký</div>
 
-        <!-- Tab switch -->
-        <div class="tab-switch" style="margin-bottom:16px">
-          <button class="tab-btn active" id="mgmtTab-cards" onclick="switchMgmtTab('cards')">💳 Thẻ RFID</button>
-          <button class="tab-btn" id="mgmtTab-accounts" onclick="switchMgmtTab('accounts')">👥 Tài khoản</button>
-        </div>
-
-        <!-- ── PANEL: THẺ RFID ── -->
-        <div id="mgmtPanel-cards">
-          <div class="card">
-            <div class="filter-row">
-              <input class="filter-input" id="cardSearch" placeholder="🔍 Tìm UID hoặc tên..." style="flex:1" oninput="renderCardsTable()">
-              <button class="btn-sm primary" onclick="openAddMemberModal()">+ Thêm</button>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>UID Thẻ</th>
-                    <th>Tên chủ xe</th>
-                    <th>Loại thẻ</th>
-                    <th>Hết hạn</th>
-                    <th>Phí/tháng</th>
-                    <th>Trạng thái</th>
-                    <th>Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody id="cardsTable"></tbody>
-              </table>
-            </div>
+        <div class="card">
+          <div class="filter-row">
+            <input class="filter-input" id="accountSearch" placeholder="🔍 Tìm theo tên, SĐT, UID..." style="flex:1" oninput="renderAccountsTable()">
+            <button class="btn-sm primary" onclick="openAddMemberModal()">+ Thêm</button>
           </div>
-        </div>
-
-        <!-- ── PANEL: TÀI KHOẢN ── -->
-        <div id="mgmtPanel-accounts" style="display:none">
-          <div class="card">
-            <div class="filter-row">
-              <input class="filter-input" id="accountSearch" placeholder="🔍 Tìm theo tên hoặc SĐT..." style="flex:1" oninput="renderAccountsTable()">
-              <button class="btn-sm primary" onclick="openAddMemberModal()">+ Thêm</button>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Tên đăng nhập</th>
-                    <th>Họ tên</th>
-                    <th>SĐT</th>
-                    <th>Thẻ RFID</th>
-                    <th>Ngày tạo</th>
-                    <th>Trạng thái</th>
-                    <th>Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody id="accountsTable"></tbody>
-              </table>
-            </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tên đăng nhập</th>
+                  <th>Họ tên</th>
+                  <th>SĐT</th>
+                  <th>Thẻ RFID</th>
+                  <th>Hết hạn</th>
+                  <th>Trạng thái</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="accountsTable"></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -1402,7 +1367,7 @@ const adminNav = [
   { id:'dashboard', icon:'📊', label:'Trang chủ' },
   { id:'history',   icon:'📋', label:'Lịch sử vào/ra' },
   { id:'revenue',   icon:'💰', label:'Doanh thu',     section:'Tài chính' },
-  { id:'cards',     icon:'💳', label:'Quản lý thẻ',   section:'Quản lý' },
+  { id:'cards', icon:'👥', label:'Tài khoản', section:'Quản lý' },
 ];
 
 const memberNav = [
@@ -1498,7 +1463,7 @@ function navigateTo(pageId) {
 
   const titles = {
     dashboard:'Trang chủ', history:'Lịch sử vào/ra',
-    revenue:'Doanh thu', cards:'Quản lý thẻ & tài khoản',
+    revenue:'Doanh thu', cards:'Quản lý tài khoản',
     profile:'Hồ sơ của tôi'
   };
   const titleEl = document.getElementById('topbarTitle');
@@ -1664,7 +1629,10 @@ function renderAccountsTable() {
   if (!tbody) return;
   const search = (document.getElementById('accountSearch')?.value || '').toLowerCase();
   const list   = search
-    ? accountsData.filter(a => a.name.toLowerCase().includes(search) || a.phone.includes(search))
+    ? accountsData.filter(a =>
+        a.name.toLowerCase().includes(search) ||
+        a.phone.includes(search) ||
+        a.uid.toLowerCase().includes(search))
     : accountsData;
 
   if (list.length === 0) {
@@ -1674,25 +1642,55 @@ function renderAccountsTable() {
 
   tbody.innerHTML = list.map((a) => {
     const realIdx = accountsData.indexOf(a);
+    // Lấy ngày hết hạn từ cardsData
+    const card   = cardsData.find(c => c.uid === a.uid);
+    const expiry = card ? card.expiry : '—';
+    const status = card
+      ? (card.status === 'active'
+          ? '<span class="badge green">Hoạt động</span>'
+          : card.status === 'expiring'
+          ? '<span class="badge orange">Sắp hết hạn</span>'
+          : '<span class="badge red">Hết hạn</span>')
+      : '<span class="badge green">Hoạt động</span>';
     return `<tr>
       <td data-label="Username"><b>${a.username}</b></td>
       <td data-label="Họ tên">${a.name}</td>
       <td data-label="SĐT">${a.phone}</td>
       <td data-label="Thẻ RFID"><span class="mono">${a.uid}</span></td>
-      <td data-label="Ngày tạo">${a.created}</td>
-      <td data-label="Trạng thái"><span class="badge green">Hoạt động</span></td>
-      <td data-label="Thao tác" style="display:flex;gap:6px">
-        <button class="btn-sm outline" onclick="showToast('✏️ Chỉnh sửa tài khoản','info')">Sửa</button>
+      <td data-label="Hết hạn">${expiry}</td>
+      <td data-label="Trạng thái">${status}</td>
+      <td data-label="Thao tác" style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn-sm success" onclick="renewAccount(${realIdx})">🔄 Gia hạn</button>
         <button class="btn-sm danger"  onclick="deleteAccount(${realIdx})">🗑️ Xóa</button>
       </td>
     </tr>`;
   }).join('');
 }
 
+function renewAccount(idx) {
+  const acc  = accountsData[idx];
+  if (!acc) return;
+  const card = cardsData.find(c => c.uid === acc.uid);
+  if (!card) { showToast('❌ Không tìm thấy thẻ!', 'danger'); return; }
+  const fmt      = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  const parseFmt = s => { const [d,m,y] = s.split('/'); return new Date(+y,+m-1,+d); };
+  let base = parseFmt(card.expiry);
+  if (isNaN(base) || base < new Date()) base = new Date();
+  base.setMonth(base.getMonth() + 1);
+  card.expiry = fmt(base);
+  card.status = 'active';
+  renderAccountsTable();
+  showToast(`✅ Đã gia hạn ${acc.name} đến ${card.expiry}`, 'success');
+}
+
 function deleteAccount(idx) {
   const acc = accountsData[idx];
   if (!acc) return;
   if (!confirm(`Xóa tài khoản ${acc.username} — ${acc.name}?`)) return;
+  // Xóa cả thẻ liên kết
+  const cardIdx = cardsData.findIndex(c => c.uid === acc.uid);
+  if (cardIdx > -1) cardsData.splice(cardIdx, 1);
+  delete USERS[acc.username];
   accountsData.splice(idx, 1);
   renderAccountsTable();
   showToast(`🗑️ Đã xóa tài khoản ${acc.username}`, 'danger');
