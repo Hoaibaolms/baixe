@@ -2021,8 +2021,11 @@ function switchRevTab(btn, type) {
 // ── MANUAL MODE ───────────────────────────────
 async function setManualMode(enabled) {
   applyManualModeUI(enabled);
-  // Ghi lên Firebase để ESP32 đọc
-  await fbPut('/settings/manualMode', enabled);
+  // Ghi vào /cmd (ESP32 đọc 1 GET) và /settings (backup)
+  await Promise.all([
+    fbPatch('/cmd', { manualMode: enabled }),
+    fbPut('/settings/manualMode', enabled)
+  ]);
 }
 
 function applyManualModeUI(enabled) {
@@ -2472,13 +2475,20 @@ async function toggleGate(gate) {
     el.textContent  = '● Đang mở';
     el.className    = 'gate-state open';
     if (btn) { btn.textContent = '▼ Đóng cổng'; btn.className = 'btn-gate close-btn'; }
-    await fbPut(`/gates/${gate}`, 'open');
+    // Ghi vào /cmd và /gates cùng lúc
+    await Promise.all([
+      fbPatch('/cmd', { [gate]: 'open' }),
+      fbPut(`/gates/${gate}`, 'open')
+    ]);
   } else {
     gateOpenState[gate] = false;
     el.textContent  = '● Đóng';
     el.className    = 'gate-state closed';
     if (btn) { btn.textContent = '▲ Mở cổng'; btn.className = 'btn-gate open-btn'; }
-    await fbPut(`/gates/${gate}`, 'closed');
+    await Promise.all([
+      fbPatch('/cmd', { [gate]: 'closed' }),
+      fbPut(`/gates/${gate}`, 'closed')
+    ]);
   }
 }
 
