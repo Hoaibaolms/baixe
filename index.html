@@ -35,6 +35,8 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  html, body { overflow-x: hidden; width: 100%; }
+
   body {
     font-family: 'Be Vietnam Pro', sans-serif;
     background: var(--bg);
@@ -159,7 +161,7 @@
   .login-hint b { color: var(--primary); font-weight: 600; }
 
   /* ── APP LAYOUT ── */
-  .app { display: none; min-height: 100vh; }
+  .app { display: none; min-height: 100vh; width: 100%; overflow-x: hidden; }
   .app.visible { display: flex; }
 
   /* SIDEBAR */
@@ -247,6 +249,8 @@
     flex: 1;
     display: flex; flex-direction: column;
     min-height: 100vh;
+    min-width: 0;
+    overflow-x: hidden;
   }
   .topbar {
     background: var(--surface);
@@ -697,8 +701,9 @@
   @media (max-width: 768px) {
     /* Ẩn sidebar, topbar desktop */
     .sidebar { display: none !important; }
-    .main { margin-left: 0 !important; }
+    .main { margin-left: 0 !important; width: 100% !important; }
     .topbar { display: none !important; }
+    .app { display: flex; flex-direction: column; width: 100% !important; }
 
     /* Hiện mobile nav + topbar */
     .mobile-nav { display: block; }
