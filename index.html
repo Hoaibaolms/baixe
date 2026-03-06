@@ -1218,6 +1218,7 @@
         <div class="card">
           <div class="filter-row">
             <input class="filter-input" id="accountSearch" placeholder="🔍 Tìm theo tên, SĐT, UID..." style="flex:1" oninput="renderAccountsTable()">
+            <button class="btn-sm outline" onclick="debugFirebase()" title="Kiểm tra kết nối Firebase">🔍 Debug</button>
             <button class="btn-sm primary" onclick="openAddMemberModal()">+ Thêm</button>
           </div>
           <div class="table-wrap">
@@ -1515,7 +1516,7 @@ async function doLogin() {
   if (btn) { btn.textContent = 'Đăng nhập →'; btn.disabled = false; }
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').classList.add('visible');
-  initApp();
+  window.initApp();
 }
 
 function doLogout() {
@@ -1977,15 +1978,49 @@ function initGateControls() {
   if (btns) btns.classList.add('disabled');
 }
 
+async function debugFirebase() {
+  const tbody = document.getElementById('accountsTable');
+  if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:12px">⏳ Đang kiểm tra...</td></tr>`;
+  try {
+    const res  = await fetch(`${FIREBASE_URL}/members.json`);
+    const text = await res.text();
+    const data = JSON.parse(text);
+    if (data && data.error) {
+      if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="padding:16px;color:var(--danger)">❌ Firebase lỗi: <b>${data.error}</b></td></tr>`;
+    } else if (!data) {
+      if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="padding:16px;color:var(--text3)">⚠️ /members trống (null)</td></tr>`;
+    } else {
+      const keys = Object.keys(data);
+      if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="padding:16px;color:var(--success)">✅ Firebase OK — tìm thấy <b>${keys.length}</b> TK: ${keys.join(', ')}</td></tr>`;
+      await loadMembersFromFirebase();
+    }
+  } catch(e) {
+    if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="padding:16px;color:var(--danger)">❌ Lỗi: ${e.message}</td></tr>`;
+  }
+}
+
 async function loadMembersFromFirebase() {
+  // Hiện loading
+  const tbody = document.getElementById('accountsTable');
+  if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px">⏳ Đang tải dữ liệu...</td></tr>`;
+
   const data = await fbGet('/members');
-  if (!data) return;
 
   cardsData    = [];
   accountsData = [];
 
+  if (!data || typeof data !== 'object') {
+    if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px">
+      <div style="color:var(--danger);font-weight:600;margin-bottom:6px">⚠️ Không thể tải dữ liệu</div>
+      <div style="color:var(--text3);font-size:13px">Kiểm tra Firebase Rules — đường dẫn <b>/members</b> cần được cho phép đọc</div>
+    </td></tr>`;
+    console.warn('[Firebase] /members trả về:', data);
+    return;
+  }
+
+  console.log('[Firebase] Đã tải', Object.keys(data).length, 'thành viên');
+
   Object.entries(data).forEach(([username, m]) => {
-    // Tái tạo accountsData
     accountsData.push({
       username,
       name:    m.fullname || m.name || username,
@@ -1994,8 +2029,6 @@ async function loadMembersFromFirebase() {
       created: m.created || '—',
       status:  'active',
     });
-
-    // Tái tạo cardsData
     cardsData.push({
       uid:     m.uid     || '—',
       owner:   m.fullname || m.name || username,
@@ -2126,9 +2159,18 @@ const FIREBASE_URL = firebaseConfig.databaseURL;
 // Đọc dữ liệu từ Firebase
 async function fbGet(path) {
   try {
-    const res = await fetch(`${FIREBASE_URL}${path}.json`);
-    return await res.json();
-  } catch(e) { return null; }
+    const res  = await fetch(`${FIREBASE_URL}${path}.json`);
+    const data = await res.json();
+    // Firebase trả về {"error":"..."} khi bị chặn
+    if (data && data.error) {
+      console.error('[Firebase] Lỗi đọc' + path + ':', data.error);
+      return null;
+    }
+    return data;
+  } catch(e) {
+    console.error('[Firebase] Fetch lỗi:', e);
+    return null;
+  }
 }
 
 // Ghi dữ liệu lên Firebase
@@ -2157,10 +2199,8 @@ async function fbPatch(path, value) {
 let fbPollingInterval = null;
 
 function startFirebaseSync() {
-  // Poll Firebase mỗi 1.5 giây để realtime
   fbPollingInterval = setInterval(syncFromFirebase, 1500);
-  syncFromFirebase(); // Lần đầu ngay lập tức
-  showToast('🔥 Đã kết nối Firebase!', 'success');
+  syncFromFirebase();
 }
 
 async function syncFromFirebase() {
@@ -2355,10 +2395,14 @@ document.getElementById('historyDate').value = new Date().toISOString().split('T
 
 const _origInitApp = initApp;
 window.initApp = async function() {
+  // Bước 1: setup UI (nav, avatar, clock...)
   _origInitApp();
-  // Load members từ Firebase trước khi sync realtime
-  await loadMembersFromFirebase();
-  await loadNormalCardsFromFirebase();
+  // Bước 2: load data từ Firebase TRƯỚC khi render bảng
+  await Promise.all([
+    loadMembersFromFirebase(),
+    loadNormalCardsFromFirebase(),
+  ]);
+  // Bước 3: bắt đầu sync realtime
   initGateControls();
   startFirebaseSync();
   startESP32Monitor();
