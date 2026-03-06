@@ -46,7 +46,14 @@
   }
 
   /* ── LOGIN ── */
-  body.login-mode { overflow: hidden; }
+  html.login-mode,
+  body.login-mode {
+    overflow: hidden !important;
+    height: 100% !important;
+    position: fixed !important;
+    width: 100% !important;
+    touch-action: none !important;
+  }
   .login-screen {
     position: fixed;
     inset: 0;
@@ -924,7 +931,7 @@
   }
 </style>
 </head>
-<body class="login-mode">
+<body class="login-mode" onload="document.documentElement.classList.add('login-mode')">
 
 <!-- ══════════════════════════════════════════ -->
 <!--  LOGIN SCREEN                             -->
@@ -958,7 +965,7 @@
 <!-- ══════════════════════════════════════════ -->
 <!--  MAIN APP                                  -->
 <!-- ══════════════════════════════════════════ -->
-<div class="app" id="app">
+<div class="app" id="app" style="display:none">
 
   <!-- ── MOBILE TOPBAR ── -->
   <div class="mobile-topbar" id="mobileTopbar">
@@ -1536,16 +1543,25 @@ async function doLogin() {
 
   if (btn) { btn.textContent = 'Đăng nhập →'; btn.disabled = false; }
   document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('app').classList.add('visible');
+  const appEl = document.getElementById('app');
+  appEl.style.display = '';
+  appEl.classList.add('visible');
   document.body.classList.remove('login-mode');
+  document.documentElement.classList.remove('login-mode');
+  window.scrollTo(0, 0);
   window.initApp();
 }
 
 function doLogout() {
   currentUser = null;
+  // Dừng Firebase sync
+  if (fbPollingInterval) { clearInterval(fbPollingInterval); fbPollingInterval = null; }
   document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('app').classList.remove('visible');
+  const appEl = document.getElementById('app');
+  appEl.classList.remove('visible');
+  appEl.style.display = 'none';
   document.body.classList.add('login-mode');
+  document.documentElement.classList.add('login-mode');
   window.scrollTo(0, 0);
 }
 
