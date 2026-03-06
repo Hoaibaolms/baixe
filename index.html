@@ -1055,7 +1055,7 @@
                   <div class="card-title">Trạng thái chỗ đỗ</div>
                   <div class="card-subtitle">Cập nhật realtime từ cảm biến IR</div>
                 </div>
-                <button class="btn-sm primary" onclick="refreshSlots()">🔄 Refresh</button>
+                <span style="font-size:12px;color:var(--success);font-weight:600;">🟢 Realtime từ ESP32</span>
               </div>
               <div class="slots-grid" id="slotsGrid"></div>
             </div>
@@ -1689,20 +1689,12 @@ function renderSlots() {
 
   const grid = document.getElementById('slotsGrid');
   grid.innerHTML = slotData.map(s => `
-    <div class="slot-card ${s.occupied ? 'occupied' : 'empty'}" onclick="toggleSlot(${s.id})">
+    <div class="slot-card ${s.occupied ? 'occupied' : 'empty'}" style="cursor:default">
       <div class="slot-icon">${s.occupied ? '🚗' : '🅿️'}</div>
       <div class="slot-number">${s.label}</div>
       <div class="slot-status">${s.occupied ? 'Có xe' : 'Trống'}</div>
     </div>
   `).join('');
-}
-
-function toggleSlot(id) {
-  const slot = slotData.find(s => s.id === id);
-  if (slot) {
-    slot.occupied = !slot.occupied;
-    renderSlots();
-  }
 }
 
 function refreshSlots() {
