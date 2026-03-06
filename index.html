@@ -300,6 +300,7 @@
     box-shadow: 0 0 0 3px rgba(13,148,136,0.25);
     animation: pulse 2s infinite;
   }
+  .esp32-badge.checking { background:#fef3c7; color:#d97706; border-color:#fde68a; }
   .esp32-badge.disconnected {
     background: var(--danger-light);
     color: var(--danger);
@@ -2390,31 +2391,41 @@ async function toggleGate(gate) {
 // ESP32 ghi /esp32/lastSeen (Firebase server timestamp = số ms Unix)
 // Nếu > 15 giây không thấy heartbeat → coi là mất kết nối
 
-const ESP32_TIMEOUT_MS = 15000; // 15 giây
+const ESP32_TIMEOUT_MS = 20000; // 20 giây
+
+// Lưu uptime lần trước để so sánh
+let _lastESP32Uptime = -1;
+let _lastESP32UptimeAt = 0; // thời điểm app nhận được uptime đó
 
 function updateESP32Badge(esp32Data) {
-  if (!esp32Data || !esp32Data.lastSeen) {
+  if (!esp32Data || !esp32Data.status) {
     setBadge('disconnected', 'ESP32 — Chưa kết nối');
     return;
   }
 
-  const lastSeen = typeof esp32Data.lastSeen === 'number'
-    ? esp32Data.lastSeen
-    : Date.now(); // fallback
+  const curUptime = esp32Data.uptime || 0;
+  const ip        = esp32Data.ip     ? ` · ${esp32Data.ip}` : '';
+  const timeStr   = esp32Data.time   ? ` · ${esp32Data.time}` : '';
 
-  const diffMs = Date.now() - lastSeen;
+  // Nếu uptime thay đổi so với lần trước → ESP32 đang gửi heartbeat bình thường
+  if (curUptime !== _lastESP32Uptime) {
+    _lastESP32Uptime   = curUptime;
+    _lastESP32UptimeAt = Date.now();
+  }
 
-  if (diffMs < ESP32_TIMEOUT_MS) {
-    const secAgo = Math.floor(diffMs / 1000);
-    const ip     = esp32Data.ip ? ` · ${esp32Data.ip}` : '';
-    const uptime = esp32Data.uptime ? ` · ↑${esp32Data.uptime}s` : '';
-    setBadge('connected', `ESP32 — Online${ip}${uptime}`);
+  // Tính xem bao lâu rồi không thấy uptime thay đổi
+  const silentMs = Date.now() - _lastESP32UptimeAt;
+
+  if (_lastESP32UptimeAt === 0) {
+    setBadge('checking', 'ESP32 — Đang kiểm tra...');
+    return;
+  }
+
+  if (silentMs < ESP32_TIMEOUT_MS) {
+    setBadge('connected', `ESP32 — Online${ip}${timeStr} ↑${curUptime}s`);
   } else {
-    const minAgo = Math.floor(diffMs / 60000);
-    const timeStr = minAgo < 1
-      ? `${Math.floor(diffMs/1000)}s trước`
-      : `${minAgo} phút trước`;
-    setBadge('disconnected', `ESP32 — Mất kết nối (${timeStr})`);
+    const s = Math.floor(silentMs / 1000);
+    setBadge('disconnected', `ESP32 — Mất kết nối (${s}s)`);
   }
 }
 
