@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Bãi Đỗ Xe Thông Minh</title>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -683,6 +683,17 @@
   .mobile-topbar-logo span { color: var(--primary); }
   .mobile-topbar-right { display: flex; align-items: center; gap: 8px; }
 
+  .mobile-logout-btn {
+    width: 32px; height: 32px;
+    border: none; background: var(--danger-light);
+    color: var(--danger); border-radius: 8px;
+    font-size: 15px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .mobile-logout-btn:hover { background: var(--danger); color: white; }
+
   @media (max-width: 768px) {
     /* Ẩn sidebar, topbar desktop */
     .sidebar { display: none !important; }
@@ -839,8 +850,12 @@
     .btn-sm { padding: 10px 14px !important; }
   }
 
-  /* Tablet */
-  @media (min-width: 769px) and (max-width: 1024px) {
+  /* Chống zoom input trên iOS — font-size >= 16px */
+  @media (max-width: 768px) {
+    .form-input, .filter-input, input, select, textarea {
+      font-size: 16px !important;
+    }
+  }
     .sidebar { width: 200px !important; }
     .main { margin-left: 200px !important; }
     .grid-4 { grid-template-columns: 1fr 1fr !important; }
@@ -896,6 +911,7 @@
         <span id="esp32BadgeText">ESP32…</span>
       </div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);font-weight:600;" id="clockDisplayMobile">--:--</div>
+      <button class="mobile-logout-btn" onclick="doLogout()" title="Đăng xuất">🚪</button>
     </div>
   </div>
 
