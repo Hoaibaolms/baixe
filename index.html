@@ -785,7 +785,7 @@
     }
 
     /* Charts */
-    .chart-bar-wrap { height: 120px !important; gap: 4px !important; }
+    .chart-bar-wrap { height: 180px !important; gap: 4px !important; }
     .chart-val { font-size: 9px !important; }
     .chart-label { font-size: 9px !important; }
 
@@ -1111,8 +1111,8 @@
 
           <div class="section-gap">
             <div class="card">
-              <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
-                <div class="card-title">Biểu đồ doanh thu</div>
+              <div style="margin-bottom:12px;">
+                <div class="card-title" style="margin-bottom:10px;">Biểu đồ doanh thu</div>
                 <div class="rev-tabs">
                   <button class="rev-tab active" onclick="switchRevTab(this,'day')">Ngày</button>
                   <button class="rev-tab" onclick="switchRevTab(this,'week')">Tuần</button>
@@ -1120,7 +1120,7 @@
                   <button class="rev-tab" onclick="switchRevTab(this,'year')">Năm</button>
                 </div>
               </div>
-              <div class="chart-bar-wrap" id="revenueChart"></div>
+              <div class="chart-bar-wrap" id="revenueChart" style="height:180px;"></div>
             </div>
             <div class="card">
               <div class="card-title" style="margin-bottom:16px">Phân loại doanh thu</div>
@@ -1315,51 +1315,29 @@
 <!-- ══════════════════════════════════════════ -->
 <script>
 // ── DATA ──────────────────────────────────────
-const USERS = {
-  admin:    { pass:'123456', role:'admin',  name:'Admin Tổng', displayName:'Admin Tổng' },
-  member01: { pass:'123456', role:'member', name:'Nguyễn Văn A', uid:'11:22:33:44', fee:120000, expiry:'01/04/2026' },
-  member02: { pass:'123456', role:'member', name:'Trần Thị B',   uid:'55:66:77:88', fee:100000, expiry:'15/03/2026' },
-  member03: { pass:'123456', role:'member', name:'Lê Văn C',     uid:'AA:BB:CC:DD', fee:150000, expiry:'20/04/2026' },
+// Admin cứng — không lưu trên Firebase
+const ADMIN_USER = { pass:'123456', role:'admin', name:'Admin Tổng' };
+
+// Dữ liệu thành viên — load từ Firebase, ban đầu rỗng
+let USERS = {
+  admin: ADMIN_USER,
 };
 
 let currentUser = null;
 let currentTab  = 'admin';
 
 const slotData = [
-  { id:1, occupied:true,  label:'Chỗ 1' },
+  { id:1, occupied:false, label:'Chỗ 1' },
   { id:2, occupied:false, label:'Chỗ 2' },
-  { id:3, occupied:true,  label:'Chỗ 3' },
+  { id:3, occupied:false, label:'Chỗ 3' },
   { id:4, occupied:false, label:'Chỗ 4' },
 ];
 
-const historyData = [
-  { id:1,  timeIn:'07:12', timeOut:'09:45', duration:'2g 33p', uid:'11:22:33:44', owner:'Nguyễn Văn A', type:'month', fee:'—',  date:'05/03/2026', status:'done' },
-  { id:2,  timeIn:'07:30', timeOut:'08:10', duration:'40p',    uid:'01:02:03:04', owner:'Khách',        type:'normal',fee:'2k', date:'05/03/2026', status:'done' },
-  { id:3,  timeIn:'08:05', timeOut:'—',     duration:'—',      uid:'AA:BB:CC:DD', owner:'Lê Văn C',     type:'month', fee:'—',  date:'05/03/2026', status:'inside' },
-  { id:4,  timeIn:'08:44', timeOut:'10:20', duration:'1g 36p', uid:'01:02:03:04', owner:'Khách',        type:'normal',fee:'2k', date:'05/03/2026', status:'done' },
-  { id:5,  timeIn:'09:00', timeOut:'11:30', duration:'2g 30p', uid:'55:66:77:88', owner:'Trần Thị B',   type:'month', fee:'—',  date:'05/03/2026', status:'done' },
-  { id:6,  timeIn:'10:15', timeOut:'—',     duration:'—',      uid:'01:02:03:04', owner:'Khách',        type:'normal',fee:'2k', date:'05/03/2026', status:'inside' },
-];
+const historyData = [];
+let cardsData    = [];
+let accountsData = [];
 
-const cardsData = [
-  { uid:'11:22:33:44', owner:'Nguyễn Văn A', type:'month',  regDate:'01/03/2026', expiry:'01/04/2026', fee:'120,000đ', status:'active',  account:'member01' },
-  { uid:'55:66:77:88', owner:'Trần Thị B',   type:'month',  regDate:'15/02/2026', expiry:'15/03/2026', fee:'100,000đ', status:'expiring', account:'member02' },
-  { uid:'AA:BB:CC:DD', owner:'Lê Văn C',     type:'month',  regDate:'20/02/2026', expiry:'20/04/2026', fee:'150,000đ', status:'active',  account:'member03' },
-  { uid:'01:02:03:04', owner:'—',            type:'normal', regDate:'—',          expiry:'—',          fee:'2,000đ',   status:'active',  account:'—' },
-];
-
-const accountsData = [
-  { username:'member01', name:'Nguyễn Văn A', phone:'0901234567', uid:'11:22:33:44', created:'01/03/2026', status:'active' },
-  { username:'member02', name:'Trần Thị B',   phone:'0912345678', uid:'55:66:77:88', created:'15/02/2026', status:'active' },
-  { username:'member03', name:'Lê Văn C',     phone:'0923456789', uid:'AA:BB:CC:DD', created:'20/02/2026', status:'active' },
-];
-
-const memberHistory = [
-  { id:1, timeIn:'07:12', timeOut:'09:45', duration:'2g 33p', date:'05/03/2026', status:'done'   },
-  { id:2, timeIn:'07:30', timeOut:'18:00', duration:'10g 30p',date:'04/03/2026', status:'done'   },
-  { id:3, timeIn:'08:10', timeOut:'—',     duration:'—',       date:'03/03/2026', status:'inside' },
-];
-
+const memberHistory = [];
 const gateState = { entry: false, exit: false };
 
 // ── ADMIN NAV ─────────────────────────────────
@@ -1381,18 +1359,43 @@ function switchLoginTab(tab) {
   document.querySelectorAll('.tab-btn').forEach((b,i) => {
     b.classList.toggle('active', (i===0 && tab==='admin') || (i===1 && tab==='member'));
   });
-  document.getElementById('loginUser').value = tab === 'admin' ? 'admin' : 'member01';
+  document.getElementById('loginUser').value = tab === 'admin' ? 'admin' : '';
 }
 
-function doLogin() {
+async function doLogin() {
   const u = document.getElementById('loginUser').value.trim();
   const p = document.getElementById('loginPass').value.trim();
-  const user = USERS[u];
-  if (!user || user.pass !== p) {
+  if (!u || !p) { showToast('❌ Vui lòng nhập đầy đủ!', 'danger'); return; }
+
+  const btn = document.querySelector('.btn-primary');
+  if (btn) { btn.textContent = 'Đang đăng nhập...'; btn.disabled = true; }
+
+  try {
+    // Admin check (cứng, không cần Firebase)
+    if (u === 'admin') {
+      if (p !== ADMIN_USER.pass) throw new Error('wrong');
+      currentUser = { ...ADMIN_USER, username: 'admin' };
+    } else {
+      // Member check từ Firebase
+      const fbUser = await fbGet('/members/' + u);
+      if (!fbUser || fbUser.pass !== p) throw new Error('wrong');
+      currentUser = {
+        role: 'member',
+        username: u,
+        name: fbUser.fullname,
+        uid:  fbUser.uid,
+        fee:  fbUser.fee || 0,
+        expiry: fbUser.expiry || '—',
+        pass: fbUser.pass,
+      };
+    }
+  } catch(e) {
     showToast('❌ Sai tên đăng nhập hoặc mật khẩu!', 'danger');
+    if (btn) { btn.textContent = 'Đăng nhập →'; btn.disabled = false; }
     return;
   }
-  currentUser = { ...user, username: u };
+
+  if (btn) { btn.textContent = 'Đăng nhập →'; btn.disabled = false; }
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').classList.add('visible');
   initApp();
@@ -1679,18 +1682,21 @@ function renewAccount(idx) {
   base.setMonth(base.getMonth() + 1);
   card.expiry = fmt(base);
   card.status = 'active';
+  // Ghi Firebase
+  fbPatch('/members/' + acc.username, { expiry: card.expiry, status: 'active' });
   renderAccountsTable();
   showToast(`✅ Đã gia hạn ${acc.name} đến ${card.expiry}`, 'success');
 }
 
-function deleteAccount(idx) {
+async function deleteAccount(idx) {
   const acc = accountsData[idx];
   if (!acc) return;
   if (!confirm(`Xóa tài khoản ${acc.username} — ${acc.name}?`)) return;
-  // Xóa cả thẻ liên kết
+  // Xóa Firebase
+  await fetch(`${FIREBASE_URL}/members/${acc.username}.json`, { method: 'DELETE' });
+  // Xóa local
   const cardIdx = cardsData.findIndex(c => c.uid === acc.uid);
   if (cardIdx > -1) cardsData.splice(cardIdx, 1);
-  delete USERS[acc.username];
   accountsData.splice(idx, 1);
   renderAccountsTable();
   showToast(`🗑️ Đã xóa tài khoản ${acc.username}`, 'danger');
@@ -1724,8 +1730,9 @@ function renderRevenueChart(type) {
   const d = chartData[type];
   const max = Math.max(...d.vals);
   const chart = document.getElementById('revenueChart');
+  const maxBarH = chart ? chart.offsetHeight - 36 : 140;
   chart.innerHTML = d.labels.map((l,i) => {
-    const h = Math.round((d.vals[i]/max)*110);
+    const h = Math.max(8, Math.round((d.vals[i]/max) * maxBarH));
     return `<div class="chart-bar-col">
       <div class="chart-val">${d.vals[i]}k</div>
       <div class="chart-bar" style="height:${h}px" title="${d.vals[i]}k"></div>
@@ -1757,13 +1764,49 @@ function toggleGate(gate) {
   }
 }
 
+// ── FIREBASE MEMBERS SYNC ─────────────────────
+
+async function loadMembersFromFirebase() {
+  const data = await fbGet('/members');
+  if (!data) return;
+
+  cardsData    = [];
+  accountsData = [];
+
+  Object.entries(data).forEach(([username, m]) => {
+    // Tái tạo accountsData
+    accountsData.push({
+      username,
+      name:    m.fullname || m.name || username,
+      phone:   m.phone   || '—',
+      uid:     m.uid     || '—',
+      created: m.created || '—',
+      status:  'active',
+    });
+
+    // Tái tạo cardsData
+    cardsData.push({
+      uid:     m.uid     || '—',
+      owner:   m.fullname || m.name || username,
+      type:    'month',
+      regDate: m.created || '—',
+      expiry:  m.expiry  || '—',
+      fee:     m.fee ? Number(m.fee).toLocaleString('vi-VN') + 'đ' : '—',
+      status:  m.status  || 'active',
+      account: username,
+    });
+  });
+
+  renderAccountsTable();
+  renderCardsTable();
+}
+
 // ── MODALS ────────────────────────────────────
 function openAddMemberModal() {
   ['newUsername','newPassword','newFullname','newMemberUID','newMemberFee','newMemberPhone']
     .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   document.getElementById('modalAddMember').classList.add('show');
 }
-// alias cũ phòng khi còn ref
 function openAddCardModal()    { openAddMemberModal(); }
 function openAddAccountModal() { openAddMemberModal(); }
 
@@ -1771,7 +1814,7 @@ function closeModal(id) {
   document.getElementById(id).classList.remove('show');
 }
 
-function submitAddMember() {
+async function submitAddMember() {
   const username = document.getElementById('newUsername').value.trim();
   const password = document.getElementById('newPassword').value.trim();
   const fullname = document.getElementById('newFullname').value.trim();
@@ -1784,21 +1827,34 @@ function submitAddMember() {
   if (!fullname) { showToast('❌ Vui lòng nhập họ và tên!', 'danger'); return; }
   if (!uid)      { showToast('❌ Vui lòng nhập ID thẻ RFID!', 'danger'); return; }
 
-  // Kiểm tra trùng
-  if (USERS[username]) { showToast('❌ Tên đăng nhập đã tồn tại!', 'danger'); return; }
+  // Kiểm tra trùng username trên Firebase
+  const existing = await fbGet('/members/' + username);
+  if (existing) { showToast('❌ Tên đăng nhập đã tồn tại!', 'danger'); return; }
   if (cardsData.find(c => c.uid === uid)) { showToast('❌ UID thẻ đã tồn tại!', 'danger'); return; }
 
   const today    = new Date();
   const expiry   = new Date(today); expiry.setMonth(expiry.getMonth() + 1);
   const fmt      = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 
-  // Thêm vào USERS (đăng nhập được ngay)
-  USERS[username] = {
-    pass: password, role: 'member',
-    name: fullname, uid, fee: fee ? +fee : 0, expiry: fmt(expiry)
+  const memberData = {
+    pass: password, fullname, uid,
+    phone: phone || '—',
+    fee: fee ? +fee : 0,
+    created: fmt(today),
+    expiry: fmt(expiry),
+    status: 'active',
   };
 
-  // Thêm vào cardsData
+  // Ghi lên Firebase — đây là nguồn sự thật duy nhất
+  const btn = document.querySelector('#modalAddMember .btn-sm.primary');
+  if (btn) { btn.textContent = 'Đang lưu...'; btn.disabled = true; }
+
+  await fbPut('/members/' + username, memberData);
+
+  if (btn) { btn.textContent = '✅ Tạo thành viên'; btn.disabled = false; }
+
+  // Cập nhật local arrays
+  accountsData.unshift({ username, name: fullname, phone: phone||'—', uid, created: fmt(today), status: 'active' });
   cardsData.unshift({
     uid, owner: fullname, type: 'month',
     regDate: fmt(today), expiry: fmt(expiry),
@@ -1806,22 +1862,10 @@ function submitAddMember() {
     status: 'active', account: username
   });
 
-  // Thêm vào accountsData
-  accountsData.unshift({
-    username, name: fullname,
-    phone: phone || '—', uid,
-    created: fmt(today), status: 'active'
-  });
-
   renderCardsTable();
   renderAccountsTable();
   closeModal('modalAddMember');
-  showToast(`✅ Đã thêm thành viên: ${fullname} (${uid})`, 'success');
-
-  // Ghi Firebase
-  if (typeof fbPut === 'function') {
-    fbPut('/members/' + username, { username, fullname, uid, phone: phone||'', fee: fee||0 });
-  }
+  showToast(`✅ Đã tạo thành viên: ${fullname}`, 'success');
 }
 
 // Close modal on overlay click
@@ -2102,10 +2146,11 @@ function updateMobileNavActive(pageId) {
 // ── INIT ──────────────────────────────────────
 document.getElementById('historyDate').value = new Date().toISOString().split('T')[0];
 
-// Tự động bắt đầu sync Firebase sau khi đăng nhập
 const _origInitApp = initApp;
-window.initApp = function() {
+window.initApp = async function() {
   _origInitApp();
+  // Load members từ Firebase trước khi sync realtime
+  await loadMembersFromFirebase();
   startFirebaseSync();
   startESP32Monitor();
 };
