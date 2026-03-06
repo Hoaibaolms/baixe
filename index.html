@@ -460,22 +460,23 @@
   /* Gate disabled when not manual mode */
   .gate-controls { position: relative; }
   .gate-controls.disabled .btn-gate {
-    opacity: .35; pointer-events: none; cursor: not-allowed;
-    filter: grayscale(0.5);
+    opacity: .35 !important; pointer-events: none !important;
+    cursor: not-allowed !important; filter: grayscale(0.6);
   }
   .gate-controls.disabled .gate-card {
-    opacity: .5; pointer-events: none;
+    opacity: .45 !important; pointer-events: none !important;
   }
-  .gate-controls.disabled::after {
-    content: '🔒 Bật chế độ thủ công để điều khiển';
+  .gate-overlay {
+    display: none;
     position: absolute; inset: 0;
-    background: rgba(240,242,245,0.7);
-    backdrop-filter: blur(1px);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 700; color: var(--text2);
+    background: rgba(240,242,245,0.82);
     border-radius: var(--radius);
-    pointer-events: none;
+    align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: var(--text2);
+    text-align: center; padding: 12px;
+    z-index: 10;
   }
+  .gate-controls.disabled .gate-overlay { display: flex; }
   .btn-gate {
     width: 100%; padding: 10px;
     border: none; border-radius: var(--radius-sm);
@@ -1106,7 +1107,8 @@
                   <span class="toggle-slider"></span>
                 </label>
               </div>
-              <div class="gate-controls" id="gateControlBtns">
+              <div class="gate-controls disabled" id="gateControlBtns">
+                <div class="gate-overlay">🔒 Bật chế độ thủ công<br>để điều khiển cổng</div>
                 <div class="gate-card">
                   <div class="gate-icon">🚧</div>
                   <div class="gate-name">Cổng Vào</div>
