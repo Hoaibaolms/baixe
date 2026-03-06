@@ -1773,6 +1773,7 @@ function updateStatCards() {
 
 function renderRecentTable() {
   const tbody = document.getElementById('recentTable');
+  if (!tbody) return;
   tbody.innerHTML = historyData.slice(0,5).map(h => `
     <tr>
       <td data-label="Thời gian" class="mono">${h.date} ${h.timeIn}</td>
@@ -1788,6 +1789,7 @@ function renderRecentTable() {
 
 function renderHistoryTable() {
   const tbody = document.getElementById('historyTable');
+  if (!tbody) return;
   tbody.innerHTML = historyData.map((h,i) => `
     <tr>
       <td data-label="#">${i+1}</td>
@@ -1953,6 +1955,7 @@ async function deleteAccount(idx) {
 
 function renderMemberHistory() {
   const tbody = document.getElementById('memberHistoryTable');
+  if (!tbody) return;
   tbody.innerHTML = memberHistory.map(h => `
     <tr>
       <td data-label="#">${h.id}</td>
@@ -2472,7 +2475,7 @@ function updateESP32Badge(esp32Data) {
   }
 
   if (silentMs < ESP32_TIMEOUT_MS) {
-    setBadge('connected', `ESP32 — Online${ip}${timeStr} ↑${curUptime}s`);
+    setBadge('connected', 'ESP32 — Online');
   } else {
     const s = Math.floor(silentMs / 1000);
     setBadge('disconnected', `ESP32 — Mất kết nối (${s}s)`);
