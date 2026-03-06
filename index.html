@@ -46,11 +46,15 @@
   }
 
   /* ── LOGIN ── */
+  body.login-mode { overflow: hidden; }
   .login-screen {
-    min-height: 100vh;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow-y: auto;
     background: linear-gradient(135deg, #e8effd 0%, #f0f2f5 50%, #ede9fe 100%);
     position: relative;
     overflow: hidden;
@@ -447,8 +451,24 @@
   .toggle-switch input:checked + .toggle-slider { background:#f59e0b; }
   .toggle-switch input:checked + .toggle-slider:before { transform:translateX(20px); }
   /* Gate disabled when not manual mode */
-  .gate-controls.disabled .btn-gate { opacity:.4; pointer-events:none; cursor:not-allowed; }
-  .gate-controls.disabled .gate-card { opacity:.6; }
+  .gate-controls { position: relative; }
+  .gate-controls.disabled .btn-gate {
+    opacity: .35; pointer-events: none; cursor: not-allowed;
+    filter: grayscale(0.5);
+  }
+  .gate-controls.disabled .gate-card {
+    opacity: .5; pointer-events: none;
+  }
+  .gate-controls.disabled::after {
+    content: '🔒 Bật chế độ thủ công để điều khiển';
+    position: absolute; inset: 0;
+    background: rgba(240,242,245,0.7);
+    backdrop-filter: blur(1px);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: var(--text2);
+    border-radius: var(--radius);
+    pointer-events: none;
+  }
   .btn-gate {
     width: 100%; padding: 10px;
     border: none; border-radius: var(--radius-sm);
@@ -904,7 +924,7 @@
   }
 </style>
 </head>
-<body>
+<body class="login-mode">
 
 <!-- ══════════════════════════════════════════ -->
 <!--  LOGIN SCREEN                             -->
@@ -1517,6 +1537,7 @@ async function doLogin() {
   if (btn) { btn.textContent = 'Đăng nhập →'; btn.disabled = false; }
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').classList.add('visible');
+  document.body.classList.remove('login-mode');
   window.initApp();
 }
 
@@ -1524,6 +1545,8 @@ function doLogout() {
   currentUser = null;
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('app').classList.remove('visible');
+  document.body.classList.add('login-mode');
+  window.scrollTo(0, 0);
 }
 
 // ── INIT APP ──────────────────────────────────
@@ -1974,29 +1997,33 @@ function toggleGate(gate) {
 
 // ── MANUAL MODE ───────────────────────────────
 async function setManualMode(enabled) {
-  const btns     = document.getElementById('gateControlBtns');
-  const subtitle = document.getElementById('gateSubtitle');
-  const desc     = document.getElementById('manualModeDesc');
-
-  if (enabled) {
-    btns.classList.remove('disabled');
-    subtitle.textContent = '⚠️ Chế độ thủ công — RFID bị vô hiệu';
-    subtitle.style.color = '#f59e0b';
-    desc.textContent = 'Bật — RFID bị vô hiệu hoá';
-  } else {
-    btns.classList.add('disabled');
-    subtitle.textContent = 'RFID đang hoạt động';
-    subtitle.style.color = '';
-    desc.textContent = 'Tắt — RFID hoạt động bình thường';
-  }
+  applyManualModeUI(enabled);
   // Ghi lên Firebase để ESP32 đọc
   await fbPut('/settings/manualMode', enabled);
 }
 
+function applyManualModeUI(enabled) {
+  const btns     = document.getElementById('gateControlBtns');
+  const desc     = document.getElementById('manualModeDesc');
+  const toggle   = document.getElementById('manualModeToggle');
+  const subtitle = document.getElementById('gateSubtitle');
+
+  if (enabled) {
+    if (btns)     btns.classList.remove('disabled');
+    if (desc)     desc.textContent = 'Bật — RFID bị vô hiệu hoá';
+    if (toggle)   toggle.checked = true;
+    if (subtitle) { subtitle.textContent = '⚠️ Chế độ thủ công — RFID bị vô hiệu'; subtitle.style.color = '#f59e0b'; }
+  } else {
+    if (btns)     btns.classList.add('disabled');
+    if (desc)     desc.textContent = 'Tắt — RFID hoạt động bình thường';
+    if (toggle)   toggle.checked = false;
+    if (subtitle) { subtitle.textContent = 'RFID đang hoạt động'; subtitle.style.color = ''; }
+  }
+}
+
 // Khởi tạo: buttons bị disable cho đến khi bật manual mode
 function initGateControls() {
-  const btns = document.getElementById('gateControlBtns');
-  if (btns) btns.classList.add('disabled');
+  applyManualModeUI(false); // Mặc định tắt, chờ Firebase sync
 }
 
 async function debugFirebase() {
@@ -2294,6 +2321,11 @@ async function syncFromFirebase() {
     slotData[2].occupied = data.slots.slot3 === true;
     slotData[3].occupied = data.slots.slot4 === true;
     renderSlots();
+  }
+
+  // Đồng bộ manual mode từ Firebase
+  if (data.settings && data.settings.manualMode !== undefined) {
+    applyManualModeUI(data.settings.manualMode === true || data.settings.manualMode === 'true');
   }
 
   // Cập nhật trạng thái cổng
