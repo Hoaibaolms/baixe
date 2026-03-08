@@ -2023,24 +2023,20 @@ async function setManualMode(enabled) {
   applyManualModeUI(enabled);
 
   if (!enabled) {
-    // TẮT manual → đóng cả 2 cổng ngay trên app + báo ESP32
+    // TẮT manual → đóng 2 cổng trên app + ghi Firebase
     updateGateUI('entry', 'closed');
     updateGateUI('exit',  'closed');
     gateOpenState.entry = false;
     gateOpenState.exit  = false;
     await Promise.all([
-      fbPatch('/cmd', { manualMode: false, entry: 'closed', exit: 'closed' }),
       fbPut('/settings/manualMode', false),
       fbPut('/gates/entry', 'closed'),
       fbPut('/gates/exit',  'closed'),
     ]);
     showToast('🔒 Tắt thủ công — 2 cổng đã đóng', 'info');
   } else {
-    // BẬT manual → GIỮ NGUYÊN trạng thái cổng, chỉ bật flag
-    await Promise.all([
-      fbPatch('/cmd', { manualMode: true }),
-      fbPut('/settings/manualMode', true)
-    ]);
+    // BẬT manual → chỉ ghi manualMode, GIỮ NGUYÊN trạng thái cổng
+    await fbPut('/settings/manualMode', true);
     showToast('⚙️ Bật chế độ thủ công', 'info');
   }
 }
@@ -2492,20 +2488,13 @@ async function toggleGate(gate) {
     el.textContent  = '● Đang mở';
     el.className    = 'gate-state open';
     if (btn) { btn.textContent = '▼ Đóng cổng'; btn.className = 'btn-gate close-btn'; }
-    // Ghi vào /cmd và /gates cùng lúc
-    await Promise.all([
-      fbPatch('/cmd', { [gate]: 'open' }),
-      fbPut(`/gates/${gate}`, 'open')
-    ]);
+    await fbPut(`/gates/${gate}`, 'open');
   } else {
     gateOpenState[gate] = false;
     el.textContent  = '● Đóng';
     el.className    = 'gate-state closed';
     if (btn) { btn.textContent = '▲ Mở cổng'; btn.className = 'btn-gate open-btn'; }
-    await Promise.all([
-      fbPatch('/cmd', { [gate]: 'closed' }),
-      fbPut(`/gates/${gate}`, 'closed')
-    ]);
+    await fbPut(`/gates/${gate}`, 'closed');
   }
 }
 
