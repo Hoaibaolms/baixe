@@ -2499,53 +2499,41 @@ async function toggleGate(gate) {
 // ESP32 ghi /esp32/lastSeen (Firebase server timestamp = số ms Unix)
 // Nếu > 15 giây không thấy heartbeat → coi là mất kết nối
 
-const ESP32_TIMEOUT_MS = 8000;  // 8 giây — heartbeat mỗi 3s, miss 2 lần = offline
+// Lưu data ESP32 nhận được gần nhất từ syncFromFirebase
+let _esp32LastData = null;
+let _esp32LastReceivedAt = 0; // thời điểm app nhận được data (Date.now())
+const ESP32_TIMEOUT_MS = 9000; // 9s = 3 lần miss heartbeat 3s
 
+// Gọi khi syncFromFirebase nhận được data /esp32
 function updateESP32Badge(esp32Data) {
-  if (!esp32Data || !esp32Data.status) {
-    setBadge('disconnected', 'ESP32 — Chưa kết nối');
+  if (!esp32Data || !esp32Data.status) return;
+  // Lưu data + thời điểm nhận
+  _esp32LastData = esp32Data;
+  _esp32LastReceivedAt = Date.now();
+}
+
+// Chạy mỗi 1s — tính toán offline dựa trên data đã có, không fetch thêm
+function tickESP32Badge() {
+  if (_esp32LastReceivedAt === 0) {
+    setBadge('checking', 'ESP32 — Đang kiểm tra...');
     return;
   }
-
-  const ip      = esp32Data.ip   ? ` · ${esp32Data.ip}`   : '';
-  const timeStr = esp32Data.time ? ` · ${esp32Data.time}` : '';
-
-  // Dùng field "ts" (epoch giây ESP32 ghi) so với thời gian thực của app
-  // Nếu ESP32 không có NTP (ts=0) → fallback dùng uptime để detect thay đổi
-  const ts = esp32Data.ts || 0;
-
-  let silentMs;
-  if (ts > 0) {
-    // Có NTP: so sánh trực tiếp epoch time
-    const nowSec = Math.floor(Date.now() / 1000);
-    silentMs = (nowSec - ts) * 1000;
-  } else {
-    // Không có NTP: dùng uptime — nếu uptime không đổi quá 15s → offline
-    const curUptime = esp32Data.uptime || 0;
-    if (curUptime !== updateESP32Badge._lastUptime) {
-      updateESP32Badge._lastUptime = curUptime;
-      updateESP32Badge._lastUptimeAt = Date.now();
-    }
-    silentMs = updateESP32Badge._lastUptimeAt
-      ? Date.now() - updateESP32Badge._lastUptimeAt
-      : 0;
-  }
-
+  const silentMs = Date.now() - _esp32LastReceivedAt;
+  const d = _esp32LastData;
+  const ip = d?.ip ? ` · ${d.ip}` : '';
   if (silentMs < ESP32_TIMEOUT_MS) {
-    setBadge('connected', `ESP32 — Online${ip}${timeStr}`);
+    setBadge('connected', `ESP32 — Online${ip}`);
   } else {
     const s = Math.floor(silentMs / 1000);
     setBadge('disconnected', `ESP32 — Mất kết nối (${s}s)`);
   }
 }
-updateESP32Badge._lastUptime   = -1;
-updateESP32Badge._lastUptimeAt = 0;
 
 async function checkESP32Status() {
-  // Được gọi riêng khi cần (standalone check)
   try {
     const esp32Data = await fbGet('/esp32');
     updateESP32Badge(esp32Data);
+    tickESP32Badge();
   } catch(e) {
     setBadge('disconnected', 'ESP32 — Lỗi Firebase');
   }
@@ -2581,9 +2569,10 @@ function setBadge(state, text) {
 }
 
 function startESP32Monitor() {
-  checkESP32Status();
-  // Interval riêng mỗi 2s — không phụ thuộc syncFromFirebase
-  setInterval(checkESP32Status, 2000);
+  checkESP32Status(); // fetch lần đầu ngay
+  // tickESP32Badge chạy mỗi 1s — chỉ tính toán, không fetch HTTP
+  setInterval(tickESP32Badge, 1000);
+  // syncFromFirebase mỗi 3s sẽ tự gọi updateESP32Badge để cập nhật data
 }
 
 // ── MOBILE NAV ────────────────────────────────
