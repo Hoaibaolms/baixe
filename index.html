@@ -2020,25 +2020,18 @@ function switchRevTab(btn, type) {
 
 // ── MANUAL MODE ───────────────────────────────
 async function setManualMode(enabled) {
-  applyManualModeUI(enabled);
-
   if (!enabled) {
+    // Tắt manual → đóng 2 cổng + tắt flag
+    await fbPatch('/control', { manualMode: false, entry: 'closed', exit: 'closed' });
     updateGateUI('entry', 'closed');
     updateGateUI('exit',  'closed');
-    gateOpenState.entry = false;
-    gateOpenState.exit  = false;
-    await Promise.all([
-      fbPatch('/cmd', { ts: Date.now().toString(), manualMode: false }),
-      fbPut('/settings/manualMode', false),   // để syncFromFirebase đọc đúng
-    ]);
     showToast('🔒 Tắt thủ công — 2 cổng đã đóng', 'info');
   } else {
-    await Promise.all([
-      fbPatch('/cmd', { ts: Date.now().toString(), manualMode: true }),
-      fbPut('/settings/manualMode', true),    // để syncFromFirebase đọc đúng
-    ]);
+    // Bật manual → chỉ set flag, giữ nguyên trạng thái cổng
+    await fbPatch('/control', { manualMode: true });
     showToast('⚙️ Bật chế độ thủ công', 'info');
   }
+  applyManualModeUI(enabled);
 }
 
 function applyManualModeUI(enabled) {
@@ -2390,13 +2383,12 @@ async function syncFromFirebase() {
   // Dùng Promise.allSettled để 1 path lỗi không block cả batch
   const toBool = v => v === true || v === 'true' || v === 1 || v === '1';
 
-  const [resSlots, resEsp32, resGates, resStats, resSettings, resHistory] =
+  const [resSlots, resEsp32, resControl, resStats, resHistory] =
     await Promise.allSettled([
       fbGet('/slots'),
       fbGet('/esp32'),
-      fbGet('/gates'),
+      fbGet('/control'),
       fbGet('/stats'),
-      fbGet('/settings'),
       fbGet('/history'),
     ]);
 
@@ -2407,12 +2399,8 @@ async function syncFromFirebase() {
   const esp32Val = resEsp32.status === 'fulfilled' ? resEsp32.value : null;
   if (esp32Val) updateESP32Badge(esp32Val);
 
-  // ── Cổng ──────────────────────────────────
-  const gatesVal = resGates.status === 'fulfilled' ? resGates.value : null;
-  if (gatesVal) {
-    updateGateUI('entry', gatesVal.entry);
-    updateGateUI('exit',  gatesVal.exit);
-  }
+  // ── Cổng — KHÔNG sync về UI để tránh nhảy ──
+  // UI cổng chỉ do toggleGate() điều khiển
 
   // ── Stats ──────────────────────────────────
   const statsVal = resStats.status === 'fulfilled' ? resStats.value : null;
@@ -2422,12 +2410,10 @@ async function syncFromFirebase() {
     document.getElementById('statTodayRevenue').textContent = (rev/1000).toFixed(0) + 'k';
   }
 
-  // ── Manual mode — chỉ sync lần đầu khi app mở
-  // Sau đó user là người quyết định, Firebase không override lại
-  const settingsVal = resSettings.status === 'fulfilled' ? resSettings.value : null;
-  if (settingsVal && settingsVal.manualMode !== undefined && !window._manualModeSynced) {
-    window._manualModeSynced = true;
-    applyManualModeUI(toBool(settingsVal.manualMode));
+  // ── Manual mode — đọc từ /control ──
+  const controlVal = resControl.status === 'fulfilled' ? resControl.value : null;
+  if (controlVal && controlVal.manualMode !== undefined) {
+    applyManualModeUI(toBool(controlVal.manualMode));
   }
 
   // ── Lịch sử ────────────────────────────────
@@ -2495,7 +2481,7 @@ async function toggleGate(gate) {
   const isOpen = gateOpenState[gate];
   const val = isOpen ? 'closed' : 'open';
 
-  // Cập nhật UI ngay lập tức (không chờ Firebase)
+  // Cập nhật UI ngay (không chờ Firebase)
   gateOpenState[gate] = !isOpen;
   if (!isOpen) {
     el.textContent = '● Đang mở'; el.className = 'gate-state open';
@@ -2505,20 +2491,15 @@ async function toggleGate(gate) {
     if (btn) { btn.textContent = '▲ Mở cổng'; btn.className = 'btn-gate open-btn'; }
   }
 
-  // Ghi /cmd với timestamp mới → ESP32 nhận ra lệnh mới, xử lý ngay
-  const ts = Date.now().toString();
-  await fbPatch('/cmd', { ts, [gate]: val, manualMode: true });
+  // Ghi vào /control — ESP32 đọc 1 GET duy nhất, nhanh hơn
+  await fbPatch('/control', { [gate]: val });
 }
 
 // ── ESP32 HEARTBEAT STATUS ────────────────────
 // ESP32 ghi /esp32/lastSeen (Firebase server timestamp = số ms Unix)
 // Nếu > 15 giây không thấy heartbeat → coi là mất kết nối
 
-const ESP32_TIMEOUT_MS = 20000; // 20 giây
-
-// Lưu uptime lần trước để so sánh
-let _lastESP32Uptime = -1;
-let _lastESP32UptimeAt = 0; // thời điểm app nhận được uptime đó
+const ESP32_TIMEOUT_MS = 15000; // 15 giây — heartbeat ESP32 mỗi 3s, 5 lần miss = offline
 
 function updateESP32Badge(esp32Data) {
   if (!esp32Data || !esp32Data.status) {
@@ -2526,31 +2507,39 @@ function updateESP32Badge(esp32Data) {
     return;
   }
 
-  const curUptime = esp32Data.uptime || 0;
-  const ip        = esp32Data.ip     ? ` · ${esp32Data.ip}` : '';
-  const timeStr   = esp32Data.time   ? ` · ${esp32Data.time}` : '';
+  const ip      = esp32Data.ip   ? ` · ${esp32Data.ip}`   : '';
+  const timeStr = esp32Data.time ? ` · ${esp32Data.time}` : '';
 
-  // Nếu uptime thay đổi so với lần trước → ESP32 đang gửi heartbeat bình thường
-  if (curUptime !== _lastESP32Uptime) {
-    _lastESP32Uptime   = curUptime;
-    _lastESP32UptimeAt = Date.now();
-  }
+  // Dùng field "ts" (epoch giây ESP32 ghi) so với thời gian thực của app
+  // Nếu ESP32 không có NTP (ts=0) → fallback dùng uptime để detect thay đổi
+  const ts = esp32Data.ts || 0;
 
-  // Tính xem bao lâu rồi không thấy uptime thay đổi
-  const silentMs = Date.now() - _lastESP32UptimeAt;
-
-  if (_lastESP32UptimeAt === 0) {
-    setBadge('checking', 'ESP32 — Đang kiểm tra...');
-    return;
+  let silentMs;
+  if (ts > 0) {
+    // Có NTP: so sánh trực tiếp epoch time
+    const nowSec = Math.floor(Date.now() / 1000);
+    silentMs = (nowSec - ts) * 1000;
+  } else {
+    // Không có NTP: dùng uptime — nếu uptime không đổi quá 15s → offline
+    const curUptime = esp32Data.uptime || 0;
+    if (curUptime !== updateESP32Badge._lastUptime) {
+      updateESP32Badge._lastUptime = curUptime;
+      updateESP32Badge._lastUptimeAt = Date.now();
+    }
+    silentMs = updateESP32Badge._lastUptimeAt
+      ? Date.now() - updateESP32Badge._lastUptimeAt
+      : 0;
   }
 
   if (silentMs < ESP32_TIMEOUT_MS) {
-    setBadge('connected', 'ESP32 — Online');
+    setBadge('connected', `ESP32 — Online${ip}${timeStr}`);
   } else {
     const s = Math.floor(silentMs / 1000);
     setBadge('disconnected', `ESP32 — Mất kết nối (${s}s)`);
   }
 }
+updateESP32Badge._lastUptime   = -1;
+updateESP32Badge._lastUptimeAt = 0;
 
 async function checkESP32Status() {
   // Được gọi riêng khi cần (standalone check)
@@ -2562,7 +2551,19 @@ async function checkESP32Status() {
   }
 }
 
+let _lastBadgeState = '';
 function setBadge(state, text) {
+  // Khi ESP32 vừa mất kết nối → reset UI về trạng thái an toàn
+  if (state === 'disconnected' && _lastBadgeState !== 'disconnected') {
+    // Tắt manual mode trên UI
+    applyManualModeUI(false);
+    // Reset UI cổng về đóng
+    updateGateUI('entry', 'closed');
+    updateGateUI('exit',  'closed');
+    showToast('⚠️ ESP32 mất kết nối — đã reset về trạng thái đóng', 'warning');
+  }
+  _lastBadgeState = state;
+
   // Mobile badge
   const badge = document.getElementById('esp32Badge');
   const label = document.getElementById('esp32BadgeText');
