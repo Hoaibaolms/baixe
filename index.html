@@ -3,940 +3,293 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Bãi Đỗ Xe Thông Minh</title>
+<title>Bãi Đỗ Xe Thông Minh v21</title>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f0f2f5;
-    --surface: #ffffff;
-    --surface2: #f7f8fa;
-    --border: #e4e7ec;
-    --text: #0f1c2e;
-    --text2: #5a6a7e;
-    --text3: #9aa5b4;
-    --primary: #1a56db;
-    --primary-light: #e8effd;
-    --primary-dark: #1240a8;
-    --success: #0d9488;
-    --success-light: #e6f7f5;
-    --danger: #e53e3e;
-    --danger-light: #fde8e8;
-    --warning: #d97706;
-    --warning-light: #fef3c7;
-    --accent: #7c3aed;
-    --accent-light: #ede9fe;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
-    --shadow: 0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05);
-    --shadow-lg: 0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.07);
-    --radius: 14px;
-    --radius-sm: 8px;
-    --radius-lg: 20px;
+    --bg:#f0f2f5;--surface:#fff;--surface2:#f7f8fa;--border:#e4e7ec;
+    --text:#0f1c2e;--text2:#5a6a7e;--text3:#9aa5b4;
+    --primary:#1a56db;--primary-light:#e8effd;--primary-dark:#1240a8;
+    --success:#0d9488;--success-light:#e6f7f5;
+    --danger:#e53e3e;--danger-light:#fde8e8;
+    --warning:#d97706;--warning-light:#fef3c7;
+    --accent:#7c3aed;--accent-light:#ede9fe;
+    --shadow-sm:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.05);
+    --shadow:0 4px 16px rgba(0,0,0,.08),0 2px 6px rgba(0,0,0,.05);
+    --shadow-lg:0 12px 40px rgba(0,0,0,.12),0 4px 12px rgba(0,0,0,.07);
+    --radius:14px;--radius-sm:8px;--radius-lg:20px;
   }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{overflow-x:hidden;width:100%}
+  body{font-family:'Be Vietnam Pro',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  /* LOGIN */
+  html.login-mode,body.login-mode{overflow:hidden!important;height:100%!important;position:fixed!important;width:100%!important;touch-action:none!important}
+  .login-screen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#e8effd 0%,#f0f2f5 50%,#ede9fe 100%);overflow:hidden}
+  .login-screen::before{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(26,86,219,.08) 0%,transparent 70%);top:-200px;right:-200px;border-radius:50%}
+  .login-screen::after{content:'';position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(124,58,237,.07) 0%,transparent 70%);bottom:-100px;left:-100px;border-radius:50%}
+  .login-card{background:var(--surface);border-radius:var(--radius-lg);padding:48px 44px;width:420px;box-shadow:var(--shadow-lg);position:relative;z-index:1;animation:slideUp .5s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes slideUp{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+  .login-logo{display:flex;align-items:center;gap:12px;margin-bottom:32px}
+  .login-logo-icon{width:48px;height:48px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px}
+  .login-logo h1{font-size:22px;font-weight:800;letter-spacing:-.5px}.login-logo span{color:var(--primary)}
+  .login-subtitle{color:var(--text2);margin-bottom:32px;line-height:1.5}
+  .tab-switch{display:flex;gap:4px;background:var(--surface2);border-radius:var(--radius-sm);padding:4px;margin-bottom:28px}
+  .tab-btn{flex:1;padding:8px;border:none;background:none;cursor:pointer;border-radius:6px;font-family:inherit;font-size:13px;font-weight:600;color:var(--text2);transition:all .2s}
+  .tab-btn.active{background:var(--surface);color:var(--primary);box-shadow:var(--shadow-sm)}
+  .form-group{margin-bottom:18px}
+  .form-label{display:block;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:7px}
+  .form-input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:14px;background:var(--surface2);color:var(--text);transition:all .2s;outline:none}
+  .form-input:focus{border-color:var(--primary);background:var(--surface);box-shadow:0 0 0 3px rgba(26,86,219,.1)}
+  .btn-primary{width:100%;padding:13px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.3px}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(26,86,219,.35)}
+  .login-hint{text-align:center;margin-top:20px;font-size:12px;color:var(--text3)}.login-hint b{color:var(--primary);font-weight:600}
 
-  html, body { overflow-x: hidden; width: 100%; }
+  /* APP LAYOUT */
+  .app{display:none;min-height:100vh;width:100%;overflow-x:hidden}
+  .app.visible{display:flex}
+  .sidebar{width:240px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100;transition:transform .3s}
+  .sidebar-header{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
+  .sidebar-logo{display:flex;align-items:center;gap:10px}
+  .sidebar-logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px}
+  .sidebar-logo h2{font-size:16px;font-weight:800;letter-spacing:-.3px}.sidebar-logo span{color:var(--primary)}
+  .sidebar-user{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+  .user-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0}
+  .user-avatar.admin{background:linear-gradient(135deg,var(--primary),var(--accent))}
+  .user-avatar.member{background:linear-gradient(135deg,var(--success),#059669)}
+  .user-info{min-width:0}
+  .user-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .user-role{font-size:11px;color:var(--text3);font-weight:500}
+  .sidebar-nav{flex:1;padding:12px;overflow-y:auto}
+  .nav-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);padding:8px 8px 6px;margin-top:8px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;color:var(--text2);font-weight:500;font-size:13.5px;border:none;background:none;width:100%;text-align:left}
+  .nav-item:hover{background:var(--surface2);color:var(--text)}
+  .nav-item.active{background:var(--primary-light);color:var(--primary);font-weight:700}
+  .nav-item .nav-icon{font-size:16px;width:20px;text-align:center}
+  .sidebar-footer{padding:12px;border-top:1px solid var(--border)}
+  .btn-logout{width:100%;padding:9px 10px;display:flex;align-items:center;gap:10px;border:none;background:none;cursor:pointer;color:var(--danger);font-family:inherit;font-size:13px;font-weight:600;border-radius:var(--radius-sm);transition:all .15s}
+  .btn-logout:hover{background:var(--danger-light)}
 
-  body {
-    font-family: 'Be Vietnam Pro', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 14px;
-  }
+  .main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh;min-width:0;overflow-x:hidden}
+  .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+  .topbar-title{font-size:16px;font-weight:700}
+  .topbar-actions{display:flex;align-items:center;gap:12px}
+  .topbar-time{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text2);font-weight:600}
+  .content{padding:24px 28px;flex:1}
 
-  /* ── LOGIN ── */
-  html.login-mode,
-  body.login-mode {
-    overflow: hidden !important;
-    height: 100% !important;
-    position: fixed !important;
-    width: 100% !important;
-    touch-action: none !important;
-  }
-  .login-screen {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow-y: auto;
-    background: linear-gradient(135deg, #e8effd 0%, #f0f2f5 50%, #ede9fe 100%);
-    position: relative;
-    overflow: hidden;
-  }
-  .login-screen::before {
-    content: '';
-    position: absolute;
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(26,86,219,0.08) 0%, transparent 70%);
-    top: -200px; right: -200px;
-    border-radius: 50%;
-  }
-  .login-screen::after {
-    content: '';
-    position: absolute;
-    width: 400px; height: 400px;
-    background: radial-gradient(circle, rgba(124,58,237,0.07) 0%, transparent 70%);
-    bottom: -100px; left: -100px;
-    border-radius: 50%;
-  }
-  .login-card {
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    padding: 48px 44px;
-    width: 420px;
-    box-shadow: var(--shadow-lg);
-    position: relative;
-    z-index: 1;
-    animation: slideUp 0.5s cubic-bezier(0.34,1.56,0.64,1);
-  }
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(24px) scale(0.97); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  .login-logo {
-    display: flex; align-items: center; gap: 12px;
-    margin-bottom: 32px;
-  }
-  .login-logo-icon {
-    width: 48px; height: 48px;
-    background: linear-gradient(135deg, var(--primary), var(--accent));
-    border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-  }
-  .login-logo h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
-  .login-logo span { color: var(--primary); }
-  .login-subtitle { color: var(--text2); margin-bottom: 32px; line-height: 1.5; }
-
-  .tab-switch {
-    display: flex; gap: 4px;
-    background: var(--surface2);
-    border-radius: var(--radius-sm);
-    padding: 4px;
-    margin-bottom: 28px;
-  }
-  .tab-btn {
-    flex: 1; padding: 8px;
-    border: none; background: none; cursor: pointer;
-    border-radius: 6px;
-    font-family: inherit; font-size: 13px; font-weight: 600;
-    color: var(--text2);
-    transition: all 0.2s;
-  }
-  .tab-btn.active {
-    background: var(--surface);
-    color: var(--primary);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .form-group { margin-bottom: 18px; }
-  .form-label {
-    display: block; font-size: 13px; font-weight: 600;
-    color: var(--text2); margin-bottom: 7px;
-  }
-  .form-input {
-    width: 100%; padding: 11px 14px;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-family: inherit; font-size: 14px;
-    background: var(--surface2);
-    color: var(--text);
-    transition: all 0.2s;
-    outline: none;
-  }
-  .form-input:focus {
-    border-color: var(--primary);
-    background: var(--surface);
-    box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
-  }
-  .btn-primary {
-    width: 100%; padding: 13px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: white; border: none; border-radius: var(--radius-sm);
-    font-family: inherit; font-size: 14px; font-weight: 700;
-    cursor: pointer; transition: all 0.2s;
-    letter-spacing: 0.3px;
-  }
-  .btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(26,86,219,0.35);
-  }
-  .btn-primary:active { transform: translateY(0); }
-  .login-hint {
-    text-align: center; margin-top: 20px;
-    font-size: 12px; color: var(--text3);
-  }
-  .login-hint b { color: var(--primary); font-weight: 600; }
-
-  /* ── APP LAYOUT ── */
-  .app { display: none; min-height: 100vh; width: 100%; overflow-x: hidden; }
-  .app.visible { display: flex; }
-
-  /* SIDEBAR */
-  .sidebar {
-    width: 240px; min-height: 100vh;
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    display: flex; flex-direction: column;
-    position: fixed; left: 0; top: 0; bottom: 0;
-    z-index: 100;
-    transition: transform 0.3s;
-  }
-  .sidebar-header {
-    padding: 24px 20px 20px;
-    border-bottom: 1px solid var(--border);
-  }
-  .sidebar-logo {
-    display: flex; align-items: center; gap: 10px;
-  }
-  .sidebar-logo-icon {
-    width: 36px; height: 36px;
-    background: linear-gradient(135deg, var(--primary), var(--accent));
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-  }
-  .sidebar-logo h2 { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
-  .sidebar-logo span { color: var(--primary); }
-
-  .sidebar-user {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 10px;
-  }
-  .user-avatar {
-    width: 34px; height: 34px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 700; color: white;
-    flex-shrink: 0;
-  }
-  .user-avatar.admin { background: linear-gradient(135deg, var(--primary), var(--accent)); }
-  .user-avatar.member { background: linear-gradient(135deg, var(--success), #059669); }
-  .user-info { min-width: 0; }
-  .user-name { font-size: 13px; font-weight: 700; truncate: ellipsis; white-space: nowrap; overflow: hidden; }
-  .user-role { font-size: 11px; color: var(--text3); font-weight: 500; }
-
-  .sidebar-nav { flex: 1; padding: 12px 12px; overflow-y: auto; }
-  .nav-section-title {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 1px; color: var(--text3);
-    padding: 8px 8px 6px; margin-top: 8px;
-  }
-  .nav-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 9px 10px; border-radius: var(--radius-sm);
-    cursor: pointer; transition: all 0.15s;
-    color: var(--text2); font-weight: 500; font-size: 13.5px;
-    border: none; background: none; width: 100%; text-align: left;
-  }
-  .nav-item:hover { background: var(--surface2); color: var(--text); }
-  .nav-item.active { background: var(--primary-light); color: var(--primary); font-weight: 700; }
-  .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
-  .nav-badge {
-    margin-left: auto; background: var(--danger);
-    color: white; font-size: 10px; font-weight: 700;
-    padding: 1px 6px; border-radius: 10px;
-  }
-
-  .sidebar-footer {
-    padding: 12px;
-    border-top: 1px solid var(--border);
-  }
-  .btn-logout {
-    width: 100%; padding: 9px 10px;
-    display: flex; align-items: center; gap: 10px;
-    border: none; background: none; cursor: pointer;
-    color: var(--danger); font-family: inherit; font-size: 13px; font-weight: 600;
-    border-radius: var(--radius-sm); transition: all 0.15s;
-  }
-  .btn-logout:hover { background: var(--danger-light); }
-
-  /* MAIN CONTENT */
-  .main {
-    margin-left: 240px;
-    flex: 1;
-    display: flex; flex-direction: column;
-    min-height: 100vh;
-    min-width: 0;
-    overflow-x: hidden;
-  }
-  .topbar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 28px;
-    height: 60px;
-    display: flex; align-items: center; justify-content: space-between;
-    position: sticky; top: 0; z-index: 50;
-  }
-  .topbar-title { font-size: 16px; font-weight: 700; }
-  .topbar-actions { display: flex; align-items: center; gap: 12px; }
-  .topbar-time {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px; color: var(--text2); font-weight: 600;
-  }
-  .status-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--success);
-    box-shadow: 0 0 0 3px rgba(13,148,136,0.2);
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%,100% { box-shadow: 0 0 0 3px rgba(13,148,136,0.2); }
-    50% { box-shadow: 0 0 0 6px rgba(13,148,136,0.1); }
-  }
-
-  /* ESP32 Status Badge */
-  .esp32-badge {
-    display: flex; align-items: center; gap: 7px;
-    padding: 5px 12px 5px 8px;
-    border-radius: 20px;
-    font-size: 12px; font-weight: 700;
-    border: 1.5px solid;
-    transition: all 0.4s;
-    cursor: default;
-  }
-  .esp32-badge .esp32-dot {
-    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-  }
-  .esp32-badge.connected {
-    background: var(--success-light);
-    color: var(--success);
-    border-color: #99f6e4;
-  }
-  .esp32-badge.connected .esp32-dot {
-    background: var(--success);
-    box-shadow: 0 0 0 3px rgba(13,148,136,0.25);
-    animation: pulse 2s infinite;
-  }
-  .esp32-badge.checking { background:#fef3c7; color:#d97706; border-color:#fde68a; }
-  .esp32-badge.disconnected {
-    background: var(--danger-light);
-    color: var(--danger);
-    border-color: #fca5a5;
-  }
-  .esp32-badge.disconnected .esp32-dot {
-    background: var(--danger);
-    animation: none;
-  }
-  .esp32-badge.connecting {
-    background: var(--warning-light);
-    color: var(--warning);
-    border-color: #fcd34d;
-  }
-  .esp32-badge.connecting .esp32-dot {
-    background: var(--warning);
-    animation: pulse-orange 1s infinite;
-  }
-  @keyframes pulse-orange {
-    0%,100% { box-shadow: 0 0 0 3px rgba(217,119,6,0.25); }
-    50% { box-shadow: 0 0 0 6px rgba(217,119,6,0.1); }
-  }
-
-  .content { padding: 24px 28px; flex: 1; }
+  /* ESP32 Badge */
+  .esp32-badge{display:flex;align-items:center;gap:7px;padding:5px 12px 5px 8px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid;transition:all .4s;cursor:default}
+  .esp32-badge .esp32-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .esp32-badge.connected{background:var(--success-light);color:var(--success);border-color:#99f6e4}
+  .esp32-badge.connected .esp32-dot{background:var(--success);box-shadow:0 0 0 3px rgba(13,148,136,.25);animation:pulse 2s infinite}
+  .esp32-badge.checking{background:#fef3c7;color:#d97706;border-color:#fde68a}
+  .esp32-badge.disconnected{background:var(--danger-light);color:var(--danger);border-color:#fca5a5}
+  .esp32-badge.disconnected .esp32-dot{background:var(--danger)}
+  .esp32-badge.connecting{background:var(--warning-light);color:var(--warning);border-color:#fcd34d}
+  .esp32-badge.connecting .esp32-dot{background:var(--warning);animation:pulse-o 1s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(13,148,136,.2)}50%{box-shadow:0 0 0 6px rgba(13,148,136,.1)}}
+  @keyframes pulse-o{0%,100%{box-shadow:0 0 0 3px rgba(217,119,6,.25)}50%{box-shadow:0 0 0 6px rgba(217,119,6,.1)}}
 
   /* PAGE */
-  .page { display: none; }
-  .page.active { display: block; animation: fadeIn 0.25s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-  .page-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.3px; }
-  .page-subtitle { color: var(--text2); font-size: 13px; margin-bottom: 24px; }
+  .page{display:none}
+  .page.active{display:block;animation:fadeIn .25s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  .page-title{font-size:20px;font-weight:800;margin-bottom:6px;letter-spacing:-.3px}
+  .page-subtitle{color:var(--text2);font-size:13px;margin-bottom:24px}
 
   /* CARDS */
-  .card {
-    background: var(--surface);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    padding: 20px;
-    box-shadow: var(--shadow-sm);
-  }
-  .card-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .card-title { font-size: 14px; font-weight: 700; }
-  .card-subtitle { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:20px;box-shadow:var(--shadow-sm)}
+  .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .card-title{font-size:14px;font-weight:700}
+  .card-subtitle{font-size:12px;color:var(--text3);margin-top:2px}
 
   /* GRID */
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
 
   /* STAT CARD */
-  .stat-card {
-    background: var(--surface);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    padding: 18px 20px;
-    box-shadow: var(--shadow-sm);
-    display: flex; align-items: flex-start; gap: 14px;
-  }
-  .stat-icon {
-    width: 44px; height: 44px; border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; flex-shrink: 0;
-  }
-  .stat-icon.blue { background: var(--primary-light); }
-  .stat-icon.green { background: var(--success-light); }
-  .stat-icon.orange { background: var(--warning-light); }
-  .stat-icon.purple { background: var(--accent-light); }
-  .stat-value { font-size: 26px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
-  .stat-label { font-size: 12px; color: var(--text2); margin-top: 4px; font-weight: 500; }
-  .stat-change { font-size: 11px; margin-top: 6px; font-weight: 600; }
-  .stat-change.up { color: var(--success); }
-  .stat-change.down { color: var(--danger); }
+  .stat-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:18px 20px;box-shadow:var(--shadow-sm);display:flex;align-items:flex-start;gap:14px}
+  .stat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .stat-icon.blue{background:var(--primary-light)}.stat-icon.green{background:var(--success-light)}.stat-icon.orange{background:var(--warning-light)}.stat-icon.purple{background:var(--accent-light)}
+  .stat-value{font-size:26px;font-weight:800;letter-spacing:-1px;line-height:1}
+  .stat-label{font-size:12px;color:var(--text2);margin-top:4px;font-weight:500}
+  .stat-change{font-size:11px;margin-top:6px;font-weight:600}
+  .stat-change.up{color:var(--success)}.stat-change.down{color:var(--danger)}
 
   /* PARKING SLOTS */
-  .slots-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  .slot-card {
-    border-radius: var(--radius);
-    border: 2px solid var(--border);
-    padding: 18px 14px;
-    text-align: center;
-    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-    cursor: default;
-    position: relative;
-    overflow: hidden;
-  }
-  .slot-card::before {
-    content: '';
-    position: absolute; inset: 0;
-    opacity: 0; transition: opacity 0.3s;
-  }
-  .slot-card.empty {
-    background: var(--success-light);
-    border-color: #99f6e4;
-  }
-  .slot-card.occupied {
-    background: var(--danger-light);
-    border-color: #fca5a5;
-  }
-  .slot-icon { font-size: 32px; margin-bottom: 8px; }
-  .slot-number { font-size: 11px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
-  .slot-status {
-    font-size: 12px; font-weight: 700; margin-top: 4px;
-  }
-  .slot-card.empty .slot-status { color: var(--success); }
-  .slot-card.occupied .slot-status { color: var(--danger); }
-  .slot-card.empty .slot-icon::after { content: '🟢'; font-size: 10px; }
+  .slots-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .slot-card{border-radius:var(--radius);border:2px solid var(--border);padding:18px 14px;text-align:center;transition:all .3s cubic-bezier(.34,1.56,.64,1)}
+  .slot-card.empty{background:var(--success-light);border-color:#99f6e4}
+  .slot-card.occupied{background:var(--danger-light);border-color:#fca5a5}
+  .slot-icon{font-size:32px;margin-bottom:8px}
+  .slot-number{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+  .slot-status{font-size:12px;font-weight:700;margin-top:4px}
+  .slot-card.empty .slot-status{color:var(--success)}.slot-card.occupied .slot-status{color:var(--danger)}
 
   /* GATE CONTROLS */
-  .gate-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .gate-card {
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    padding: 18px;
-    background: var(--surface);
-    text-align: center;
-  }
-  .gate-icon { font-size: 36px; margin-bottom: 8px; }
-  .gate-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-  .gate-state {
-    display: inline-block; padding: 3px 10px;
-    border-radius: 20px; font-size: 11px; font-weight: 700;
-    margin-bottom: 14px;
-  }
-  .gate-state.closed { background: var(--danger-light); color: var(--danger); }
-  .gate-state.open { background: var(--success-light); color: var(--success); }
-
-  /* Toggle switch */
-  .toggle-switch { position:relative; display:inline-block; width:46px; height:26px; flex-shrink:0; }
-  .toggle-switch input { opacity:0; width:0; height:0; }
-  .toggle-slider {
-    position:absolute; cursor:pointer; inset:0;
-    background:#cbd5e1; border-radius:26px; transition:.3s;
-  }
-  .toggle-slider:before {
-    content:""; position:absolute;
-    width:20px; height:20px; left:3px; bottom:3px;
-    background:white; border-radius:50%;
-    transition:.3s; box-shadow:0 1px 3px rgba(0,0,0,.2);
-  }
-  .toggle-switch input:checked + .toggle-slider { background:#f59e0b; }
-  .toggle-switch input:checked + .toggle-slider:before { transform:translateX(20px); }
-  /* Gate disabled when not manual mode */
-  .gate-controls { position: relative; }
-  .gate-controls.disabled .btn-gate {
-    opacity: .35 !important; pointer-events: none !important;
-    cursor: not-allowed !important; filter: grayscale(0.6);
-  }
-  .gate-controls.disabled .gate-card {
-    opacity: .45 !important; pointer-events: none !important;
-  }
-  .gate-overlay {
-    display: none;
-    position: absolute; inset: 0;
-    background: rgba(240,242,245,0.82);
-    border-radius: var(--radius);
-    align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 700; color: var(--text2);
-    text-align: center; padding: 12px;
-    z-index: 10;
-  }
-  .gate-controls.disabled .gate-overlay { display: flex; }
-  .btn-gate {
-    width: 100%; padding: 10px;
-    border: none; border-radius: var(--radius-sm);
-    font-family: inherit; font-size: 13px; font-weight: 700;
-    cursor: pointer; transition: all 0.2s;
-  }
-  .btn-gate.open-btn {
-    background: var(--success-light); color: var(--success);
-    border: 1.5px solid #99f6e4;
-  }
-  .btn-gate.open-btn:hover { background: var(--success); color: white; }
-  .btn-gate.close-btn {
-    background: var(--danger-light); color: var(--danger);
-    border: 1.5px solid #fca5a5;
-  }
-  .btn-gate.close-btn:hover { background: var(--danger); color: white; }
+  .gate-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;position:relative}
+  .gate-card{border-radius:var(--radius);border:1px solid var(--border);padding:18px;background:var(--surface);text-align:center}
+  .gate-icon{font-size:36px;margin-bottom:8px}
+  .gate-name{font-size:14px;font-weight:700;margin-bottom:4px}
+  .gate-state{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;margin-bottom:14px}
+  .gate-state.closed{background:var(--danger-light);color:var(--danger)}
+  .gate-state.open{background:var(--success-light);color:var(--success)}
+  .toggle-switch{position:relative;display:inline-block;width:46px;height:26px;flex-shrink:0}
+  .toggle-switch input{opacity:0;width:0;height:0}
+  .toggle-slider{position:absolute;cursor:pointer;inset:0;background:#cbd5e1;border-radius:26px;transition:.3s}
+  .toggle-slider:before{content:"";position:absolute;width:20px;height:20px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.3s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .toggle-switch input:checked + .toggle-slider{background:#f59e0b}
+  .toggle-switch input:checked + .toggle-slider:before{transform:translateX(20px)}
+  .gate-controls.disabled .btn-gate{opacity:.35!important;pointer-events:none!important;filter:grayscale(.6)}
+  .gate-controls.disabled .gate-card{opacity:.45!important;pointer-events:none!important}
+  .gate-overlay{display:none;position:absolute;inset:0;background:rgba(240,242,245,.82);border-radius:var(--radius);align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text2);text-align:center;padding:12px;z-index:10}
+  .gate-controls.disabled .gate-overlay{display:flex}
+  .btn-gate{width:100%;padding:10px;border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+  .btn-gate.open-btn{background:var(--success-light);color:var(--success);border:1.5px solid #99f6e4}
+  .btn-gate.open-btn:hover{background:var(--success);color:white}
+  .btn-gate.close-btn{background:var(--danger-light);color:var(--danger);border:1.5px solid #fca5a5}
+  .btn-gate.close-btn:hover{background:var(--danger);color:white}
 
   /* TABLE */
-  .table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; }
-  th {
-    font-size: 11px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.5px; color: var(--text3);
-    padding: 10px 14px; text-align: left;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface2);
-  }
-  th:first-child { border-radius: 8px 0 0 0; }
-  th:last-child { border-radius: 0 8px 0 0; }
-  td {
-    padding: 12px 14px; border-bottom: 1px solid var(--border);
-    font-size: 13px; vertical-align: middle;
-  }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: var(--surface2); }
+  .table-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse}
+  th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);background:var(--surface2)}
+  td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:var(--surface2)}
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+  .badge.green{background:var(--success-light);color:var(--success)}
+  .badge.red{background:var(--danger-light);color:var(--danger)}
+  .badge.blue{background:var(--primary-light);color:var(--primary)}
+  .badge.purple{background:var(--accent-light);color:var(--accent)}
+  .badge.orange{background:var(--warning-light);color:var(--warning)}
+  .mono{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600}
 
-  .badge {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 3px 9px; border-radius: 20px;
-    font-size: 11px; font-weight: 700;
-  }
-  .badge.green { background: var(--success-light); color: var(--success); }
-  .badge.red { background: var(--danger-light); color: var(--danger); }
-  .badge.blue { background: var(--primary-light); color: var(--primary); }
-  .badge.purple { background: var(--accent-light); color: var(--accent); }
-  .badge.orange { background: var(--warning-light); color: var(--warning); }
+  /* CHART */
+  .chart-bar-wrap{display:flex;align-items:flex-end;gap:6px;height:120px;padding:0 4px}
+  .chart-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .chart-bar{width:100%;border-radius:6px 6px 0 0;background:linear-gradient(180deg,var(--primary),#3b82f6);transition:height .5s cubic-bezier(.34,1.56,.64,1);min-height:4px}
+  .chart-bar:hover{filter:brightness(1.1)}
+  .chart-label{font-size:10px;color:var(--text3);font-weight:600}
+  .chart-val{font-size:10px;color:var(--primary);font-weight:700}
+  .rev-tabs{display:flex;gap:4px}
+  .rev-tab{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:inherit;background:none;color:var(--text2);transition:all .15s}
+  .rev-tab.active{background:var(--primary);color:white}
+  .rev-tab:hover:not(.active){background:var(--surface2)}
 
-  .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; }
-
-  /* CHART AREA */
-  .chart-bar-wrap { display: flex; align-items: flex-end; gap: 6px; height: 120px; padding: 0 4px; }
-  .chart-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-  .chart-bar {
-    width: 100%; border-radius: 6px 6px 0 0;
-    background: linear-gradient(180deg, var(--primary), #3b82f6);
-    transition: height 0.5s cubic-bezier(0.34,1.56,0.64,1);
-    min-height: 4px;
-    position: relative;
-  }
-  .chart-bar:hover { filter: brightness(1.1); }
-  .chart-label { font-size: 10px; color: var(--text3); font-weight: 600; }
-  .chart-val { font-size: 10px; color: var(--primary); font-weight: 700; }
-
-  /* REVENUE TABS */
-  .rev-tabs { display: flex; gap: 4px; }
-  .rev-tab {
-    padding: 5px 12px; border-radius: 20px;
-    font-size: 12px; font-weight: 600;
-    border: none; cursor: pointer; font-family: inherit;
-    background: none; color: var(--text2);
-    transition: all 0.15s;
-  }
-  .rev-tab.active { background: var(--primary); color: white; }
-  .rev-tab:hover:not(.active) { background: var(--surface2); }
-
-  /* FILTERS */
-  .filter-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
-  .filter-input {
-    padding: 8px 12px; border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm); font-family: inherit; font-size: 13px;
-    background: var(--surface2); color: var(--text);
-    outline: none; transition: border-color 0.2s;
-  }
-  .filter-input:focus { border-color: var(--primary); }
-  .btn-sm {
-    padding: 8px 14px; border-radius: var(--radius-sm);
-    font-family: inherit; font-size: 12px; font-weight: 700;
-    cursor: pointer; transition: all 0.2s; border: none;
-  }
-  .btn-sm.primary { background: var(--primary); color: white; }
-  .btn-sm.primary:hover { background: var(--primary-dark); }
-  .btn-sm.outline {
-    background: none; color: var(--primary);
-    border: 1.5px solid var(--primary);
-  }
-  .btn-sm.outline:hover { background: var(--primary-light); }
-  .btn-sm.danger { background: var(--danger-light); color: var(--danger); }
-  .btn-sm.danger:hover { background: var(--danger); color: white; }
-  .btn-sm.success { background: var(--success-light); color: var(--success); }
-  .btn-sm.success:hover { background: var(--success); color: white; }
+  /* FILTER */
+  .filter-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+  .filter-input{padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;background:var(--surface2);color:var(--text);outline:none;transition:border-color .2s}
+  .filter-input:focus{border-color:var(--primary)}
+  .btn-sm{padding:8px 14px;border-radius:var(--radius-sm);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;border:none}
+  .btn-sm.primary{background:var(--primary);color:white}.btn-sm.primary:hover{background:var(--primary-dark)}
+  .btn-sm.outline{background:none;color:var(--primary);border:1.5px solid var(--primary)}.btn-sm.outline:hover{background:var(--primary-light)}
+  .btn-sm.danger{background:var(--danger-light);color:var(--danger)}.btn-sm.danger:hover{background:var(--danger);color:white}
+  .btn-sm.success{background:var(--success-light);color:var(--success)}.btn-sm.success:hover{background:var(--success);color:white}
 
   /* MODAL */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(15,28,46,0.4); backdrop-filter: blur(4px);
-    z-index: 200; align-items: center; justify-content: center;
-  }
-  .modal-overlay.show { display: flex; animation: fadeIn 0.2s; }
-  .modal {
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    padding: 28px;
-    width: 480px; max-width: 95vw;
-    box-shadow: var(--shadow-lg);
-    animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  }
-  .modal-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  .modal-title { font-size: 17px; font-weight: 800; }
-  .modal-close {
-    width: 32px; height: 32px; border-radius: 8px;
-    border: none; background: var(--surface2); cursor: pointer;
-    font-size: 16px; display: flex; align-items: center; justify-content: center;
-    transition: background 0.15s;
-  }
-  .modal-close:hover { background: var(--border); }
-  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,28,46,.4);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center}
+  .modal-overlay.show{display:flex;animation:fadeIn .2s}
+  .modal{background:var(--surface);border-radius:var(--radius-lg);padding:28px;width:480px;max-width:95vw;box-shadow:var(--shadow-lg);animation:slideUp .3s cubic-bezier(.34,1.56,.64,1)}
+  .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+  .modal-title{font-size:17px;font-weight:800}
+  .modal-close{width:32px;height:32px;border-radius:8px;border:none;background:var(--surface2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background .15s}
+  .modal-close:hover{background:var(--border)}
+  .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:24px}
 
   /* PROFILE */
-  .profile-hero {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-    border-radius: var(--radius-lg);
-    padding: 28px;
-    color: white; margin-bottom: 20px;
-    display: flex; align-items: center; gap: 20px;
-  }
-  .profile-avatar-big {
-    width: 64px; height: 64px; border-radius: 50%;
-    background: rgba(255,255,255,0.25);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px; font-weight: 800; flex-shrink: 0;
-    border: 3px solid rgba(255,255,255,0.4);
-  }
-  .profile-name { font-size: 20px; font-weight: 800; }
-  .profile-sub { font-size: 13px; opacity: 0.8; margin-top: 4px; }
-  .profile-card-badge {
-    margin-left: auto; background: rgba(255,255,255,0.2);
-    border: 1px solid rgba(255,255,255,0.3);
-    border-radius: 10px; padding: 10px 16px; text-align: center;
-    min-width: 130px;
-  }
-  .profile-card-uid { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; }
-  .profile-card-type { font-size: 11px; opacity: 0.8; margin-top: 3px; }
-  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .info-item { padding: 14px 16px; background: var(--surface2); border-radius: var(--radius-sm); border: 1px solid var(--border); }
-  .info-label { font-size: 11px; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-  .info-value { font-size: 15px; font-weight: 700; margin-top: 4px; }
-
-  /* EMPTY STATE */
-  .empty-state { text-align: center; padding: 40px 20px; color: var(--text3); }
-  .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
-  .empty-state p { font-size: 13px; }
+  .profile-hero{background:linear-gradient(135deg,var(--primary) 0%,var(--accent) 100%);border-radius:var(--radius-lg);padding:28px;color:white;margin-bottom:20px;display:flex;align-items:center;gap:20px}
+  .profile-avatar-big{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;flex-shrink:0;border:3px solid rgba(255,255,255,.4)}
+  .profile-name{font-size:20px;font-weight:800}
+  .profile-sub{font-size:13px;opacity:.8;margin-top:4px}
+  .profile-card-badge{margin-left:auto;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:10px 16px;text-align:center;min-width:130px}
+  .profile-card-uid{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700}
+  .profile-card-type{font-size:11px;opacity:.8;margin-top:3px}
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .info-item{padding:14px 16px;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border)}
+  .info-label{font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+  .info-value{font-size:15px;font-weight:700;margin-top:4px}
 
   /* TOAST */
-  .toast-container { position: fixed; top: 16px; right: 16px; z-index: 999; display: flex; flex-direction: column; gap: 8px; }
-  .toast {
-    background: var(--text); color: white;
-    padding: 12px 18px; border-radius: var(--radius-sm);
-    font-size: 13px; font-weight: 600;
-    box-shadow: var(--shadow-lg);
-    animation: slideIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
-    display: flex; align-items: center; gap: 8px;
+  .toast-container{position:fixed;top:16px;right:16px;z-index:999;display:flex;flex-direction:column;gap:8px}
+  .toast{background:var(--text);color:white;padding:12px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;box-shadow:var(--shadow-lg);animation:slideIn .3s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;gap:8px}
+  @keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+  .toast.success{background:var(--success)}.toast.danger{background:var(--danger)}.toast.info{background:var(--primary)}.toast.warning{background:var(--warning)}
+
+  .section-gap{display:flex;flex-direction:column;gap:20px}
+  .row-gap{display:flex;gap:16px}
+  .row-gap>*{flex:1}
+  select.form-input{appearance:none}
+  ::-webkit-scrollbar{width:5px;height:5px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
+
+  /* MOBILE NAV */
+  .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--surface);border-top:1px solid var(--border);box-shadow:0 -4px 20px rgba(0,0,0,.08);padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px)}
+  .mobile-nav-inner{display:flex;align-items:stretch;height:56px}
+  .mobile-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:none;cursor:pointer;color:var(--text3);font-family:inherit;font-size:9px;font-weight:600;letter-spacing:.2px;padding:6px 2px;border-radius:10px;transition:color .15s,background .15s}
+  .mobile-nav-item .mnav-icon{font-size:20px;line-height:1}
+  .mobile-nav-item.active{color:var(--primary)}
+  .mobile-nav-item.active .mnav-icon{background:var(--primary-light);border-radius:10px;padding:3px 10px;display:block}
+  .mobile-topbar{display:none;position:fixed;top:0;left:0;right:0;z-index:150;background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px;padding-top:env(safe-area-inset-top,0px);height:calc(52px + env(safe-area-inset-top,0px));align-items:flex-end;justify-content:space-between;padding-bottom:10px;box-shadow:var(--shadow-sm)}
+  .mobile-topbar-left{display:flex;align-items:center;gap:10px}
+  .mobile-topbar-logo{font-size:18px;font-weight:800;letter-spacing:-.5px}.mobile-topbar-logo span{color:var(--primary)}
+  .mobile-topbar-right{display:flex;align-items:center;gap:8px}
+  .mobile-logout-btn{width:32px;height:32px;border:none;background:var(--danger-light);color:var(--danger);border-radius:8px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
+  .mobile-logout-btn:hover{background:var(--danger);color:white}
+
+  @media(max-width:768px){
+    .sidebar,.topbar{display:none!important}
+    .app,.app.visible{display:block!important;width:100vw!important;overflow-x:hidden!important}
+    .main{margin-left:0!important;width:100vw!important;max-width:100vw!important;overflow-x:hidden!important}
+    .mobile-nav{display:block}.mobile-topbar{display:flex}
+    .content{padding:16px 14px!important;padding-top:calc(52px + env(safe-area-inset-top,0px) + 12px)!important;padding-bottom:calc(56px + env(safe-area-inset-bottom,0px) + 16px)!important}
+    .login-card{width:100%!important;max-width:100vw;min-height:100vh;border-radius:0!important;padding:40px 24px!important;display:flex;flex-direction:column;justify-content:center}
+    .page-title{font-size:18px!important}.page-subtitle{font-size:12px!important;margin-bottom:16px!important}
+    .grid-4{grid-template-columns:1fr 1fr!important;gap:10px!important}
+    .grid-3{grid-template-columns:1fr 1fr!important;gap:10px!important}
+    .grid-2{grid-template-columns:1fr!important;gap:10px!important}
+    .stat-card{padding:14px 12px!important;gap:10px!important}
+    .stat-icon{width:36px!important;height:36px!important;font-size:16px!important;border-radius:10px!important}
+    .stat-value{font-size:20px!important}.stat-label{font-size:11px!important}.stat-change{display:none}
+    .slots-grid{grid-template-columns:repeat(2,1fr)!important;gap:10px!important}
+    .slot-card{padding:14px 10px!important}.slot-icon{font-size:26px!important}
+    .row-gap{flex-direction:column!important;gap:12px!important}
+    .gate-controls{grid-template-columns:1fr 1fr!important;gap:10px!important}
+    .gate-card{padding:14px 10px!important}.gate-icon{font-size:28px!important}
+    .card{padding:16px 14px!important;border-radius:12px!important}.card-header{margin-bottom:12px!important}
+    .table-wrap{margin:0 -14px}
+    table thead{display:none}
+    table,tbody,tr,td{display:block;width:100%}
+    tr{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 14px}
+    tr:hover td{background:transparent!important}
+    td{padding:2px 0!important;border:none!important;font-size:13px!important}
+    td[data-label]::before{content:attr(data-label) ': ';font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:1px}
+    .filter-row{flex-wrap:wrap!important;gap:8px!important}
+    .filter-row .filter-input,.filter-row input,.filter-row select{flex:1 1 calc(50% - 4px)!important;min-width:120px!important;width:auto!important;font-size:13px!important}
+    .modal-overlay{align-items:flex-end!important;padding:0!important}
+    .modal{width:100%!important;max-width:100%!important;border-radius:var(--radius-lg) var(--radius-lg) 0 0!important;padding:24px 20px!important;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))!important}
+    .profile-hero{flex-direction:column!important;text-align:center!important;gap:12px!important;padding:20px 16px!important}
+    .profile-card-badge{margin-left:0!important;width:100%!important}
+    .info-grid{grid-template-columns:1fr 1fr!important}
+    .section-gap{gap:14px!important}
+    .esp32-badge{padding:4px 8px 4px 6px!important;font-size:10px!important}
+    .toast-container{top:auto!important;bottom:calc(64px + env(safe-area-inset-bottom,0px))!important;right:12px!important;left:12px!important}
+    .toast{font-size:12px!important;padding:10px 14px!important}
+    .btn-gate{padding:12px!important;font-size:13px!important}
+    .btn-sm{padding:10px 14px!important}
   }
-  @keyframes slideIn { from { opacity:0; transform: translateX(20px); } to { opacity:1; transform:translateX(0); } }
-  .toast.success { background: var(--success); }
-  .toast.danger { background: var(--danger); }
-  .toast.info { background: var(--primary); }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-
-  /* Section spacing */
-  .section-gap { display: flex; flex-direction: column; gap: 20px; }
-  .row-gap { display: flex; gap: 16px; }
-  .row-gap > * { flex: 1; }
-
-  select.form-input { appearance: none; }
-
-  /* ══════════════════════════════════════════════
-     MOBILE RESPONSIVE — Tối ưu điện thoại
-  ══════════════════════════════════════════════ */
-
-  /* Bottom nav bar cho mobile */
-  .mobile-nav {
-    display: none;
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
-    padding: 0 4px;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  .mobile-nav-inner {
-    display: flex; align-items: stretch;
-    height: 56px;
-  }
-  .mobile-nav-item {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 2px;
-    border: none; background: none; cursor: pointer;
-    color: var(--text3); font-family: inherit;
-    font-size: 9px; font-weight: 600;
-    letter-spacing: 0.2px;
-    padding: 6px 2px;
-    border-radius: 10px;
-    transition: color 0.15s, background 0.15s;
-    position: relative;
-  }
-  .mobile-nav-item .mnav-icon { font-size: 20px; line-height: 1; }
-  .mobile-nav-item.active {
-    color: var(--primary);
-  }
-  .mobile-nav-item.active .mnav-icon {
-    background: var(--primary-light);
-    border-radius: 10px;
-    padding: 3px 10px;
-    display: block;
-  }
-  .mobile-nav-badge {
-    position: absolute; top: 4px; right: calc(50% - 18px);
-    background: var(--danger); color: white;
-    font-size: 9px; font-weight: 700;
-    width: 16px; height: 16px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-  }
-
-  /* Mobile topbar */
-  .mobile-topbar {
-    display: none;
-    position: fixed; top: 0; left: 0; right: 0; z-index: 150;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 16px;
-    padding-top: env(safe-area-inset-top, 0px);
-    height: calc(52px + env(safe-area-inset-top, 0px));
-    align-items: flex-end; justify-content: space-between;
-    padding-bottom: 10px;
-    box-shadow: var(--shadow-sm);
-  }
-  .mobile-topbar-left { display: flex; align-items: center; gap: 10px; }
-  .mobile-topbar-logo { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
-  .mobile-topbar-logo span { color: var(--primary); }
-  .mobile-topbar-right { display: flex; align-items: center; gap: 8px; }
-
-  .mobile-logout-btn {
-    width: 32px; height: 32px;
-    border: none; background: var(--danger-light);
-    color: var(--danger); border-radius: 8px;
-    font-size: 15px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.15s;
-    flex-shrink: 0;
-  }
-  .mobile-logout-btn:hover { background: var(--danger); color: white; }
-
-  @media (max-width: 768px) {
-    /* Ẩn sidebar, topbar desktop */
-    .sidebar { display: none !important; }
-    .topbar { display: none !important; }
-
-    /* App full width, block layout */
-    .app, .app.visible {
-      display: block !important;
-      width: 100vw !important;
-      overflow-x: hidden !important;
-    }
-
-    /* Main full width, no offset */
-    .main {
-      margin-left: 0 !important;
-      width: 100vw !important;
-      max-width: 100vw !important;
-      overflow-x: hidden !important;
-    }
-
-    /* Hiện mobile nav + topbar */
-    .mobile-nav { display: block; }
-    .mobile-topbar { display: flex; }
-
-    /* Nội dung main: padding cho topbar + bottom nav */
-    .content {
-      padding: 16px 14px !important;
-      padding-top: calc(52px + env(safe-area-inset-top, 0px) + 12px) !important;
-      padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 16px) !important;
-    }
-
-    /* Login card */
-    .login-card {
-      width: 100% !important;
-      max-width: 100vw;
-      min-height: 100vh;
-      border-radius: 0 !important;
-      padding: 40px 24px !important;
-      display: flex; flex-direction: column; justify-content: center;
-    }
-
-    /* Page title */
-    .page-title { font-size: 18px !important; }
-    .page-subtitle { font-size: 12px !important; margin-bottom: 16px !important; }
-
-    /* Grid responsive */
-    .grid-4 { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
-    .grid-3 { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
-    .grid-2 { grid-template-columns: 1fr !important; gap: 10px !important; }
-
-    /* Stat cards nhỏ lại */
-    .stat-card { padding: 14px 12px !important; gap: 10px !important; }
-    .stat-icon { width: 36px !important; height: 36px !important; font-size: 16px !important; border-radius: 10px !important; }
-    .stat-value { font-size: 20px !important; }
-    .stat-label { font-size: 11px !important; }
-    .stat-change { display: none; }
-
-    /* Slots */
-    .slots-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
-    .slot-card { padding: 14px 10px !important; }
-    .slot-icon { font-size: 26px !important; }
-
-    /* Row-gap stack vertically */
-    .row-gap { flex-direction: column !important; gap: 12px !important; }
-
-    /* Gate controls */
-    .gate-controls { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
-    .gate-card { padding: 14px 10px !important; }
-    .gate-icon { font-size: 28px !important; }
-
-    /* Cards */
-    .card { padding: 16px 14px !important; border-radius: 12px !important; }
-    .card-header { margin-bottom: 12px !important; }
-
-    /* Bảng → card list trên mobile */
-    .table-wrap { margin: 0 -14px; }
-    table thead { display: none; }
-    table, tbody, tr, td { display: block; width: 100%; }
-    tr {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 12px 14px;
-      position: relative;
-    }
-    tr:last-child { border-bottom: none; }
-    tr:hover td { background: transparent !important; }
-    td {
-      padding: 2px 0 !important;
-      border: none !important;
-      font-size: 13px !important;
-    }
-    td[data-label]::before {
-      content: attr(data-label) ': ';
-      font-size: 10px; font-weight: 700;
-      color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px;
-      display: block; margin-bottom: 1px;
-    }
-
-    /* Filter row */
-    .filter-row {
-      flex-wrap: wrap !important;
-      gap: 8px !important;
-    }
-    .filter-row .filter-input,
-    .filter-row input,
-    .filter-row select {
-      flex: 1 1 calc(50% - 4px) !important;
-      min-width: 120px !important;
-      width: auto !important;
-      font-size: 13px !important;
-    }
-    .filter-row .btn-sm {
-      flex: 1 1 calc(50% - 4px) !important;
-    }
-
-    /* Charts */
-    .chart-bar-wrap { height: 180px !important; gap: 4px !important; }
-    .chart-val { font-size: 9px !important; }
-    .chart-label { font-size: 9px !important; }
-
-    /* Revenue tabs */
-    .rev-tabs { gap: 2px !important; }
-    .rev-tab { padding: 4px 8px !important; font-size: 11px !important; }
-
-    /* Card-header flex on mobile */
-    .card-header { flex-wrap: wrap !important; gap: 8px !important; }
-
-    /* Modals full screen */
-    .modal-overlay { align-items: flex-end !important; padding: 0 !important; }
-    .modal {
-      width: 100% !important; max-width: 100% !important;
-      border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
-      padding: 24px 20px !important;
-      padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important;
-    }
-
-    /* Profile hero */
-    .profile-hero {
-      flex-direction: column !important;
-      text-align: center !important;
-      gap: 12px !important;
-      padding: 20px 16px !important;
-    }
-    .profile-card-badge { margin-left: 0 !important; width: 100% !important; }
-
-    /* Info grid */
-    .info-grid { grid-template-columns: 1fr 1fr !important; }
-
-    /* Section gap */
-    .section-gap { gap: 14px !important; }
-
-    /* ESP32 badge compact */
-    .esp32-badge {
-      padding: 4px 8px 4px 6px !important;
-      font-size: 10px !important;
-    }
-
-    /* Toast position */
-    .toast-container {
-      top: auto !important;
-      bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
-      right: 12px !important; left: 12px !important;
-    }
-    .toast { font-size: 12px !important; padding: 10px 14px !important; }
-
-    /* Buttons bigger touch targets */
-    .btn-gate { padding: 12px !important; font-size: 13px !important; }
-    .btn-sm { padding: 10px 14px !important; }
-  }
-
-  /* Chống zoom input trên iOS — font-size >= 16px */
-  @media (max-width: 768px) {
-    .form-input, .filter-input, input, select, textarea {
-      font-size: 16px !important;
-    }
-  }
-
-  /* Tablet */
-  @media (min-width: 769px) and (max-width: 1024px) {
-    .sidebar { width: 200px !important; }
-    .main { margin-left: 200px !important; }
-    .grid-4 { grid-template-columns: 1fr 1fr !important; }
-    .grid-3 { grid-template-columns: 1fr 1fr !important; }
+  @media(max-width:768px){.form-input,input,select,textarea{font-size:16px!important}}
+  @media(min-width:769px) and (max-width:1024px){
+    .sidebar{width:200px!important}.main{margin-left:200px!important}
+    .grid-4{grid-template-columns:1fr 1fr!important}.grid-3{grid-template-columns:1fr 1fr!important}
   }
 </style>
 </head>
 <body class="login-mode" onload="document.documentElement.classList.add('login-mode')">
 
-<!-- ══════════════════════════════════════════ -->
-<!--  LOGIN SCREEN                             -->
-<!-- ══════════════════════════════════════════ -->
+<!-- LOGIN -->
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
     <div class="login-logo">
@@ -944,12 +297,10 @@
       <h1>Bãi Đỗ Xe <span>Thông Minh</span></h1>
     </div>
     <p class="login-subtitle">Hệ thống quản lý bãi xe thông minh.<br>Đăng nhập để tiếp tục.</p>
-
     <div class="tab-switch">
       <button class="tab-btn active" onclick="switchLoginTab('admin')">🔑 Admin</button>
       <button class="tab-btn" onclick="switchLoginTab('member')">👤 Thành viên</button>
     </div>
-
     <div class="form-group">
       <label class="form-label">Tên đăng nhập</label>
       <input class="form-input" id="loginUser" placeholder="admin / member01..." value="admin">
@@ -963,33 +314,27 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════ -->
-<!--  MAIN APP                                  -->
-<!-- ══════════════════════════════════════════ -->
+<!-- MAIN APP -->
 <div class="app" id="app" style="display:none">
 
-  <!-- ── MOBILE TOPBAR ── -->
+  <!-- MOBILE TOPBAR -->
   <div class="mobile-topbar" id="mobileTopbar">
     <div class="mobile-topbar-left">
-      <div style="width:28px;height:28px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;">🅿️</div>
+      <div style="width:28px;height:28px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px">🅿️</div>
       <div class="mobile-topbar-logo">Bãi Đỗ Xe <span>Thông Minh</span></div>
     </div>
     <div class="mobile-topbar-right">
-      <div class="esp32-badge connecting" id="esp32Badge" title="Trạng thái ESP32">
+      <div class="esp32-badge connecting" id="esp32Badge">
         <div class="esp32-dot"></div>
         <span id="esp32BadgeText">ESP32…</span>
       </div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);font-weight:600;" id="clockDisplayMobile">--:--</div>
-      <button class="mobile-logout-btn" onclick="doLogout()" title="Đăng xuất">🚪</button>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);font-weight:600" id="clockMobile">--:--</div>
+      <button class="mobile-logout-btn" onclick="doLogout()">🚪</button>
     </div>
   </div>
 
-  <!-- ── MOBILE BOTTOM NAV ── -->
-  <nav class="mobile-nav" id="mobileNav">
-    <div class="mobile-nav-inner" id="mobileNavInner">
-      <!-- filled by JS -->
-    </div>
-  </nav>
+  <!-- MOBILE BOTTOM NAV -->
+  <nav class="mobile-nav"><div class="mobile-nav-inner" id="mobileNavInner"></div></nav>
 
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
@@ -999,7 +344,6 @@
         <h2>Bãi Đỗ Xe <span>Thông Minh</span></h2>
       </div>
     </div>
-
     <div class="sidebar-user">
       <div class="user-avatar" id="sidebarAvatar">A</div>
       <div class="user-info">
@@ -1007,15 +351,9 @@
         <div class="user-role" id="sidebarRole">Quản trị viên</div>
       </div>
     </div>
-
-    <nav class="sidebar-nav" id="sidebarNav">
-      <!-- Filled by JS -->
-    </nav>
-
+    <nav class="sidebar-nav" id="sidebarNav"></nav>
     <div class="sidebar-footer">
-      <button class="btn-logout" onclick="doLogout()">
-        <span>🚪</span> Đăng xuất
-      </button>
+      <button class="btn-logout" onclick="doLogout()"><span>🚪</span> Đăng xuất</button>
     </div>
   </aside>
 
@@ -1024,7 +362,7 @@
     <div class="topbar">
       <div class="topbar-title" id="topbarTitle">Dashboard</div>
       <div class="topbar-actions">
-        <div class="esp32-badge connecting" id="esp32BadgeDesktop" title="Trạng thái kết nối ESP32">
+        <div class="esp32-badge connecting" id="esp32BadgeDesktop">
           <div class="esp32-dot"></div>
           <span id="esp32BadgeTextDesktop">ESP32 — Đang kiểm tra…</span>
         </div>
@@ -1034,76 +372,38 @@
 
     <div class="content">
 
-      <!-- ── PAGE: DASHBOARD ── -->
+      <!-- DASHBOARD -->
       <div class="page active" id="page-dashboard">
         <div class="page-title">Trang chủ</div>
         <div class="page-subtitle">Tổng quan bãi xe thời gian thực</div>
-
         <div class="section-gap">
-          <!-- Stats -->
           <div class="grid-4">
-            <div class="stat-card">
-              <div class="stat-icon green">🚗</div>
-              <div>
-                <div class="stat-value" id="statOccupied">2</div>
-                <div class="stat-label">Chỗ đang đỗ</div>
-                <div class="stat-change up">▲ 1 so với sáng</div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon blue">🅿️</div>
-              <div>
-                <div class="stat-value" id="statFree">2</div>
-                <div class="stat-label">Chỗ còn trống</div>
-                <div class="stat-change">Tổng 4 chỗ</div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon orange">📋</div>
-              <div>
-                <div class="stat-value" id="statTodayTrips">0</div>
-                <div class="stat-label">Lượt hôm nay</div>
-                <div class="stat-change up">Từ Firebase</div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon purple">💰</div>
-              <div>
-                <div class="stat-value" id="statTodayRevenue">0k</div>
-                <div class="stat-label">Doanh thu hôm nay</div>
-                <div class="stat-change up">Từ Firebase</div>
-              </div>
-            </div>
+            <div class="stat-card"><div class="stat-icon green">🚗</div><div><div class="stat-value" id="statOccupied">0</div><div class="stat-label">Chỗ đang đỗ</div></div></div>
+            <div class="stat-card"><div class="stat-icon blue">🅿️</div><div><div class="stat-value" id="statFree">4</div><div class="stat-label">Chỗ còn trống</div><div class="stat-change">Tổng 4 chỗ</div></div></div>
+            <div class="stat-card"><div class="stat-icon orange">📋</div><div><div class="stat-value" id="statTodayTrips">0</div><div class="stat-label">Lượt hôm nay</div></div></div>
+            <div class="stat-card"><div class="stat-icon purple">💰</div><div><div class="stat-value" id="statTodayRevenue">0k</div><div class="stat-label">Doanh thu hôm nay</div></div></div>
           </div>
 
-          <!-- Slots + Gate -->
           <div class="row-gap">
             <div class="card" style="flex:2">
               <div class="card-header">
-                <div>
-                  <div class="card-title">Trạng thái chỗ đỗ</div>
-                  <div class="card-subtitle">Cập nhật realtime từ cảm biến IR</div>
-                </div>
-                <span style="font-size:12px;color:var(--success);font-weight:600;">🟢 Realtime từ ESP32</span>
+                <div><div class="card-title">Trạng thái chỗ đỗ</div><div class="card-subtitle">Cập nhật realtime từ cảm biến IR</div></div>
+                <span style="font-size:12px;color:var(--success);font-weight:600" id="realtimeLabel">🟢 SSE Realtime</span>
               </div>
               <div class="slots-grid" id="slotsGrid"></div>
             </div>
 
             <div class="card" style="flex:1">
               <div class="card-header">
-                <div>
-                  <div class="card-title">Điều khiển cổng</div>
-                  <div class="card-subtitle" id="gateSubtitle">RFID đang hoạt động</div>
-                </div>
+                <div><div class="card-title">Điều khiển cổng</div><div class="card-subtitle" id="gateSubtitle">RFID đang hoạt động</div></div>
               </div>
-              <!-- Công tắc chế độ thủ công -->
-              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg);border-radius:10px;margin-bottom:12px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg);border-radius:10px;margin-bottom:12px">
                 <div>
-                  <div style="font-size:13px;font-weight:600;color:var(--text1)">🎛️ Chế độ thủ công</div>
+                  <div style="font-size:13px;font-weight:600">🎛️ Chế độ thủ công</div>
                   <div style="font-size:11px;color:var(--text3)" id="manualModeDesc">Tắt — RFID hoạt động bình thường</div>
                 </div>
                 <label class="toggle-switch">
-                  <input type="checkbox" id="manualModeToggle" onclick="setManualMode(this.checked)">
+                  <input type="checkbox" id="manualModeToggle" onchange="setManualMode(this.checked)">
                   <span class="toggle-slider"></span>
                 </label>
               </div>
@@ -1125,261 +425,129 @@
             </div>
           </div>
 
+          <!-- Recent history -->
+          <div class="card">
+            <div class="card-header">
+              <div><div class="card-title">Hoạt động gần đây</div></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Thời gian</th><th>UID Thẻ</th><th>Chủ xe</th><th>Loại thẻ</th><th>Trạng thái</th><th>Phí</th></tr></thead>
+                <tbody id="recentTable"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- ── PAGE: LỊCH SỬ ── -->
+      <!-- LỊCH SỬ -->
       <div class="page" id="page-history">
         <div class="page-title">Lịch sử xe vào/ra</div>
         <div class="page-subtitle">Toàn bộ lịch sử quét thẻ</div>
-
         <div class="card">
           <div class="filter-row">
             <input class="filter-input" type="date" id="historyDate" style="width:160px">
-            <select class="filter-input" style="width:140px">
-              <option>Tất cả loại thẻ</option>
-              <option>Thẻ thường</option>
-              <option>Thẻ tháng</option>
-            </select>
-            <select class="filter-input" style="width:120px">
-              <option>Tất cả sự kiện</option>
-              <option>Vào</option>
-              <option>Ra</option>
-            </select>
-            <button class="btn-sm primary">🔍 Lọc</button>
+            <button class="btn-sm primary" onclick="renderHistoryTable()">🔍 Lọc</button>
+            <button class="btn-sm outline" onclick="loadHistory()">🔄 Tải lại</button>
           </div>
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Thời gian vào</th>
-                  <th>Thời gian ra</th>
-                  <th>Thời gian đỗ</th>
-                  <th>UID Thẻ</th>
-                  <th>Tên chủ xe</th>
-                  <th>Loại thẻ</th>
-                  <th>Phí</th>
-                  <th>Trạng thái</th>
-                </tr>
-              </thead>
+              <thead><tr><th>#</th><th>Giờ vào</th><th>Giờ ra</th><th>Thời gian đỗ</th><th>UID Thẻ</th><th>Chủ xe</th><th>Loại thẻ</th><th>Phí</th><th>Trạng thái</th></tr></thead>
               <tbody id="historyTable"></tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- ── PAGE: DOANH THU ── -->
+      <!-- DOANH THU -->
       <div class="page" id="page-revenue">
         <div class="page-title">Doanh thu</div>
         <div class="page-subtitle">Thống kê tài chính bãi xe</div>
-
         <div class="section-gap">
           <div class="grid-4">
-            <div class="stat-card">
-              <div class="stat-icon green">📅</div>
-              <div>
-                <div class="stat-value">0k</div>
-                <div class="stat-label">Hôm nay</div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon blue">📆</div>
-              <div>
-                <div class="stat-value">0k</div>
-                <div class="stat-label">Tuần này</div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon orange">🗓️</div>
-              <div>
-                <div class="stat-value">0k</div>
-                <div class="stat-label">Tháng này</div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon purple">📊</div>
-              <div>
-                <div class="stat-value">0k</div>
-                <div class="stat-label">Năm nay</div>
-              </div>
-            </div>
+            <div class="stat-card"><div class="stat-icon green">📅</div><div><div class="stat-value" id="revToday">0k</div><div class="stat-label">Hôm nay</div></div></div>
+            <div class="stat-card"><div class="stat-icon blue">📆</div><div><div class="stat-value">—</div><div class="stat-label">Tuần này</div></div></div>
+            <div class="stat-card"><div class="stat-icon orange">🗓️</div><div><div class="stat-value">—</div><div class="stat-label">Tháng này</div></div></div>
+            <div class="stat-card"><div class="stat-icon purple">📊</div><div><div class="stat-value" id="revTrips">0</div><div class="stat-label">Lượt hôm nay</div></div></div>
           </div>
-
-          <div class="section-gap">
-            <div class="card">
-              <div style="margin-bottom:12px;">
-                <div class="card-title" style="margin-bottom:10px;">Biểu đồ doanh thu</div>
-                <div class="rev-tabs">
-                  <button class="rev-tab active" onclick="switchRevTab(this,'day')">Ngày</button>
-                  <button class="rev-tab" onclick="switchRevTab(this,'week')">Tuần</button>
-                  <button class="rev-tab" onclick="switchRevTab(this,'month')">Tháng</button>
-                  <button class="rev-tab" onclick="switchRevTab(this,'year')">Năm</button>
-                </div>
-              </div>
-              <div class="chart-bar-wrap" id="revenueChart" style="height:180px;"></div>
-            </div>
-            <div class="card">
-              <div class="card-title" style="margin-bottom:16px">Phân loại doanh thu</div>
-              <div class="section-gap" style="gap:10px">
-                <div class="info-item">
-                  <div class="info-label">Thẻ thường (2k/lượt)</div>
-                  <div class="info-value" style="color:var(--primary)">0đ <span style="font-size:12px;color:var(--text3)">0 lượt</span></div>
-                </div>
-                <div class="info-item">
-                  <div class="info-label">Thẻ tháng</div>
-                  <div class="info-value" style="color:var(--accent)">0đ <span style="font-size:12px;color:var(--text3)">0 thẻ</span></div>
-                </div>
-                <div class="info-item" style="background:var(--primary-light);border-color:#bfdbfe">
-                  <div class="info-label">Tổng tháng này</div>
-                  <div class="info-value" style="color:var(--primary)">0đ</div>
-                </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Biểu đồ doanh thu</div>
+              <div class="rev-tabs">
+                <button class="rev-tab active" onclick="switchRevTab(this,'day')">Ngày</button>
+                <button class="rev-tab" onclick="switchRevTab(this,'week')">Tuần</button>
+                <button class="rev-tab" onclick="switchRevTab(this,'month')">Tháng</button>
               </div>
             </div>
+            <div class="chart-bar-wrap" id="revenueChart"></div>
           </div>
         </div>
       </div>
 
-      <!-- ── PAGE: QUẢN LÝ TÀI KHOẢN ── -->
+      <!-- QUẢN LÝ TÀI KHOẢN -->
       <div class="page" id="page-cards">
         <div class="page-title">Quản lý tài khoản</div>
-        <div class="page-subtitle">Thành viên và thẻ RFID đăng ký</div>
-
+        <div class="page-subtitle">Thẻ tháng và tài khoản thành viên</div>
         <div class="card">
+          <div class="card-header">
+            <div><div class="card-title">Danh sách thành viên</div></div>
+            <button class="btn-sm primary" onclick="openAddMemberModal()">+ Thêm thành viên</button>
+          </div>
           <div class="filter-row">
-            <input class="filter-input" id="accountSearch" placeholder="🔍 Tìm theo tên, SĐT, UID..." style="flex:1" oninput="renderAccountsTable()">
-            <button class="btn-sm outline" onclick="debugFirebase()" title="Kiểm tra kết nối Firebase">🔍 Debug</button>
-            <button class="btn-sm primary" onclick="openAddMemberModal()">+ Thêm</button>
+            <input class="filter-input" id="accountSearch" placeholder="🔍 Tìm kiếm..." oninput="renderAccountsTable()" style="flex:1">
           </div>
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>Tên đăng nhập</th>
-                  <th>Họ tên</th>
-                  <th>SĐT</th>
-                  <th>Thẻ RFID</th>
-                  <th>Hết hạn</th>
-                  <th>Trạng thái</th>
-                  <th>Thao tác</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Username</th><th>Họ tên</th><th>SĐT</th><th>Thẻ RFID</th><th>Hết hạn</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
               <tbody id="accountsTable"></tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- ── PAGE: THẺ THƯỜNG ── -->
+      <!-- THẺ THƯỜNG -->
       <div class="page" id="page-normalcards">
         <div class="page-title">Thẻ thường</div>
-        <div class="page-subtitle">Quản lý thẻ vãng lai (không có tài khoản)</div>
-
+        <div class="page-subtitle">Quản lý thẻ vé lẻ</div>
         <div class="card">
-          <div class="filter-row">
-            <input class="filter-input" id="normalCardSearch" placeholder="🔍 Tìm theo UID..." style="flex:1" oninput="renderNormalCards()">
+          <div class="card-header">
+            <div><div class="card-title">Danh sách thẻ thường</div></div>
             <button class="btn-sm primary" onclick="openAddNormalCardModal()">+ Thêm thẻ</button>
+          </div>
+          <div class="filter-row">
+            <input class="filter-input" id="normalCardSearch" placeholder="🔍 Tìm UID, ghi chú..." oninput="renderNormalCards()" style="flex:1">
           </div>
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>UID Thẻ</th>
-                  <th>Ghi chú</th>
-                  <th>Ngày thêm</th>
-                  <th>Trạng thái</th>
-                  <th>Thao tác</th>
-                </tr>
-              </thead>
+              <thead><tr><th>UID</th><th>Ghi chú</th><th>Ngày thêm</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
               <tbody id="normalCardsTable"></tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- ── PAGE: HỒ SƠ THÀNH VIÊN ── -->
+      <!-- PROFILE (member) -->
       <div class="page" id="page-profile">
         <div class="page-title">Hồ sơ của tôi</div>
-        <div class="page-subtitle">Thông tin thẻ và lịch sử xe của bạn</div>
-
-        <div class="section-gap">
-          <div class="profile-hero">
-            <div class="profile-avatar-big" id="profileAvatar">M</div>
-            <div>
-              <div class="profile-name" id="profileName">Nguyễn Văn A</div>
-              <div class="profile-sub" id="profileSub">Thành viên thẻ tháng • Đang hoạt động</div>
-            </div>
-            <div class="profile-card-badge">
-              <div class="profile-card-uid" id="profileUID">11:22:33:44</div>
-              <div class="profile-card-type">Thẻ tháng</div>
-            </div>
+        <div class="page-subtitle">Thông tin thẻ và lịch sử cá nhân</div>
+        <div class="profile-hero">
+          <div class="profile-avatar-big" id="profileAvatar">A</div>
+          <div>
+            <div class="profile-name" id="profileName">—</div>
+            <div class="profile-sub">Thành viên thẻ tháng</div>
           </div>
-
-          <div class="grid-2">
-            <div class="card">
-              <div class="card-title" style="margin-bottom:14px">Thông tin thẻ</div>
-              <div class="info-grid">
-                <div class="info-item">
-                  <div class="info-label">Ngày đăng ký</div>
-                  <div class="info-value">01/03/2026</div>
-                </div>
-                <div class="info-item">
-                  <div class="info-label">Hết hạn</div>
-                  <div class="info-value" style="color:var(--success)">01/04/2026</div>
-                </div>
-                <div class="info-item">
-                  <div class="info-label">Phí tháng</div>
-                  <div class="info-value" style="color:var(--primary)">120,000đ</div>
-                </div>
-                <div class="info-item">
-                  <div class="info-label">Lượt tháng này</div>
-                  <div class="info-value">23 lượt</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-title" style="margin-bottom:14px">Thống kê sử dụng</div>
-              <div class="info-grid">
-                <div class="info-item">
-                  <div class="info-label">Tổng thời gian đỗ</div>
-                  <div class="info-value">47 giờ</div>
-                </div>
-                <div class="info-item">
-                  <div class="info-label">Lượt hôm nay</div>
-                  <div class="info-value">1 lượt</div>
-                </div>
-                <div class="info-item">
-                  <div class="info-label">TB mỗi ngày</div>
-                  <div class="info-value">2.1 giờ</div>
-                </div>
-                <div class="info-item">
-                  <div class="info-label">Tổng tháng</div>
-                  <div class="info-value">23 lượt</div>
-                </div>
-              </div>
-            </div>
+          <div class="profile-card-badge">
+            <div class="profile-card-uid" id="profileUID">—</div>
+            <div class="profile-card-type">Thẻ RFID</div>
           </div>
-
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">Lịch sử xe của tôi</div>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Giờ vào</th>
-                    <th>Giờ ra</th>
-                    <th>Thời gian đỗ</th>
-                    <th>Ngày</th>
-                    <th>Trạng thái</th>
-                  </tr>
-                </thead>
-                <tbody id="memberHistoryTable"></tbody>
-              </table>
-            </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Lịch sử xe của tôi</div></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>Giờ vào</th><th>Giờ ra</th><th>Thời gian đỗ</th><th>Ngày</th><th>Trạng thái</th></tr></thead>
+              <tbody id="memberHistoryTable"></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -1388,43 +556,22 @@
   </main>
 </div><!-- /app -->
 
-<!-- ══════════════════════════════════════════ -->
-<!--  MODALS                                    -->
-<!-- ══════════════════════════════════════════ -->
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
 
-<!-- Modal thêm thành viên (gộp thẻ + tài khoản) -->
+<!-- MODAL: Thêm thành viên -->
 <div class="modal-overlay" id="modalAddMember">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">➕ Thêm thành viên mới</div>
+      <div class="modal-title">➕ Thêm thành viên</div>
       <button class="modal-close" onclick="closeModal('modalAddMember')">✕</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Tên đăng nhập <span style="color:var(--danger)">*</span></label>
-      <input class="form-input" placeholder="VD: member04" id="newUsername">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Mật khẩu <span style="color:var(--danger)">*</span></label>
-      <input class="form-input" type="password" placeholder="••••••••" id="newPassword">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Họ và tên <span style="color:var(--danger)">*</span></label>
-      <input class="form-input" placeholder="VD: Nguyễn Văn A" id="newFullname">
-    </div>
-    <div class="form-group">
-      <label class="form-label">ID thẻ RFID <span style="color:var(--danger)">*</span></label>
-      <input class="form-input" placeholder="VD: AA:BB:CC:DD" id="newMemberUID">
-    </div>
-    <div class="grid-2" style="gap:12px">
-      <div class="form-group">
-        <label class="form-label">Phí / tháng (đ)</label>
-        <input class="form-input" type="number" placeholder="120000" id="newMemberFee">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Số điện thoại</label>
-        <input class="form-input" placeholder="0912345678" id="newMemberPhone">
-      </div>
-    </div>
+    <div class="form-group"><label class="form-label">Tên đăng nhập *</label><input class="form-input" id="newUsername" placeholder="vd: member01"></div>
+    <div class="form-group"><label class="form-label">Mật khẩu *</label><input class="form-input" id="newPassword" type="password" placeholder="••••••••"></div>
+    <div class="form-group"><label class="form-label">Họ và tên *</label><input class="form-input" id="newFullname" placeholder="Nguyễn Văn A"></div>
+    <div class="form-group"><label class="form-label">UID Thẻ RFID *</label><input class="form-input" id="newMemberUID" placeholder="AB:CD:EF:12"></div>
+    <div class="form-group"><label class="form-label">Số điện thoại</label><input class="form-input" id="newMemberPhone" placeholder="0901234567"></div>
+    <div class="form-group"><label class="form-label">Phí tháng (đ)</label><input class="form-input" id="newMemberFee" type="number" placeholder="50000"></div>
     <div class="modal-footer">
       <button class="btn-sm outline" onclick="closeModal('modalAddMember')">Hủy</button>
       <button class="btn-sm primary" onclick="submitAddMember()">✅ Tạo thành viên</button>
@@ -1432,21 +579,15 @@
   </div>
 </div>
 
-<!-- Modal thêm thẻ thường -->
+<!-- MODAL: Thêm thẻ thường -->
 <div class="modal-overlay" id="modalAddNormalCard">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">💳 Thêm thẻ thường</div>
+      <div class="modal-title">➕ Thêm thẻ thường</div>
       <button class="modal-close" onclick="closeModal('modalAddNormalCard')">✕</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">UID Thẻ RFID <span style="color:var(--danger)">*</span></label>
-      <input class="form-input" placeholder="VD: AA:BB:CC:DD" id="newNormalUID">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Ghi chú (biển số, tên...)</label>
-      <input class="form-input" placeholder="VD: 51A-12345" id="newNormalNote">
-    </div>
+    <div class="form-group"><label class="form-label">UID Thẻ *</label><input class="form-input" id="newNormalUID" placeholder="AB:CD:EF:12"></div>
+    <div class="form-group"><label class="form-label">Ghi chú</label><input class="form-input" id="newNormalNote" placeholder="Vd: Xe máy khách vãng lai"></div>
     <div class="modal-footer">
       <button class="btn-sm outline" onclick="closeModal('modalAddNormalCard')">Hủy</button>
       <button class="btn-sm primary" onclick="submitAddNormalCard()">✅ Thêm thẻ</button>
@@ -1454,56 +595,122 @@
   </div>
 </div>
 
-<!-- Toast container -->
-<div class="toast-container" id="toastContainer"></div>
-
-<!-- ══════════════════════════════════════════ -->
-<!--  JAVASCRIPT                               -->
-<!-- ══════════════════════════════════════════ -->
 <script>
-// ── DATA ──────────────────────────────────────
-// Admin cứng — không lưu trên Firebase
-const ADMIN_USER = { pass:'123456', role:'admin', name:'Admin Tổng' };
+// ════════════════════════════════════════════
+//  CONFIG
+// ════════════════════════════════════════════
+const FIREBASE_URL  = 'https://baidoxe-a798f-default-rtdb.firebaseio.com';
+const ADMIN_USER    = { role:'admin', name:'Admin', pass:'123456' };
+const TOTAL_SLOTS   = 4;
+// ESP32 gửi heartbeat mỗi 2s → timeout 8s = miss 3 lần mới offline
+// Dùng Date.now() đo khoảng cách thực tế nhận SSE event, không so epoch
+const ESP32_TIMEOUT = 8000;
 
-// Dữ liệu thành viên — load từ Firebase, ban đầu rỗng
-let USERS = {
-  admin: ADMIN_USER,
-};
+// ════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════
+let currentUser     = null;
+let accountsData    = [];
+let cardsData       = [];
+let normalCardsData = [];
+let historyData     = [];
+let slotData        = Array.from({length:TOTAL_SLOTS},(_,i)=>({id:i+1,label:'Chỗ '+(i+1),occupied:false}));
+let gateOpenState   = { entry:false, exit:false };
+let manualMode      = false;
+let _esp32ReceivedAt = 0;  // Date.now() lúc nhận HB cuối — so sánh với Date.now() hiện tại
+let _esp32LastSeq   = -1;  // seq number từ ESP32 — tăng mỗi HB
+let _lastBadge      = '';
+let fbListeners     = [];
 
-let currentUser = null;
-let currentTab  = 'admin';
-
-const slotData = [
-  { id:1, occupied:false, label:'Chỗ 1' },
-  { id:2, occupied:false, label:'Chỗ 2' },
-  { id:3, occupied:false, label:'Chỗ 3' },
-  { id:4, occupied:false, label:'Chỗ 4' },
-];
-
-const historyData = [];
-let cardsData    = [];
-let accountsData = [];
-
-const memberHistory = [];
-const gateState = { entry: false, exit: false };
-
-// ── ADMIN NAV ─────────────────────────────────
+// ════════════════════════════════════════════
+//  NAV CONFIG
+// ════════════════════════════════════════════
 const adminNav = [
-  { id:'dashboard', icon:'📊', label:'Trang chủ' },
-  { id:'history',   icon:'📋', label:'Lịch sử vào/ra' },
-  { id:'revenue',   icon:'💰', label:'Doanh thu',     section:'Tài chính' },
-  { id:'cards',     icon:'👥', label:'Tài khoản',     section:'Quản lý' },
-  { id:'normalcards', icon:'💳', label:'Thẻ thường' },
+  {id:'dashboard',icon:'🏠',label:'Trang chủ'},
+  {id:'history',  icon:'📋',label:'Lịch sử vào/ra'},
+  {id:'revenue',  icon:'💰',label:'Doanh thu'},
+  {id:'cards',    icon:'👥',label:'Quản lý tài khoản'},
+  {id:'normalcards',icon:'🎫',label:'Thẻ thường'},
 ];
-
 const memberNav = [
-  { id:'profile', icon:'👤', label:'Hồ sơ của tôi' },
-  { id:'history', icon:'📋', label:'Lịch sử xe tôi' },
+  {id:'profile',icon:'👤',label:'Hồ sơ của tôi'},
+  {id:'history',icon:'📋',label:'Lịch sử xe tôi'},
 ];
 
-// ── LOGIN ─────────────────────────────────────
+// ════════════════════════════════════════════
+//  FIREBASE HELPERS
+// ════════════════════════════════════════════
+async function fbGet(path) {
+  try {
+    const r = await fetch(`${FIREBASE_URL}${path}.json`);
+    const d = await r.json();
+    if (d && d.error) { console.error('[FB] Error', path, d.error); return null; }
+    return d;
+  } catch(e) { console.error('[FB] Fetch error:', e); return null; }
+}
+
+async function fbPut(path, value) {
+  try {
+    await fetch(`${FIREBASE_URL}${path}.json`, {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: typeof value === 'string' ? value : JSON.stringify(value)
+    });
+  } catch(e) { console.error('[FB] PUT error:', e); }
+}
+
+async function fbPatch(path, value) {
+  try {
+    await fetch(`${FIREBASE_URL}${path}.json`, {
+      method:'PATCH', headers:{'Content-Type':'application/json'},
+      body: typeof value === 'string' ? value : JSON.stringify(value)
+    });
+  } catch(e) { console.error('[FB] PATCH error:', e); }
+}
+
+// ════════════════════════════════════════════
+//  FIREBASE REALTIME (SSE — EventSource)
+//  Thay polling bằng push realtime thật sự
+// ════════════════════════════════════════════
+function listenFirebase(path, callback) {
+  const url = `${FIREBASE_URL}${path}.json`;
+  let es;
+  function connect() {
+    es = new EventSource(url);
+    // "put" = full replace (initial load hoặc overwrite)
+    es.addEventListener('put', e => {
+      try {
+        const d = JSON.parse(e.data);
+        if (d && d.data !== undefined && d.data !== null) callback(d.data);
+      } catch(err) {}
+    });
+    // "patch" = partial update — merge với data hiện tại
+    es.addEventListener('patch', e => {
+      try {
+        const d = JSON.parse(e.data);
+        // patch data có thể là partial object, path="/" thì là toàn bộ
+        if (d && d.data !== undefined && d.data !== null) callback(d.data);
+      } catch(err) {}
+    });
+    es.onerror = () => {
+      // EventSource tự reconnect, không cần xử lý thêm
+      // Log để debug nếu cần
+      // console.warn('[SSE] Reconnecting', path);
+    };
+    fbListeners.push(es);
+  }
+  connect();
+  return { close: () => es && es.close() };
+}
+
+function stopAllListeners() {
+  fbListeners.forEach(es => { try { es.close ? es.close() : null; } catch(e){} });
+  fbListeners = [];
+}
+
+// ════════════════════════════════════════════
+//  LOGIN
+// ════════════════════════════════════════════
 function switchLoginTab(tab) {
-  currentTab = tab;
   document.querySelectorAll('.tab-btn').forEach((b,i) => {
     b.classList.toggle('active', (i===0 && tab==='admin') || (i===1 && tab==='member'));
   });
@@ -1519,632 +726,441 @@ async function doLogin() {
   if (btn) { btn.textContent = 'Đang đăng nhập...'; btn.disabled = true; }
 
   try {
-    // Admin check (cứng, không cần Firebase)
     if (u === 'admin') {
       if (p !== ADMIN_USER.pass) throw new Error('wrong');
-      currentUser = { ...ADMIN_USER, username: 'admin' };
+      currentUser = { ...ADMIN_USER, username:'admin' };
     } else {
-      // Member check từ Firebase
       const fbUser = await fbGet('/members/' + u);
       if (!fbUser || fbUser.pass !== p) throw new Error('wrong');
-      currentUser = {
-        role: 'member',
-        username: u,
-        name: fbUser.fullname,
-        uid:  fbUser.uid,
-        fee:  fbUser.fee || 0,
-        expiry: fbUser.expiry || '—',
-        pass: fbUser.pass,
-      };
+      currentUser = { role:'member', username:u, name:fbUser.fullname, uid:fbUser.uid,
+        fee:fbUser.fee||0, expiry:fbUser.expiry||'—', pass:fbUser.pass };
     }
-  } catch(e) {
+  } catch {
     showToast('❌ Sai tên đăng nhập hoặc mật khẩu!', 'danger');
     if (btn) { btn.textContent = 'Đăng nhập →'; btn.disabled = false; }
     return;
   }
-
   if (btn) { btn.textContent = 'Đăng nhập →'; btn.disabled = false; }
   document.getElementById('loginScreen').style.display = 'none';
-  const appEl = document.getElementById('app');
-  appEl.style.display = '';
-  appEl.classList.add('visible');
+  const app = document.getElementById('app');
+  app.style.display = ''; app.classList.add('visible');
   document.body.classList.remove('login-mode');
   document.documentElement.classList.remove('login-mode');
-  window.scrollTo(0, 0);
-  window.initApp();
+  window.scrollTo(0,0);
+  initApp();
 }
 
 function doLogout() {
+  stopAllListeners();
   currentUser = null;
-  // Dừng Firebase sync
-  if (fbPollingInterval) { clearInterval(fbPollingInterval); fbPollingInterval = null; }
+  const app = document.getElementById('app');
+  app.classList.remove('visible'); app.style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
-  const appEl = document.getElementById('app');
-  appEl.classList.remove('visible');
-  appEl.style.display = 'none';
   document.body.classList.add('login-mode');
   document.documentElement.classList.add('login-mode');
-  window.scrollTo(0, 0);
+  window.scrollTo(0,0);
 }
 
-// ── INIT APP ──────────────────────────────────
+// ════════════════════════════════════════════
+//  INIT APP
+// ════════════════════════════════════════════
 async function initApp() {
   const isAdmin = currentUser.role === 'admin';
 
-  // Sidebar user
-  const av = document.getElementById('sidebarAvatar');
-  av.textContent = currentUser.name[0];
-  av.className = 'user-avatar ' + (isAdmin ? 'admin' : 'member');
+  // Sidebar
+  document.getElementById('sidebarAvatar').textContent = currentUser.name[0];
+  document.getElementById('sidebarAvatar').className = 'user-avatar ' + (isAdmin?'admin':'member');
   document.getElementById('sidebarName').textContent = currentUser.name;
   document.getElementById('sidebarRole').textContent = isAdmin ? 'Quản trị viên' : 'Thành viên thẻ tháng';
 
-  // Build nav
+  // Nav
   const nav = isAdmin ? adminNav : memberNav;
-  const navEl = document.getElementById('sidebarNav');
-  let html = '';
-  let lastSection = '';
-  nav.forEach(item => {
-    if (item.section && item.section !== lastSection) {
-      html += `<div class="nav-section-title">${item.section}</div>`;
-      lastSection = item.section;
-    }
-    html += `<button class="nav-item" onclick="navigateTo('${item.id}')" id="nav-${item.id}">
+  document.getElementById('sidebarNav').innerHTML = nav.map(item =>
+    `<button class="nav-item" onclick="navigateTo('${item.id}')" id="nav-${item.id}">
       <span class="nav-icon">${item.icon}</span> ${item.label}
-    </button>`;
-  });
-  navEl.innerHTML = html;
+    </button>`).join('');
+  renderMobileNav();
 
-  // Member profile
   if (!isAdmin) {
     document.getElementById('profileName').textContent = currentUser.name;
     document.getElementById('profileAvatar').textContent = currentUser.name[0];
     document.getElementById('profileUID').textContent = currentUser.uid || '—';
   }
 
-  // Mobile nav
-  renderMobileNav();
-
-  const firstPage = isAdmin ? 'dashboard' : 'profile';
-  navigateTo(firstPage);
-  renderAll();
+  navigateTo(isAdmin ? 'dashboard' : 'profile');
+  renderSlots();
   startClock();
+  renderRevenueChart('day');
 
-  // Load Firebase data
+  // Load initial data
   await Promise.all([
     loadMembersFromFirebase(),
     loadNormalCardsFromFirebase(),
+    loadHistory(),
   ]);
-  initGateControls();
-  startFirebaseSync();
-  startESP32Monitor();
+
+  // Start realtime listeners
+  startRealtimeListeners();
 }
 
-function navigateTo(pageId) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  const page = document.getElementById('page-' + pageId);
-  const navBtn = document.getElementById('nav-' + pageId);
-  if (page) page.classList.add('active');
-  if (navBtn) navBtn.classList.add('active');
+// ════════════════════════════════════════════
+//  REALTIME LISTENERS — Push, không polling
+// ════════════════════════════════════════════
+function startRealtimeListeners() {
+  // 1. Slots — IR sensor status
+  listenFirebase('/slots', (data) => {
+    if (!data || typeof data !== 'object') return;
+    const toBool = v => v === true || v === 'true' || v === 1;
+    let changed = false;
+    for (let i = 0; i < TOTAL_SLOTS; i++) {
+      const v = toBool(data['slot'+(i+1)]);
+      if (slotData[i].occupied !== v) { slotData[i].occupied = v; changed = true; }
+    }
+    if (changed) renderSlots();
+  });
 
-  // Mobile nav active
-  updateMobileNavActive(pageId);
+  // 2. ESP32 heartbeat — đo bằng Date.now() lúc nhận event, không dùng epoch ESP32
+  //    ESP32 v21 ghi seq tăng dần; v20 ghi status:"online"
+  listenFirebase('/esp32', (data) => {
+    if (!data) return;
+    if (data.status === 'online' || typeof data.seq === 'number') {
+      const seq = (typeof data.seq === 'number') ? data.seq : -1;
+      if (seq === -1 || seq !== _esp32LastSeq) {
+        _esp32LastSeq    = seq;
+        _esp32ReceivedAt = Date.now(); // thời điểm browser nhận HB
+        tickESP32Badge();
+      }
+    }
+  });
 
-  // Scroll to top on mobile
-  window.scrollTo(0, 0);
+  // 3. Gate state
+  listenFirebase('/gates', (data) => {
+    if (!data) return;
+    updateGateUI('entry', data.entry || 'closed');
+    updateGateUI('exit',  data.exit  || 'closed');
+  });
 
-  const titles = {
-    dashboard:'Trang chủ', history:'Lịch sử vào/ra',
-    revenue:'Doanh thu', cards:'Quản lý tài khoản',
-    normalcards:'Thẻ thường', profile:'Hồ sơ của tôi'
-  };
-  const titleEl = document.getElementById('topbarTitle');
-  if (titleEl) titleEl.textContent = titles[pageId] || pageId;
+  // 4. Control (manual mode + gate state) — SSE pushed khi ESP32 hoặc app ghi
+  listenFirebase('/control', (data) => {
+    if (!data) return;
+    const nm = data.manualMode === true || data.manualMode === 'true';
+    applyManualModeUI(nm); // luôn sync UI, kể cả khi không đổi
+    // Đồng bộ UI cổng từ Firebase /control (source of truth)
+    if (nm) {
+      if (data.entry) updateGateUI('entry', data.entry);
+      if (data.exit)  updateGateUI('exit',  data.exit);
+    }
+  });
 
-  // Auto reload dữ liệu khi chuyển trang
-  if (pageId === 'cards' || pageId === 'accounts') {
-    loadMembersFromFirebase();
+  // 5. Stats
+  listenFirebase('/stats', (data) => {
+    if (!data) return;
+    document.getElementById('statTodayTrips').textContent = data.totalToday || 0;
+    const rev = data.revenueToday || 0;
+    const revStr = (rev/1000).toFixed(0) + 'k';
+    document.getElementById('statTodayRevenue').textContent = revStr;
+    document.getElementById('revToday').textContent = revStr;
+    document.getElementById('revTrips').textContent = data.totalToday || 0;
+  });
+
+  // 6. History (chỉ listen recent 50 entries)
+  listenFirebase('/history', (data) => {
+    if (!data || typeof data !== 'object') return;
+    const rows = Object.entries(data).reverse().slice(0, 50);
+    historyData = rows.map(([k,h]) => ({...h, key:k}));
+    renderRecentTable();
+    renderHistoryTable();
+    // Nếu đang xem profile member, cập nhật lịch sử của họ
+    if (currentUser?.role === 'member') renderMemberHistory();
+  });
+
+  // ESP32 badge ticker
+  setInterval(tickESP32Badge, 2000);
+}
+
+// ════════════════════════════════════════════
+//  GATE CONTROL — Ghi /control để ESP32 poll
+// ════════════════════════════════════════════
+async function setManualMode(enabled) {
+  applyManualModeUI(enabled);
+  if (enabled) {
+    // Bật manual: ghi cổng closed mặc định để ESP32 đồng bộ trạng thái
+    await fbPatch('/control', JSON.stringify({manualMode:true, entry:'closed', exit:'closed'}));
+    showToast('🎛️ Chế độ thủ công đã bật','warning');
+  } else {
+    // Tắt manual: đóng 2 cổng ngay, ghi 1 PATCH atomic
+    await fbPatch('/control', JSON.stringify({manualMode:false, entry:'closed', exit:'closed'}));
+    updateGateUI('entry','closed');
+    updateGateUI('exit','closed');
+    showToast('🔒 Tắt thủ công — 2 cổng đã đóng','info');
   }
-  if (pageId === 'normalcards') {
-    loadNormalCardsFromFirebase();
+}
+
+async function toggleGate(gate) {
+  if (!manualMode) return; // an toàn: không cho toggle khi chưa manual
+  const isOpen = gateOpenState[gate];
+  const val = isOpen ? 'closed' : 'open';
+  updateGateUI(gate, val); // Cập nhật UI ngay, không chờ Firebase echo về
+  // Ghi /control với manualMode:true + lệnh cổng cùng 1 PATCH
+  // ESP32 poll mỗi 250ms → phản hồi <500ms
+  await fbPatch('/control', JSON.stringify({manualMode:true, [gate]:val}));
+  showToast(val==='open' ? `🚧 Cổng ${gate==='entry'?'vào':'ra'} đang mở` : `🔒 Cổng ${gate==='entry'?'vào':'ra'} đã đóng`,
+    val==='open' ? 'success' : 'info');
+}
+
+function applyManualModeUI(enabled) {
+  manualMode = enabled;
+  const btns     = document.getElementById('gateControlBtns');
+  const desc     = document.getElementById('manualModeDesc');
+  const toggle   = document.getElementById('manualModeToggle');
+  const subtitle = document.getElementById('gateSubtitle');
+  if (enabled) {
+    btns?.classList.remove('disabled');
+    if (desc)     desc.textContent = 'Bật — RFID bị vô hiệu hoá';
+    if (toggle)   toggle.checked = true;
+    if (subtitle) { subtitle.textContent = '⚠️ Chế độ thủ công — RFID bị vô hiệu'; subtitle.style.color = '#f59e0b'; }
+  } else {
+    btns?.classList.add('disabled');
+    if (desc)     desc.textContent = 'Tắt — RFID hoạt động bình thường';
+    if (toggle)   toggle.checked = false;
+    if (subtitle) { subtitle.textContent = 'RFID đang hoạt động'; subtitle.style.color = ''; }
   }
-  if (pageId === 'profile' && currentUser?.role === 'member') {
-    loadMemberProfile();
+}
+
+function updateGateUI(gate, state) {
+  const el  = document.getElementById(gate + 'State');
+  const btn = document.getElementById('btn-gate-' + gate);
+  const open = (state === 'open');
+  gateOpenState[gate] = open;
+  if (el)  { el.textContent = open ? '● Đang mở' : '● Đóng'; el.className = 'gate-state ' + (open ? 'open' : 'closed'); }
+  if (btn) { btn.textContent = open ? '▼ Đóng cổng' : '▲ Mở cổng'; btn.className = 'btn-gate ' + (open ? 'close-btn' : 'open-btn'); }
+}
+
+// ════════════════════════════════════════════
+//  ESP32 BADGE
+// ════════════════════════════════════════════
+function tickESP32Badge() {
+  // _esp32ReceivedAt = Date.now() lúc browser nhận HB event
+  // So sánh với Date.now() hiện tại → không bị lệch epoch
+  if (_esp32ReceivedAt === 0) { setBadge('checking', 'ESP32 — Đang kiểm tra...'); return; }
+  const elapsed = Date.now() - _esp32ReceivedAt;
+  if (elapsed < ESP32_TIMEOUT) {
+    const s = Math.floor(elapsed/1000);
+    setBadge('connected', `ESP32 — Online (${s}s ago)`);
+  } else {
+    setBadge('disconnected', `ESP32 — Mất kết nối (${Math.floor(elapsed/1000)}s)`);
   }
 }
 
-function navTo(pageId) { navigateTo(pageId); }
-
-// ── NORMAL CARDS ───────────────────────────────
-let normalCardsData = [];
-
-function renderNormalCards() {
-  const tbody  = document.getElementById('normalCardsTable');
-  if (!tbody) return;
-  const search = (document.getElementById('normalCardSearch')?.value || '').toLowerCase();
-  const list   = search
-    ? normalCardsData.filter(c => c.uid.toLowerCase().includes(search) || (c.note||'').toLowerCase().includes(search))
-    : normalCardsData;
-
-  if (list.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:24px">Chưa có thẻ thường nào</td></tr>`;
-    return;
+function setBadge(state, text) {
+  if (state === 'disconnected' && _lastBadge !== 'disconnected') {
+    applyManualModeUI(false);
+    updateGateUI('entry','closed'); updateGateUI('exit','closed');
+    showToast('⚠️ ESP32 mất kết nối', 'warning');
   }
-  tbody.innerHTML = list.map((c) => {
-    const realIdx = normalCardsData.indexOf(c);
-    return `<tr>
-      <td data-label="UID"><span class="mono">${c.uid}</span></td>
-      <td data-label="Ghi chú">${c.note || '—'}</td>
-      <td data-label="Ngày thêm">${c.created}</td>
-      <td data-label="Trạng thái"><span class="badge ${c.blocked ? 'red' : 'green'}">${c.blocked ? 'Bị khóa' : 'Hoạt động'}</span></td>
-      <td data-label="Thao tác" style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn-sm ${c.blocked ? 'success' : 'outline'}" onclick="toggleBlockNormalCard(${realIdx})">${c.blocked ? '🔓 Mở khóa' : '🔒 Khóa'}</button>
-        <button class="btn-sm danger" onclick="deleteNormalCard(${realIdx})">🗑️ Xóa</button>
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-function openAddNormalCardModal() {
-  document.getElementById('newNormalUID').value  = '';
-  document.getElementById('newNormalNote').value = '';
-  document.getElementById('modalAddNormalCard').classList.add('show');
-}
-
-async function submitAddNormalCard() {
-  const uid  = document.getElementById('newNormalUID').value.trim().toUpperCase();
-  const note = document.getElementById('newNormalNote').value.trim();
-  if (!uid) { showToast('❌ Vui lòng nhập UID thẻ!', 'danger'); return; }
-  if (normalCardsData.find(c => c.uid === uid)) { showToast('❌ UID đã tồn tại!', 'danger'); return; }
-
-  const fmt   = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-  const entry = { uid, note, created: fmt(new Date()), blocked: false };
-
-  await fbPut('/normalcards/' + uid.replace(/:/g,'-'), entry);
-  normalCardsData.unshift(entry);
-  renderNormalCards();
-  closeModal('modalAddNormalCard');
-  showToast(`✅ Đã thêm thẻ ${uid}`, 'success');
-}
-
-async function toggleBlockNormalCard(idx) {
-  const c = normalCardsData[idx];
-  if (!c) return;
-  c.blocked = !c.blocked;
-  await fbPatch('/normalcards/' + c.uid.replace(/:/g,'-'), { blocked: c.blocked });
-  renderNormalCards();
-  showToast(c.blocked ? `🔒 Đã khóa thẻ ${c.uid}` : `🔓 Đã mở khóa ${c.uid}`, c.blocked ? 'danger' : 'success');
-}
-
-async function deleteNormalCard(idx) {
-  const c = normalCardsData[idx];
-  if (!c) return;
-  if (!confirm(`Xóa thẻ ${c.uid}?`)) return;
-  await fetch(`${FIREBASE_URL}/normalcards/${c.uid.replace(/:/g,'-')}.json`, { method: 'DELETE' });
-  normalCardsData.splice(idx, 1);
-  renderNormalCards();
-  showToast(`🗑️ Đã xóa thẻ ${c.uid}`, 'danger');
-}
-
-async function loadNormalCardsFromFirebase() {
-  const data = await fbGet('/normalcards');
-  if (!data) return;
-  normalCardsData = Object.values(data);
-  renderNormalCards();
-}
-
-// ── RENDER ────────────────────────────────────
-function renderAll() {
-  renderSlots();
-  renderRecentTable();
-  renderHistoryTable();
-  renderCardsTable();
-  renderAccountsTable();
-  renderMemberHistory();
-  renderRevenueChart('day');
-  updateStatCards();
-}
-
-function renderSlots() {
-  const occupied = slotData.filter(s => s.occupied).length;
-  document.getElementById('statOccupied').textContent = occupied;
-  document.getElementById('statFree').textContent = 4 - occupied;
-
-  const grid = document.getElementById('slotsGrid');
-
-  // Lần đầu: tạo các card nếu chưa có (tránh xoá/tạo lại gây flash)
-  if (grid.children.length !== slotData.length) {
-    grid.innerHTML = slotData.map(s => `
-      <div class="slot-card empty" data-slot="${s.id}" style="cursor:default">
-        <div class="slot-icon">🅿️</div>
-        <div class="slot-number">${s.label}</div>
-        <div class="slot-status">Trống</div>
-      </div>
-    `).join('');
-  }
-
-  // Các lần tiếp: chỉ cập nhật từng card nào thay đổi trạng thái
-  slotData.forEach(s => {
-    const card = grid.querySelector(`[data-slot="${s.id}"]`);
-    if (!card) return;
-    const isOccupied = s.occupied;
-    const wasOccupied = card.classList.contains('occupied');
-    if (isOccupied === wasOccupied) return; // không đổi → bỏ qua, tránh flash
-    card.classList.toggle('occupied', isOccupied);
-    card.classList.toggle('empty', !isOccupied);
-    card.querySelector('.slot-icon').textContent = isOccupied ? '🚗' : '🅿️';
-    card.querySelector('.slot-status').textContent = isOccupied ? 'Có xe' : 'Trống';
+  _lastBadge = state;
+  const shortText = state==='connected'?'Online':state==='disconnected'?'Offline':'…';
+  [['esp32Badge','esp32BadgeText'],['esp32BadgeDesktop','esp32BadgeTextDesktop']].forEach(([bid,tid]) => {
+    const b = document.getElementById(bid), t = document.getElementById(tid);
+    if (b) b.className = `esp32-badge ${state}`;
+    if (t) t.textContent = bid.includes('Desktop') ? text : shortText;
   });
 }
 
-function refreshSlots() {
-  renderSlots();
-  showToast('🔄 Đã cập nhật trạng thái chỗ đỗ!', 'info');
-}
+// ════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════
+function navigateTo(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + pageId)?.classList.add('active');
+  document.getElementById('nav-' + pageId)?.classList.add('active');
+  updateMobileNavActive(pageId);
+  window.scrollTo(0,0);
+  const titles = {dashboard:'Trang chủ',history:'Lịch sử vào/ra',revenue:'Doanh thu',
+    cards:'Quản lý tài khoản',normalcards:'Thẻ thường',profile:'Hồ sơ của tôi'};
+  document.getElementById('topbarTitle').textContent = titles[pageId] || pageId;
 
-function updateStatCards() {
+  if (pageId === 'cards') loadMembersFromFirebase();
+  if (pageId === 'normalcards') loadNormalCardsFromFirebase();
+  if (pageId === 'history') renderHistoryTable();
+  if (pageId === 'profile' && currentUser?.role === 'member') renderMemberHistory();
+}
+function navTo(id) { navigateTo(id); }
+
+// ════════════════════════════════════════════
+//  RENDER SLOTS
+// ════════════════════════════════════════════
+function renderSlots() {
   const occupied = slotData.filter(s => s.occupied).length;
   document.getElementById('statOccupied').textContent = occupied;
-  document.getElementById('statFree').textContent = 4 - occupied;
+  document.getElementById('statFree').textContent = TOTAL_SLOTS - occupied;
+
+  const grid = document.getElementById('slotsGrid');
+  if (grid.children.length !== TOTAL_SLOTS) {
+    grid.innerHTML = slotData.map(s =>
+      `<div class="slot-card empty" data-slot="${s.id}">
+        <div class="slot-icon">🅿️</div>
+        <div class="slot-number">${s.label}</div>
+        <div class="slot-status">Trống</div>
+      </div>`).join('');
+  }
+  slotData.forEach(s => {
+    const card = grid.querySelector(`[data-slot="${s.id}"]`);
+    if (!card) return;
+    const was = card.classList.contains('occupied');
+    if (s.occupied === was) return;
+    card.classList.toggle('occupied', s.occupied);
+    card.classList.toggle('empty', !s.occupied);
+    card.querySelector('.slot-icon').textContent = s.occupied ? '🚗' : '🅿️';
+    card.querySelector('.slot-status').textContent = s.occupied ? 'Có xe' : 'Trống';
+  });
+}
+
+// ════════════════════════════════════════════
+//  RENDER TABLES
+// ════════════════════════════════════════════
+function calcDuration(timeIn, timeOut) {
+  if (!timeIn || !timeOut) return '—';
+  try {
+    const [ih,im] = timeIn.split(':').map(Number);
+    const [oh,om] = timeOut.split(':').map(Number);
+    const diff = (oh*60+om) - (ih*60+im);
+    if (diff <= 0) return '—';
+    return diff >= 60 ? `${Math.floor(diff/60)}g ${diff%60}p` : `${diff}p`;
+  } catch { return '—'; }
 }
 
 function renderRecentTable() {
   const tbody = document.getElementById('recentTable');
   if (!tbody) return;
-  tbody.innerHTML = historyData.slice(0,5).map(h => `
-    <tr>
-      <td data-label="Thời gian" class="mono">${h.date} ${h.timeIn}</td>
-      <td data-label="UID"><span class="mono">${h.uid}</span></td>
-      <td data-label="Loại thẻ">${h.type==='month' ? '<span class="badge purple">Thẻ tháng</span>' : '<span class="badge blue">Thẻ thường</span>'}</td>
-      <td data-label="Trạng thái">${h.status==='inside'
-        ? '<span class="badge green">● Đang trong bãi</span>'
-        : '<span class="badge orange">Đã ra</span>'}</td>
-      <td data-label="Phí"><b>${h.fee}</b></td>
-    </tr>
-  `).join('');
+  const rows = historyData.slice(0,5);
+  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px">Chưa có hoạt động</td></tr>'; return; }
+  tbody.innerHTML = rows.map(h => `<tr>
+    <td data-label="Thời gian" class="mono">${h.date||''} ${h.timeIn||''}</td>
+    <td data-label="UID"><span class="mono">${h.uid||'—'}</span></td>
+    <td data-label="Chủ xe">${h.owner||'Khách'}</td>
+    <td data-label="Loại thẻ">${h.type==='month'?'<span class="badge purple">Thẻ tháng</span>':'<span class="badge blue">Thẻ thường</span>'}</td>
+    <td data-label="Trạng thái">${h.status==='inside'?'<span class="badge green">● Đang trong bãi</span>':'<span class="badge orange">Đã ra</span>'}</td>
+    <td data-label="Phí"><b>${h.fee>0 ? (h.fee/1000)+'k' : '—'}</b></td>
+  </tr>`).join('');
 }
 
 function renderHistoryTable() {
   const tbody = document.getElementById('historyTable');
   if (!tbody) return;
-  tbody.innerHTML = historyData.map((h,i) => `
-    <tr>
-      <td data-label="#">${i+1}</td>
-      <td data-label="Giờ vào" class="mono">${h.timeIn}</td>
-      <td data-label="Giờ ra" class="mono">${h.timeOut}</td>
-      <td data-label="Thời gian đỗ">${h.duration}</td>
-      <td data-label="UID"><span class="mono">${h.uid}</span></td>
-      <td data-label="Chủ xe">${h.owner}</td>
-      <td data-label="Loại thẻ">${h.type==='month' ? '<span class="badge purple">Thẻ tháng</span>' : '<span class="badge blue">Thẻ thường</span>'}</td>
-      <td data-label="Phí"><b>${h.fee}</b></td>
-      <td data-label="Trạng thái">${h.status==='inside'
-        ? '<span class="badge green">Đang trong bãi</span>'
-        : '<span class="badge orange">Đã ra</span>'}</td>
-    </tr>
-  `).join('');
-}
-
-// ── MGMT TABS ─────────────────────────────────
-function switchMgmtTab(tab) {
-  ['cards','accounts'].forEach(t => {
-    document.getElementById('mgmtPanel-' + t).style.display = t === tab ? '' : 'none';
-    document.getElementById('mgmtTab-' + t).classList.toggle('active', t === tab);
-  });
-}
-
-function renderCardsTable() {
-  const tbody  = document.getElementById('cardsTable');
-  if (!tbody) return;
-  const search = (document.getElementById('cardSearch')?.value || '').toLowerCase();
-  const list   = search
-    ? cardsData.filter(c => c.uid.toLowerCase().includes(search) || c.owner.toLowerCase().includes(search))
-    : cardsData;
-
-  if (list.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px">Không tìm thấy thẻ nào</td></tr>`;
-    return;
+  const dateFilter = document.getElementById('historyDate')?.value;
+  let rows = historyData;
+  if (dateFilter) {
+    const [y,m,d] = dateFilter.split('-');
+    const fmtDate = `${d}/${m}/${y}`;
+    rows = rows.filter(h => h.date === fmtDate);
   }
-
-  tbody.innerHTML = list.map((c, idx) => {
-    const realIdx = cardsData.indexOf(c);
-    const statusBadge = c.status === 'active'
-      ? '<span class="badge green">Hoạt động</span>'
-      : c.status === 'expiring'
-      ? '<span class="badge orange">Sắp hết hạn</span>'
-      : '<span class="badge red">Hết hạn</span>';
-    const typeBadge = c.type === 'month'
-      ? '<span class="badge purple">Thẻ tháng</span>'
-      : '<span class="badge blue">Thẻ thường</span>';
-    return `<tr>
-      <td data-label="UID"><span class="mono">${c.uid}</span></td>
-      <td data-label="Chủ xe">${c.owner}</td>
-      <td data-label="Loại thẻ">${typeBadge}</td>
-      <td data-label="Hết hạn">${c.expiry}</td>
-      <td data-label="Phí"><b>${c.fee}</b></td>
-      <td data-label="Trạng thái">${statusBadge}</td>
-      <td data-label="Thao tác" style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn-sm success" onclick="renewCard(${realIdx})">🔄 Gia hạn</button>
-        <button class="btn-sm danger"  onclick="deleteCard(${realIdx})">🗑️ Xóa</button>
-      </td>
-    </tr>`;
-  }).join('');
+  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:24px">Không có dữ liệu</td></tr>'; return; }
+  tbody.innerHTML = rows.map((h,i) => `<tr>
+    <td data-label="#">${i+1}</td>
+    <td data-label="Giờ vào" class="mono">${h.timeIn||'—'}</td>
+    <td data-label="Giờ ra" class="mono">${h.timeOut||'—'}</td>
+    <td data-label="Thời gian đỗ">${calcDuration(h.timeIn, h.timeOut)}</td>
+    <td data-label="UID"><span class="mono">${h.uid||'—'}</span></td>
+    <td data-label="Chủ xe">${h.owner||'Khách'}</td>
+    <td data-label="Loại thẻ">${h.type==='month'?'<span class="badge purple">Thẻ tháng</span>':'<span class="badge blue">Thẻ thường</span>'}</td>
+    <td data-label="Phí"><b>${h.fee>0?(h.fee/1000)+'k':'—'}</b></td>
+    <td data-label="Trạng thái">${h.status==='inside'?'<span class="badge green">Đang trong bãi</span>':'<span class="badge orange">Đã ra</span>'}</td>
+  </tr>`).join('');
 }
 
-function renewCard(idx) {
-  const card = cardsData[idx];
-  if (!card) return;
-  // Tính hết hạn mới: 1 tháng từ ngày hết hạn cũ (hoặc từ hôm nay nếu đã hết)
-  const fmt = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-  const parseFmt = s => { const [d,m,y] = s.split('/'); return new Date(+y, +m-1, +d); };
-  let base = parseFmt(card.expiry);
-  if (isNaN(base)) base = new Date();
-  if (base < new Date()) base = new Date(); // nếu đã hết hạn thì tính từ hôm nay
-  base.setMonth(base.getMonth() + 1);
-  card.expiry = fmt(base);
-  card.status = 'active';
-  renderCardsTable();
-  showToast(`✅ Đã gia hạn thẻ ${card.uid} đến ${card.expiry}`, 'success');
+function renderMemberHistory() {
+  const tbody = document.getElementById('memberHistoryTable');
+  if (!tbody || !currentUser?.uid) return;
+  const myUID = currentUser.uid.toUpperCase();
+  const rows = historyData.filter(h => h.uid && h.uid.toUpperCase() === myUID).slice(0,30);
+  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text3)">Chưa có lịch sử</td></tr>'; return; }
+  tbody.innerHTML = rows.map((h,i) => `<tr>
+    <td>${i+1}</td>
+    <td class="mono">${h.timeIn||'—'}</td>
+    <td class="mono">${h.timeOut||'—'}</td>
+    <td>${calcDuration(h.timeIn, h.timeOut)}</td>
+    <td>${h.date||'—'}</td>
+    <td>${h.status==='inside'?'<span class="badge green">Đang trong bãi</span>':'<span class="badge orange">Đã ra</span>'}</td>
+  </tr>`).join('');
 }
 
-function deleteCard(idx) {
-  const card = cardsData[idx];
-  if (!card) return;
-  if (!confirm(`Xóa thẻ ${card.uid} — ${card.owner}?`)) return;
-  cardsData.splice(idx, 1);
-  renderCardsTable();
-  showToast(`🗑️ Đã xóa thẻ ${card.uid}`, 'danger');
+async function loadHistory() {
+  const data = await fbGet('/history');
+  if (!data) return;
+  historyData = Object.entries(data).reverse().slice(0,100).map(([k,h])=>({...h,key:k}));
+  renderHistoryTable();
+  renderRecentTable();
+  if (currentUser?.role === 'member') renderMemberHistory();
+}
+
+// ════════════════════════════════════════════
+//  MEMBER MANAGEMENT
+// ════════════════════════════════════════════
+async function loadMembersFromFirebase() {
+  const data = await fbGet('/members');
+  accountsData = []; cardsData = [];
+  if (!data || typeof data !== 'object') return;
+  Object.entries(data).forEach(([username, m]) => {
+    accountsData.push({username, name:m.fullname||m.name||username, phone:m.phone||'—', uid:m.uid||'—', created:m.created||'—', expiry:m.expiry||'—', status:m.status||'active'});
+    cardsData.push({uid:m.uid||'—', owner:m.fullname||username, type:'month', expiry:m.expiry||'—', fee:m.fee?Number(m.fee).toLocaleString('vi-VN')+'đ':'—', status:m.status||'active', account:username});
+  });
+  renderAccountsTable();
 }
 
 function renderAccountsTable() {
-  const tbody  = document.getElementById('accountsTable');
+  const tbody = document.getElementById('accountsTable');
   if (!tbody) return;
-  const search = (document.getElementById('accountSearch')?.value || '').toLowerCase();
-  const list   = search
-    ? accountsData.filter(a =>
-        a.name.toLowerCase().includes(search) ||
-        a.phone.includes(search) ||
-        a.uid.toLowerCase().includes(search))
-    : accountsData;
-
-  if (list.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px">Không tìm thấy tài khoản nào</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = list.map((a) => {
-    const realIdx = accountsData.indexOf(a);
-    // Lấy ngày hết hạn từ cardsData
-    const card   = cardsData.find(c => c.uid === a.uid);
-    const expiry = card ? card.expiry : '—';
-    const status = card
-      ? (card.status === 'active'
-          ? '<span class="badge green">Hoạt động</span>'
-          : card.status === 'expiring'
-          ? '<span class="badge orange">Sắp hết hạn</span>'
-          : '<span class="badge red">Hết hạn</span>')
-      : '<span class="badge green">Hoạt động</span>';
+  const s = (document.getElementById('accountSearch')?.value||'').toLowerCase();
+  const list = s ? accountsData.filter(a=>a.name.toLowerCase().includes(s)||a.phone.includes(s)||a.uid.toLowerCase().includes(s)) : accountsData;
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px">Không tìm thấy</td></tr>'; return; }
+  tbody.innerHTML = list.map(a => {
+    const idx = accountsData.indexOf(a);
+    const statBadge = a.status==='active'?'<span class="badge green">Hoạt động</span>':'<span class="badge red">Hết hạn</span>';
     return `<tr>
       <td data-label="Username"><b>${a.username}</b></td>
       <td data-label="Họ tên">${a.name}</td>
       <td data-label="SĐT">${a.phone}</td>
       <td data-label="Thẻ RFID"><span class="mono">${a.uid}</span></td>
-      <td data-label="Hết hạn">${expiry}</td>
-      <td data-label="Trạng thái">${status}</td>
+      <td data-label="Hết hạn">${a.expiry}</td>
+      <td data-label="Trạng thái">${statBadge}</td>
       <td data-label="Thao tác" style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn-sm success" onclick="renewAccount(${realIdx})">🔄 Gia hạn</button>
-        <button class="btn-sm danger"  onclick="deleteAccount(${realIdx})">🗑️ Xóa</button>
+        <button class="btn-sm success" onclick="renewAccount(${idx})">🔄 Gia hạn</button>
+        <button class="btn-sm danger" onclick="deleteAccount(${idx})">🗑️ Xóa</button>
       </td>
     </tr>`;
   }).join('');
 }
 
-function renewAccount(idx) {
-  const acc  = accountsData[idx];
-  if (!acc) return;
-  const card = cardsData.find(c => c.uid === acc.uid);
-  if (!card) { showToast('❌ Không tìm thấy thẻ!', 'danger'); return; }
-  const fmt      = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-  const parseFmt = s => { const [d,m,y] = s.split('/'); return new Date(+y,+m-1,+d); };
-  let base = parseFmt(card.expiry);
-  if (isNaN(base) || base < new Date()) base = new Date();
-  base.setMonth(base.getMonth() + 1);
-  card.expiry = fmt(base);
-  card.status = 'active';
-  // Ghi Firebase
-  fbPatch('/members/' + acc.username, { expiry: card.expiry, status: 'active' });
+async function renewAccount(idx) {
+  const acc = accountsData[idx]; if (!acc) return;
+  const fmt = d=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  const parse = s=>{ const[d,m,y]=s.split('/'); return new Date(+y,+m-1,+d); };
+  let base = parse(acc.expiry);
+  if (isNaN(base)||base<new Date()) base = new Date();
+  base.setMonth(base.getMonth()+1);
+  const newExpiry = fmt(base);
+  acc.expiry = newExpiry;
+  await fbPatch('/members/'+acc.username, {expiry:newExpiry, status:'active'});
   renderAccountsTable();
-  showToast(`✅ Đã gia hạn ${acc.name} đến ${card.expiry}`, 'success');
+  showToast(`✅ Đã gia hạn ${acc.name} đến ${newExpiry}`,'success');
 }
 
 async function deleteAccount(idx) {
-  const acc = accountsData[idx];
-  if (!acc) return;
+  const acc = accountsData[idx]; if (!acc) return;
   if (!confirm(`Xóa tài khoản ${acc.username} — ${acc.name}?`)) return;
-  // Xóa Firebase
-  await fetch(`${FIREBASE_URL}/members/${acc.username}.json`, { method: 'DELETE' });
-  // Xóa local
-  const cardIdx = cardsData.findIndex(c => c.uid === acc.uid);
-  if (cardIdx > -1) cardsData.splice(cardIdx, 1);
-  accountsData.splice(idx, 1);
+  await fetch(`${FIREBASE_URL}/members/${acc.username}.json`,{method:'DELETE'});
+  accountsData.splice(idx,1);
   renderAccountsTable();
-  showToast(`🗑️ Đã xóa tài khoản ${acc.username}`, 'danger');
+  showToast(`🗑️ Đã xóa ${acc.username}`,'danger');
 }
 
-function renderMemberHistory() {
-  const tbody = document.getElementById('memberHistoryTable');
-  if (!tbody) return;
-  tbody.innerHTML = memberHistory.map(h => `
-    <tr>
-      <td data-label="#">${h.id}</td>
-      <td data-label="Giờ vào" class="mono">${h.timeIn}</td>
-      <td data-label="Giờ ra" class="mono">${h.timeOut}</td>
-      <td data-label="Thời gian đỗ">${h.duration}</td>
-      <td data-label="Ngày">${h.date}</td>
-      <td data-label="Trạng thái">${h.status==='inside'
-        ? '<span class="badge green">Đang trong bãi</span>'
-        : '<span class="badge orange">Đã ra</span>'}</td>
-    </tr>
-  `).join('');
-}
-
-// ── REVENUE CHART ─────────────────────────────
-const chartData = {
-  day:   { labels:['T2','T3','T4','T5','T6','T7','CN'], vals:[0,0,0,0,0,0,0] },
-  week:  { labels:['T1','T2','T3','T4','T5','T6','T7','T8'], vals:[0,0,0,0,0,0,0,0] },
-  month: { labels:['Th1','Th2','Th3','Th4','Th5','Th6'], vals:[0,0,0,0,0,0] },
-  year:  { labels:['2021','2022','2023','2024','2025','2026'], vals:[0,0,0,0,0,0] },
-};
-
-function renderRevenueChart(type) {
-  const d = chartData[type];
-  const max = Math.max(...d.vals);
-  const chart = document.getElementById('revenueChart');
-  const maxBarH = chart ? chart.offsetHeight - 36 : 140;
-  chart.innerHTML = d.labels.map((l,i) => {
-    const h = Math.max(8, Math.round((d.vals[i]/max) * maxBarH));
-    return `<div class="chart-bar-col">
-      <div class="chart-val">${d.vals[i]}k</div>
-      <div class="chart-bar" style="height:${h}px" title="${d.vals[i]}k"></div>
-      <div class="chart-label">${l}</div>
-    </div>`;
-  }).join('');
-}
-
-function switchRevTab(btn, type) {
-  document.querySelectorAll('.rev-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderRevenueChart(type);
-}
-
-// ── GATE CONTROL — được định nghĩa ở phần Firebase bên dưới ──
-
-// ── MANUAL MODE ───────────────────────────────
-async function setManualMode(enabled) {
-  if (!enabled) {
-    // Tắt manual → đóng 2 cổng + tắt flag
-    await fbPatch('/control', { manualMode: false, entry: 'closed', exit: 'closed' });
-    updateGateUI('entry', 'closed');
-    updateGateUI('exit',  'closed');
-    showToast('🔒 Tắt thủ công — 2 cổng đã đóng', 'info');
-  } else {
-    // Bật manual → chỉ set flag, giữ nguyên trạng thái cổng
-    await fbPatch('/control', { manualMode: true });
-    showToast('⚙️ Bật chế độ thủ công', 'info');
-  }
-  applyManualModeUI(enabled);
-}
-
-function applyManualModeUI(enabled) {
-  const btns     = document.getElementById('gateControlBtns');
-  const desc     = document.getElementById('manualModeDesc');
-  const toggle   = document.getElementById('manualModeToggle');
-  const subtitle = document.getElementById('gateSubtitle');
-
-  // Tắt onclick tạm thời để set checked không trigger setManualMode
-  if (toggle) toggle.onclick = null;
-
-  if (enabled) {
-    if (btns)     btns.classList.remove('disabled');
-    if (desc)     desc.textContent = 'Bật — RFID bị vô hiệu hoá';
-    if (toggle)   toggle.checked = true;
-    if (subtitle) { subtitle.textContent = '⚠️ Chế độ thủ công — RFID bị vô hiệu'; subtitle.style.color = '#f59e0b'; }
-  } else {
-    if (btns)     btns.classList.add('disabled');
-    if (desc)     desc.textContent = 'Tắt — RFID hoạt động bình thường';
-    if (toggle)   toggle.checked = false;
-    if (subtitle) { subtitle.textContent = 'RFID đang hoạt động'; subtitle.style.color = ''; }
-  }
-
-  // Khôi phục onclick sau khi set checked xong (không trigger setManualMode)
-  setTimeout(() => {
-    const t = document.getElementById('manualModeToggle');
-    if (t) t.onclick = () => setManualMode(t.checked);
-  }, 0);
-}
-
-// Khởi tạo: buttons bị disable cho đến khi bật manual mode
-function initGateControls() {
-  applyManualModeUI(false); // Mặc định tắt, chờ Firebase sync
-}
-
-async function debugFirebase() {
-  const tbody = document.getElementById('accountsTable');
-  if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:12px">⏳ Đang kiểm tra...</td></tr>`;
-  try {
-    const res  = await fetch(`${FIREBASE_URL}/members.json`);
-    const text = await res.text();
-    const data = JSON.parse(text);
-    if (data && data.error) {
-      if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="padding:16px;color:var(--danger)">❌ Firebase lỗi: <b>${data.error}</b></td></tr>`;
-    } else if (!data) {
-      if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="padding:16px;color:var(--text3)">⚠️ /members trống (null)</td></tr>`;
-    } else {
-      const keys = Object.keys(data);
-      if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="padding:16px;color:var(--success)">✅ Firebase OK — tìm thấy <b>${keys.length}</b> TK: ${keys.join(', ')}</td></tr>`;
-      await loadMembersFromFirebase();
-    }
-  } catch(e) {
-    if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="padding:16px;color:var(--danger)">❌ Lỗi: ${e.message}</td></tr>`;
-  }
-}
-
-async function loadMembersFromFirebase() {
-  // Hiện loading
-  const tbody = document.getElementById('accountsTable');
-  if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:24px">⏳ Đang tải dữ liệu...</td></tr>`;
-
-  const data = await fbGet('/members');
-
-  cardsData    = [];
-  accountsData = [];
-
-  if (!data || typeof data !== 'object') {
-    if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px">
-      <div style="color:var(--danger);font-weight:600;margin-bottom:6px">⚠️ Không thể tải dữ liệu</div>
-      <div style="color:var(--text3);font-size:13px">Kiểm tra Firebase Rules — đường dẫn <b>/members</b> cần được cho phép đọc</div>
-    </td></tr>`;
-    console.warn('[Firebase] /members trả về:', data);
-    return;
-  }
-
-  console.log('[Firebase] Đã tải', Object.keys(data).length, 'thành viên');
-
-  Object.entries(data).forEach(([username, m]) => {
-    accountsData.push({
-      username,
-      name:    m.fullname || m.name || username,
-      phone:   m.phone   || '—',
-      uid:     m.uid     || '—',
-      created: m.created || '—',
-      status:  'active',
-    });
-    cardsData.push({
-      uid:     m.uid     || '—',
-      owner:   m.fullname || m.name || username,
-      type:    'month',
-      regDate: m.created || '—',
-      expiry:  m.expiry  || '—',
-      fee:     m.fee ? Number(m.fee).toLocaleString('vi-VN') + 'đ' : '—',
-      status:  m.status  || 'active',
-      account: username,
-    });
-  });
-
-  renderAccountsTable();
-  renderCardsTable();
-}
-
-// ── MODALS ────────────────────────────────────
 function openAddMemberModal() {
-  ['newUsername','newPassword','newFullname','newMemberUID','newMemberFee','newMemberPhone']
-    .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  ['newUsername','newPassword','newFullname','newMemberUID','newMemberFee','newMemberPhone'].forEach(id=>{
+    const el = document.getElementById(id); if(el) el.value='';
+  });
   document.getElementById('modalAddMember').classList.add('show');
-}
-function openAddCardModal()    { openAddMemberModal(); }
-function openAddAccountModal() { openAddMemberModal(); }
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove('show');
 }
 
 async function submitAddMember() {
@@ -2154,449 +1170,172 @@ async function submitAddMember() {
   const uid      = document.getElementById('newMemberUID').value.trim().toUpperCase();
   const fee      = document.getElementById('newMemberFee').value.trim();
   const phone    = document.getElementById('newMemberPhone').value.trim();
-
-  if (!username) { showToast('❌ Vui lòng nhập tên đăng nhập!', 'danger'); return; }
-  if (!password) { showToast('❌ Vui lòng nhập mật khẩu!', 'danger'); return; }
-  if (!fullname) { showToast('❌ Vui lòng nhập họ và tên!', 'danger'); return; }
-  if (!uid)      { showToast('❌ Vui lòng nhập ID thẻ RFID!', 'danger'); return; }
-
-  // Kiểm tra trùng username trên Firebase
-  const existing = await fbGet('/members/' + username);
-  if (existing) { showToast('❌ Tên đăng nhập đã tồn tại!', 'danger'); return; }
-  if (cardsData.find(c => c.uid === uid)) { showToast('❌ UID thẻ đã tồn tại!', 'danger'); return; }
-
-  const today    = new Date();
-  const expiry   = new Date(today); expiry.setMonth(expiry.getMonth() + 1);
-  const fmt      = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-
-  const memberData = {
-    pass: password, fullname, uid,
-    phone: phone || '—',
-    fee: fee ? +fee : 0,
-    created: fmt(today),
-    expiry: fmt(expiry),
-    status: 'active',
-  };
-
-  // Ghi lên Firebase — đây là nguồn sự thật duy nhất
-  const btn = document.querySelector('#modalAddMember .btn-sm.primary');
-  if (btn) { btn.textContent = 'Đang lưu...'; btn.disabled = true; }
-
-  await fbPut('/members/' + username, memberData);
-
-  if (btn) { btn.textContent = '✅ Tạo thành viên'; btn.disabled = false; }
-
-  // Cập nhật local arrays
-  accountsData.unshift({ username, name: fullname, phone: phone||'—', uid, created: fmt(today), status: 'active' });
-  cardsData.unshift({
-    uid, owner: fullname, type: 'month',
-    regDate: fmt(today), expiry: fmt(expiry),
-    fee: fee ? Number(fee).toLocaleString('vi-VN') + 'đ' : '—',
-    status: 'active', account: username
-  });
-
-  renderCardsTable();
+  if (!username) { showToast('❌ Nhập tên đăng nhập!','danger'); return; }
+  if (!password) { showToast('❌ Nhập mật khẩu!','danger'); return; }
+  if (!fullname) { showToast('❌ Nhập họ và tên!','danger'); return; }
+  if (!uid)      { showToast('❌ Nhập UID thẻ!','danger'); return; }
+  const existing = await fbGet('/members/'+username);
+  if (existing)  { showToast('❌ Tên đăng nhập đã tồn tại!','danger'); return; }
+  const fmt = d=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  const today = new Date(), expiry = new Date(today); expiry.setMonth(expiry.getMonth()+1);
+  const memberData = {pass:password, fullname, uid, phone:phone||'—', fee:fee?+fee:0, created:fmt(today), expiry:fmt(expiry), status:'active'};
+  await fbPut('/members/'+username, memberData);
+  accountsData.unshift({username,name:fullname,phone:phone||'—',uid,created:fmt(today),expiry:fmt(expiry),status:'active'});
   renderAccountsTable();
   closeModal('modalAddMember');
-  showToast(`✅ Đã tạo thành viên: ${fullname}`, 'success');
+  showToast(`✅ Đã tạo thành viên: ${fullname}`,'success');
 }
 
-// Close modal on overlay click
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-  overlay.addEventListener('click', e => {
-    if (e.target === overlay) overlay.classList.remove('show');
-  });
-});
-
-// ── TOAST ─────────────────────────────────────
-function showToast(msg, type='info') {
-  const container = document.getElementById('toastContainer');
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  toast.textContent = msg;
-  container.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
+// ════════════════════════════════════════════
+//  NORMAL CARDS
+// ════════════════════════════════════════════
+async function loadNormalCardsFromFirebase() {
+  const data = await fbGet('/normalcards');
+  normalCardsData = data ? Object.values(data) : [];
+  renderNormalCards();
 }
 
-// ── MEMBER PROFILE LOADER ────────────────────
-async function loadMemberProfile() {
-  if (!currentUser || currentUser.role !== 'member') return;
-  const myUID = currentUser.uid;
-  if (!myUID) return;
-
-  // Load lịch sử của riêng member từ Firebase
-  const data = await fbGet('/history');
-  if (!data) return;
-
-  const myRows = Object.entries(data)
-    .filter(([k, h]) => h.uid && h.uid.toUpperCase() === myUID.toUpperCase())
-    .reverse()
-    .slice(0, 30);
-
-  const tbody = document.getElementById('memberHistoryTable');
+function renderNormalCards() {
+  const tbody = document.getElementById('normalCardsTable');
   if (!tbody) return;
-
-  if (myRows.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text3)">Chưa có lịch sử vào/ra</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = myRows.map(([key, h], i) => {
-    // Tính thời gian đỗ nếu có cả vào và ra
-    let duration = '—';
-    if (h.timeIn && h.timeOut && h.timeOut !== '') {
-      try {
-        const [ih, im, is_] = h.timeIn.split(':').map(Number);
-        const [oh, om, os_] = h.timeOut.split(':').map(Number);
-        const diffMin = (oh*60+om) - (ih*60+im);
-        if (diffMin > 0) duration = diffMin >= 60
-          ? `${Math.floor(diffMin/60)}g ${diffMin%60}p`
-          : `${diffMin}p`;
-      } catch(e) {}
-    }
+  const s = (document.getElementById('normalCardSearch')?.value||'').toLowerCase();
+  const list = s ? normalCardsData.filter(c=>c.uid.toLowerCase().includes(s)||(c.note||'').toLowerCase().includes(s)) : normalCardsData;
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:24px">Chưa có thẻ thường nào</td></tr>'; return; }
+  tbody.innerHTML = list.map(c => {
+    const idx = normalCardsData.indexOf(c);
     return `<tr>
-      <td>${i+1}</td>
-      <td class="mono">${h.timeIn || '—'}</td>
-      <td class="mono">${h.timeOut || '—'}</td>
-      <td>${duration}</td>
-      <td>${h.date || '—'}</td>
-      <td>${h.status === 'inside'
-        ? '<span class="badge green">Đang trong bãi</span>'
-        : '<span class="badge orange">Đã ra</span>'}</td>
+      <td data-label="UID"><span class="mono">${c.uid}</span></td>
+      <td data-label="Ghi chú">${c.note||'—'}</td>
+      <td data-label="Ngày thêm">${c.created||'—'}</td>
+      <td data-label="Trạng thái"><span class="badge ${c.blocked?'red':'green'}">${c.blocked?'Bị khóa':'Hoạt động'}</span></td>
+      <td data-label="Thao tác" style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn-sm ${c.blocked?'success':'outline'}" onclick="toggleBlockNormalCard(${idx})">${c.blocked?'🔓 Mở khóa':'🔒 Khóa'}</button>
+        <button class="btn-sm danger" onclick="deleteNormalCard(${idx})">🗑️ Xóa</button>
+      </td>
     </tr>`;
   }).join('');
-
-  // Cập nhật stats profile
-  document.getElementById('profileUID').textContent = myUID;
-  const totalTrips = myRows.length;
-  const thisMonth  = myRows.filter(([k,h]) => h.date && h.date.includes('/' + String(new Date().getMonth()+1).padStart(2,'0') + '/')).length;
 }
 
-// ── CLOCK ─────────────────────────────────────
+function openAddNormalCardModal() {
+  document.getElementById('newNormalUID').value = '';
+  document.getElementById('newNormalNote').value = '';
+  document.getElementById('modalAddNormalCard').classList.add('show');
+}
+
+async function submitAddNormalCard() {
+  const uid  = document.getElementById('newNormalUID').value.trim().toUpperCase();
+  const note = document.getElementById('newNormalNote').value.trim();
+  if (!uid) { showToast('❌ Nhập UID thẻ!','danger'); return; }
+  if (normalCardsData.find(c=>c.uid===uid)) { showToast('❌ UID đã tồn tại!','danger'); return; }
+  const fmt = d=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  const entry = {uid, note, created:fmt(new Date()), blocked:false};
+  await fbPut('/normalcards/'+uid.replace(/:/g,'-'), entry);
+  normalCardsData.unshift(entry);
+  renderNormalCards();
+  closeModal('modalAddNormalCard');
+  showToast(`✅ Đã thêm thẻ ${uid}`,'success');
+}
+
+async function toggleBlockNormalCard(idx) {
+  const c = normalCardsData[idx]; if (!c) return;
+  c.blocked = !c.blocked;
+  await fbPatch('/normalcards/'+c.uid.replace(/:/g,'-'), {blocked:c.blocked});
+  renderNormalCards();
+  showToast(c.blocked?`🔒 Đã khóa thẻ ${c.uid}`:`🔓 Đã mở khóa ${c.uid}`, c.blocked?'danger':'success');
+}
+
+async function deleteNormalCard(idx) {
+  const c = normalCardsData[idx]; if (!c) return;
+  if (!confirm(`Xóa thẻ ${c.uid}?`)) return;
+  await fetch(`${FIREBASE_URL}/normalcards/${c.uid.replace(/:/g,'-')}.json`,{method:'DELETE'});
+  normalCardsData.splice(idx,1);
+  renderNormalCards();
+  showToast(`🗑️ Đã xóa thẻ ${c.uid}`,'danger');
+}
+
+// ════════════════════════════════════════════
+//  REVENUE CHART
+// ════════════════════════════════════════════
+const chartData = {
+  day:  {labels:['T2','T3','T4','T5','T6','T7','CN'],vals:[0,0,0,0,0,0,0]},
+  week: {labels:['T1','T2','T3','T4'],vals:[0,0,0,0]},
+  month:{labels:['Th1','Th2','Th3','Th4','Th5','Th6'],vals:[0,0,0,0,0,0]},
+};
+
+function renderRevenueChart(type) {
+  const d = chartData[type];
+  const max = Math.max(...d.vals, 1);
+  const chart = document.getElementById('revenueChart');
+  if (!chart) return;
+  const maxH = chart.offsetHeight - 36 || 80;
+  chart.innerHTML = d.labels.map((l,i) => {
+    const h = Math.max(4, Math.round((d.vals[i]/max)*maxH));
+    return `<div class="chart-bar-col">
+      <div class="chart-val">${d.vals[i]}k</div>
+      <div class="chart-bar" style="height:${h}px"></div>
+      <div class="chart-label">${l}</div>
+    </div>`;
+  }).join('');
+}
+
+function switchRevTab(btn, type) {
+  document.querySelectorAll('.rev-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderRevenueChart(type);
+}
+
+// ════════════════════════════════════════════
+//  MODAL & TOAST
+// ════════════════════════════════════════════
+function closeModal(id) { document.getElementById(id)?.classList.remove('show'); }
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show')}));
+
+function showToast(msg, type='info') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(()=>t.remove(), 3000);
+}
+
+// ════════════════════════════════════════════
+//  CLOCK
+// ════════════════════════════════════════════
 function startClock() {
-  function tick() {
+  const tick = () => {
     const now = new Date();
-    const full = now.toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-    const short = now.toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
+    const f = now.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const s = now.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
     const el = document.getElementById('clockDisplay');
-    const elM = document.getElementById('clockDisplayMobile');
-    if (el) el.textContent = full;
-    if (elM) elM.textContent = short;
-  }
+    const em = document.getElementById('clockMobile');
+    if (el) el.textContent = f;
+    if (em) em.textContent = s;
+  };
   tick();
   setInterval(tick, 1000);
 }
 
-// ── FIREBASE CONFIG ───────────────────────────
-const firebaseConfig = {
-  apiKey: "AIzaSyDn8qezGIMny7DBMnVmqIna0SgAvLaZb5k",
-  authDomain: "baidoxe-a798f.firebaseapp.com",
-  databaseURL: "https://baidoxe-a798f-default-rtdb.firebaseio.com",
-  projectId: "baidoxe-a798f",
-  storageBucket: "baidoxe-a798f.firebasestorage.app",
-  messagingSenderId: "1039524317231",
-  appId: "1:1039524317231:web:2e73c40abdd02d8b839eda"
-};
-const FIREBASE_URL = firebaseConfig.databaseURL;
-
-// Đọc dữ liệu từ Firebase
-async function fbGet(path) {
-  try {
-    const res  = await fetch(`${FIREBASE_URL}${path}.json`);
-    const data = await res.json();
-    // Firebase trả về {"error":"..."} khi bị chặn
-    if (data && data.error) {
-      console.error('[Firebase] Lỗi đọc' + path + ':', data.error);
-      return null;
-    }
-    return data;
-  } catch(e) {
-    console.error('[Firebase] Fetch lỗi:', e);
-    return null;
-  }
-}
-
-// Ghi dữ liệu lên Firebase
-async function fbPut(path, value) {
-  try {
-    await fetch(`${FIREBASE_URL}${path}.json`, {
-      method: 'PUT',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(value)
-    });
-  } catch(e) { console.error('Firebase PUT error:', e); }
-}
-
-// Patch (cập nhật 1 phần)
-async function fbPatch(path, value) {
-  try {
-    await fetch(`${FIREBASE_URL}${path}.json`, {
-      method: 'PATCH',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(value)
-    });
-  } catch(e) { console.error('Firebase PATCH error:', e); }
-}
-
-// ── REALTIME SYNC ─────────────────────────────
-let fbPollingInterval = null;
-
-function startFirebaseSync() {
-  // Slot poll 800ms — khớp tốc độ ESP32 v5 (debounce 80ms, sync ngay sau thay đổi)
-  setInterval(syncSlotsOnly, 800);
-  // Full sync (history, stats, gates...) mỗi 3 giây
-  fbPollingInterval = setInterval(syncFromFirebase, 3000);
-  syncFromFirebase(); // gọi full sync 1 lần đầu
-}
-
-async function syncSlotsOnly() {
-  try {
-    const toBool = v => v === true || v === 'true' || v === 1 || v === '1';
-    const slotsVal = await fbGet('/slots');
-    if (slotsVal && typeof slotsVal === 'object') {
-      let changed = false;
-      [1,2,3,4].forEach((n, i) => {
-        const val = slotsVal['slot' + n];
-        const newState = val != null ? toBool(val) : false;
-        if (slotData[i].occupied !== newState) {
-          slotData[i].occupied = newState;
-          changed = true;
-        }
-      });
-      // Dùng available từ ESP32 nếu có (chính xác hơn tự đếm)
-      if (slotsVal.available != null) {
-        const avail = parseInt(slotsVal.available);
-        if (!isNaN(avail)) {
-          const el1 = document.getElementById('statFree');
-          const el2 = document.getElementById('statOccupied');
-          if (el1) el1.textContent = avail;
-          if (el2) el2.textContent = 4 - avail;
-        }
-      }
-      if (changed) renderSlots(); // chỉ render khi thực sự có thay đổi
-    }
-  } catch(e) { /* bỏ qua lỗi mạng */ }
-}
-
-async function syncFromFirebase() {
-  // Fetch từng path riêng — tránh Firebase Rules chặn đọc root "/"
-  // Dùng Promise.allSettled để 1 path lỗi không block cả batch
-  const toBool = v => v === true || v === 'true' || v === 1 || v === '1';
-
-  const [resSlots, resEsp32, resControl, resStats, resHistory] =
-    await Promise.allSettled([
-      fbGet('/slots'),
-      fbGet('/esp32'),
-      fbGet('/control'),
-      fbGet('/stats'),
-      fbGet('/history'),
-    ]);
-
-  // ── Slots (handled by syncSlotsOnly, skip renderSlots here) ──
-  // Không gọi renderSlots() trong full sync để tránh flash đè lên syncSlotsOnly
-
-  // ── ESP32 heartbeat ────────────────────────
-  const esp32Val = resEsp32.status === 'fulfilled' ? resEsp32.value : null;
-  if (esp32Val) updateESP32Badge(esp32Val);
-
-  // ── Cổng — KHÔNG sync về UI để tránh nhảy ──
-  // UI cổng chỉ do toggleGate() điều khiển
-
-  // ── Stats ──────────────────────────────────
-  const statsVal = resStats.status === 'fulfilled' ? resStats.value : null;
-  if (statsVal) {
-    document.getElementById('statTodayTrips').textContent = statsVal.totalToday || 0;
-    const rev = statsVal.revenueToday || 0;
-    document.getElementById('statTodayRevenue').textContent = (rev/1000).toFixed(0) + 'k';
-  }
-
-  // ── Manual mode — đọc từ /control ──
-  const controlVal = resControl.status === 'fulfilled' ? resControl.value : null;
-  if (controlVal && controlVal.manualMode !== undefined) {
-    applyManualModeUI(toBool(controlVal.manualMode));
-  }
-
-  // ── Lịch sử ────────────────────────────────
-  const historyVal = resHistory.status === 'fulfilled' ? resHistory.value : null;
-  if (historyVal) {
-    const rows = Object.entries(historyVal).reverse().slice(0, 50);
-    renderFirebaseHistory(rows);
-  }
-
-  // ── Profile member ─────────────────────────
-  if (currentUser?.role === 'member') {
-    const profilePage = document.getElementById('page-profile');
-    if (profilePage && profilePage.classList.contains('active')) {
-      loadMemberProfile();
-    }
-  }
-}
-
-function updateGateUI(gate, state) {
-  const el  = document.getElementById(gate + 'State');
-  const btn = document.getElementById('btn-gate-' + gate);
-  if (!el) return;
-  if (state === 'open' || state === 'opening') {
-    gateOpenState[gate] = true;
-    el.textContent = '● Đang mở';
-    el.className   = 'gate-state open';
-    if (btn) { btn.textContent = '▼ Đóng cổng'; btn.className = 'btn-gate close-btn'; }
-  } else {
-    gateOpenState[gate] = false;
-    el.textContent = '● Đóng';
-    el.className   = 'gate-state closed';
-    if (btn) { btn.textContent = '▲ Mở cổng'; btn.className = 'btn-gate open-btn'; }
-  }
-}
-
-function renderFirebaseHistory(rows) {
-  const tbody = document.getElementById('historyTable');
-  if (!tbody || rows.length === 0) return;
-  tbody.innerHTML = rows.map(([key, h], i) => `
-    <tr>
-      <td data-label="#">${i+1}</td>
-      <td data-label="Giờ vào" class="mono">${h.timeIn || '—'}</td>
-      <td data-label="Giờ ra" class="mono">${h.timeOut || '—'}</td>
-      <td data-label="Thời gian">—</td>
-      <td data-label="UID"><span class="mono">${h.uid || '—'}</span></td>
-      <td data-label="Chủ xe">${h.owner || 'Khách'}</td>
-      <td data-label="Loại thẻ">${h.type==='month'
-        ? '<span class="badge purple">Thẻ tháng</span>'
-        : '<span class="badge blue">Thẻ thường</span>'}</td>
-      <td data-label="Phí"><b>${h.fee > 0 ? h.fee/1000 + 'k' : '—'}</b></td>
-      <td data-label="Trạng thái">${h.status==='inside'
-        ? '<span class="badge green">Đang trong bãi</span>'
-        : '<span class="badge orange">Đã ra</span>'}</td>
-    </tr>
-  `).join('');
-}
-
-// Override toggleGate để gửi lệnh lên Firebase thật
-// Mỗi cổng độc lập: nhấn 1 lần = mở, nhấn lại = đóng
-const gateOpenState = { entry: false, exit: false };
-
-async function toggleGate(gate) {
-  const el  = document.getElementById(gate + 'State');
-  const btn = document.getElementById('btn-gate-' + gate);
-  const isOpen = gateOpenState[gate];
-  const val = isOpen ? 'closed' : 'open';
-
-  // Cập nhật UI ngay (không chờ Firebase)
-  gateOpenState[gate] = !isOpen;
-  if (!isOpen) {
-    el.textContent = '● Đang mở'; el.className = 'gate-state open';
-    if (btn) { btn.textContent = '▼ Đóng cổng'; btn.className = 'btn-gate close-btn'; }
-  } else {
-    el.textContent = '● Đóng'; el.className = 'gate-state closed';
-    if (btn) { btn.textContent = '▲ Mở cổng'; btn.className = 'btn-gate open-btn'; }
-  }
-
-  // Ghi vào /control — ESP32 đọc 1 GET duy nhất, nhanh hơn
-  await fbPatch('/control', { [gate]: val });
-}
-
-// ── ESP32 HEARTBEAT STATUS ────────────────────
-// ESP32 ghi /esp32/lastSeen (Firebase server timestamp = số ms Unix)
-// Nếu > 15 giây không thấy heartbeat → coi là mất kết nối
-
-// Lưu data ESP32 nhận được gần nhất từ syncFromFirebase
-let _esp32LastData = null;
-let _esp32LastReceivedAt = 0; // thời điểm app nhận được data (Date.now())
-const ESP32_TIMEOUT_MS = 9000; // 9s = 3 lần miss heartbeat 3s
-
-// Gọi khi syncFromFirebase nhận được data /esp32
-function updateESP32Badge(esp32Data) {
-  if (!esp32Data || !esp32Data.status) return;
-  // Lưu data + thời điểm nhận
-  _esp32LastData = esp32Data;
-  _esp32LastReceivedAt = Date.now();
-}
-
-// Chạy mỗi 1s — tính toán offline dựa trên data đã có, không fetch thêm
-function tickESP32Badge() {
-  if (_esp32LastReceivedAt === 0) {
-    setBadge('checking', 'ESP32 — Đang kiểm tra...');
-    return;
-  }
-  const silentMs = Date.now() - _esp32LastReceivedAt;
-  const d = _esp32LastData;
-  const ip = d?.ip ? ` · ${d.ip}` : '';
-  if (silentMs < ESP32_TIMEOUT_MS) {
-    setBadge('connected', `ESP32 — Online${ip}`);
-  } else {
-    const s = Math.floor(silentMs / 1000);
-    setBadge('disconnected', `ESP32 — Mất kết nối (${s}s)`);
-  }
-}
-
-async function checkESP32Status() {
-  try {
-    const esp32Data = await fbGet('/esp32');
-    updateESP32Badge(esp32Data);
-    tickESP32Badge();
-  } catch(e) {
-    setBadge('disconnected', 'ESP32 — Lỗi Firebase');
-  }
-}
-
-let _lastBadgeState = '';
-function setBadge(state, text) {
-  // Khi ESP32 vừa mất kết nối → reset UI về trạng thái an toàn
-  if (state === 'disconnected' && _lastBadgeState !== 'disconnected') {
-    // Tắt manual mode trên UI
-    applyManualModeUI(false);
-    // Reset UI cổng về đóng
-    updateGateUI('entry', 'closed');
-    updateGateUI('exit',  'closed');
-    showToast('⚠️ ESP32 mất kết nối — đã reset về trạng thái đóng', 'warning');
-  }
-  _lastBadgeState = state;
-
-  // Mobile badge
-  const badge = document.getElementById('esp32Badge');
-  const label = document.getElementById('esp32BadgeText');
-  if (badge && label) {
-    badge.className = `esp32-badge ${state}`;
-    label.textContent = state === 'connected' ? 'Online' : state === 'disconnected' ? 'Offline' : '…';
-  }
-  // Desktop badge
-  const badgeD = document.getElementById('esp32BadgeDesktop');
-  const labelD = document.getElementById('esp32BadgeTextDesktop');
-  if (badgeD && labelD) {
-    badgeD.className = `esp32-badge ${state}`;
-    labelD.textContent = text;
-  }
-}
-
-function startESP32Monitor() {
-  checkESP32Status(); // fetch lần đầu ngay
-  // tickESP32Badge chạy mỗi 1s — chỉ tính toán, không fetch HTTP
-  setInterval(tickESP32Badge, 1000);
-  // syncFromFirebase mỗi 3s sẽ tự gọi updateESP32Badge để cập nhật data
-}
-
-// ── MOBILE NAV ────────────────────────────────
+// ════════════════════════════════════════════
+//  MOBILE NAV
+// ════════════════════════════════════════════
 function renderMobileNav() {
-  const nav   = document.getElementById('mobileNavInner');
-  if (!nav) return;
-  const items = currentUser?.role === 'admin' ? adminNav : memberNav;
-  // Hiển thị tối đa 5 mục trên bottom nav
-  const visible = items.slice(0, 5);
-  nav.innerHTML = visible.map(item => `
-    <button class="mobile-nav-item" id="mnav-${item.id}" onclick="navTo('${item.id}')">
+  const nav = document.getElementById('mobileNavInner'); if (!nav) return;
+  const items = (currentUser?.role==='admin' ? adminNav : memberNav).slice(0,5);
+  nav.innerHTML = items.map(item =>
+    `<button class="mobile-nav-item" id="mnav-${item.id}" onclick="navTo('${item.id}')">
       <span class="mnav-icon">${item.icon}</span>
       <span>${item.label.split(' ')[0]}</span>
-    </button>
-  `).join('');
+    </button>`).join('');
 }
 
 function updateMobileNavActive(pageId) {
-  document.querySelectorAll('.mobile-nav-item').forEach(el => {
-    el.classList.toggle('active', el.id === `mnav-${pageId}`);
+  document.querySelectorAll('.mobile-nav-item').forEach(el=>{
+    el.classList.toggle('active', el.id===`mnav-${pageId}`);
   });
 }
 
-// ── INIT ──────────────────────────────────────
+// INIT
 document.getElementById('historyDate').value = new Date().toISOString().split('T')[0];
 </script>
 </body>
