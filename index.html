@@ -2028,15 +2028,12 @@ async function setManualMode(enabled) {
     updateGateUI('exit',  'closed');
     gateOpenState.entry = false;
     gateOpenState.exit  = false;
-    await Promise.all([
-      fbPut('/settings/manualMode', false),
-      fbPut('/gates/entry', 'closed'),
-      fbPut('/gates/exit',  'closed'),
-    ]);
+    // Ghi /cmd báo ESP32 tắt manual → ESP32 tự đóng cổng
+    await fbPatch('/cmd', { ts: Date.now().toString(), manualMode: false });
     showToast('🔒 Tắt thủ công — 2 cổng đã đóng', 'info');
   } else {
-    // BẬT manual → chỉ ghi manualMode, GIỮ NGUYÊN trạng thái cổng
-    await fbPut('/settings/manualMode', true);
+    // BẬT manual → ghi /cmd báo ESP32
+    await fbPatch('/cmd', { ts: Date.now().toString(), manualMode: true });
     showToast('⚙️ Bật chế độ thủ công', 'info');
   }
 }
@@ -2482,20 +2479,21 @@ async function toggleGate(gate) {
   const el  = document.getElementById(gate + 'State');
   const btn = document.getElementById('btn-gate-' + gate);
   const isOpen = gateOpenState[gate];
+  const val = isOpen ? 'closed' : 'open';
 
+  // Cập nhật UI ngay lập tức (không chờ Firebase)
+  gateOpenState[gate] = !isOpen;
   if (!isOpen) {
-    gateOpenState[gate] = true;
-    el.textContent  = '● Đang mở';
-    el.className    = 'gate-state open';
+    el.textContent = '● Đang mở'; el.className = 'gate-state open';
     if (btn) { btn.textContent = '▼ Đóng cổng'; btn.className = 'btn-gate close-btn'; }
-    await fbPut(`/gates/${gate}`, 'open');
   } else {
-    gateOpenState[gate] = false;
-    el.textContent  = '● Đóng';
-    el.className    = 'gate-state closed';
+    el.textContent = '● Đóng'; el.className = 'gate-state closed';
     if (btn) { btn.textContent = '▲ Mở cổng'; btn.className = 'btn-gate open-btn'; }
-    await fbPut(`/gates/${gate}`, 'closed');
   }
+
+  // Ghi /cmd với timestamp mới → ESP32 nhận ra lệnh mới, xử lý ngay
+  const ts = Date.now().toString();
+  await fbPatch('/cmd', { ts, [gate]: val, manualMode: true });
 }
 
 // ── ESP32 HEARTBEAT STATUS ────────────────────
