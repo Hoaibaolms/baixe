@@ -1103,7 +1103,7 @@
                   <div style="font-size:11px;color:var(--text3)" id="manualModeDesc">Tắt — RFID hoạt động bình thường</div>
                 </div>
                 <label class="toggle-switch">
-                  <input type="checkbox" id="manualModeToggle" onchange="setManualMode(this.checked)">
+                  <input type="checkbox" id="manualModeToggle" onclick="setManualMode(this.checked)">
                   <span class="toggle-slider"></span>
                 </label>
               </div>
@@ -2023,17 +2023,20 @@ async function setManualMode(enabled) {
   applyManualModeUI(enabled);
 
   if (!enabled) {
-    // TẮT manual → đóng 2 cổng trên app + ghi Firebase
     updateGateUI('entry', 'closed');
     updateGateUI('exit',  'closed');
     gateOpenState.entry = false;
     gateOpenState.exit  = false;
-    // Ghi /cmd báo ESP32 tắt manual → ESP32 tự đóng cổng
-    await fbPatch('/cmd', { ts: Date.now().toString(), manualMode: false });
+    await Promise.all([
+      fbPatch('/cmd', { ts: Date.now().toString(), manualMode: false }),
+      fbPut('/settings/manualMode', false),   // để syncFromFirebase đọc đúng
+    ]);
     showToast('🔒 Tắt thủ công — 2 cổng đã đóng', 'info');
   } else {
-    // BẬT manual → ghi /cmd báo ESP32
-    await fbPatch('/cmd', { ts: Date.now().toString(), manualMode: true });
+    await Promise.all([
+      fbPatch('/cmd', { ts: Date.now().toString(), manualMode: true }),
+      fbPut('/settings/manualMode', true),    // để syncFromFirebase đọc đúng
+    ]);
     showToast('⚙️ Bật chế độ thủ công', 'info');
   }
 }
@@ -2043,6 +2046,9 @@ function applyManualModeUI(enabled) {
   const desc     = document.getElementById('manualModeDesc');
   const toggle   = document.getElementById('manualModeToggle');
   const subtitle = document.getElementById('gateSubtitle');
+
+  // Tắt onclick tạm thời để set checked không trigger setManualMode
+  if (toggle) toggle.onclick = null;
 
   if (enabled) {
     if (btns)     btns.classList.remove('disabled');
@@ -2055,6 +2061,12 @@ function applyManualModeUI(enabled) {
     if (toggle)   toggle.checked = false;
     if (subtitle) { subtitle.textContent = 'RFID đang hoạt động'; subtitle.style.color = ''; }
   }
+
+  // Khôi phục onclick sau khi set checked xong (không trigger setManualMode)
+  setTimeout(() => {
+    const t = document.getElementById('manualModeToggle');
+    if (t) t.onclick = () => setManualMode(t.checked);
+  }, 0);
 }
 
 // Khởi tạo: buttons bị disable cho đến khi bật manual mode
@@ -2410,9 +2422,11 @@ async function syncFromFirebase() {
     document.getElementById('statTodayRevenue').textContent = (rev/1000).toFixed(0) + 'k';
   }
 
-  // ── Manual mode ────────────────────────────
+  // ── Manual mode — chỉ sync lần đầu khi app mở
+  // Sau đó user là người quyết định, Firebase không override lại
   const settingsVal = resSettings.status === 'fulfilled' ? resSettings.value : null;
-  if (settingsVal && settingsVal.manualMode !== undefined) {
+  if (settingsVal && settingsVal.manualMode !== undefined && !window._manualModeSynced) {
+    window._manualModeSynced = true;
     applyManualModeUI(toBool(settingsVal.manualMode));
   }
 
