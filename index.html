@@ -2499,7 +2499,7 @@ async function toggleGate(gate) {
 // ESP32 ghi /esp32/lastSeen (Firebase server timestamp = số ms Unix)
 // Nếu > 15 giây không thấy heartbeat → coi là mất kết nối
 
-const ESP32_TIMEOUT_MS = 15000; // 15 giây — heartbeat ESP32 mỗi 3s, 5 lần miss = offline
+const ESP32_TIMEOUT_MS = 8000;  // 8 giây — heartbeat mỗi 3s, miss 2 lần = offline
 
 function updateESP32Badge(esp32Data) {
   if (!esp32Data || !esp32Data.status) {
@@ -2581,9 +2581,9 @@ function setBadge(state, text) {
 }
 
 function startESP32Monitor() {
-  // Lần đầu check ngay
   checkESP32Status();
-  // Sau đó syncFromFirebase sẽ tự gọi updateESP32Badge mỗi 1.5s
+  // Interval riêng mỗi 2s — không phụ thuộc syncFromFirebase
+  setInterval(checkESP32Status, 2000);
 }
 
 // ── MOBILE NAV ────────────────────────────────
