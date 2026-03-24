@@ -505,26 +505,6 @@
         </div>
       </div>
 
-      <!-- THẺ THƯỜNG -->
-      <div class="page" id="page-normalcards">
-        <div class="page-title">Thẻ thường</div>
-        <div class="page-subtitle">Quản lý thẻ vé lẻ</div>
-        <div class="card">
-          <div class="card-header">
-            <div><div class="card-title">Danh sách thẻ thường</div></div>
-            <button class="btn-sm primary" onclick="openAddNormalCardModal()">+ Thêm thẻ</button>
-          </div>
-          <div class="filter-row">
-            <input class="filter-input" id="normalCardSearch" placeholder="🔍 Tìm UID, ghi chú..." oninput="renderNormalCards()" style="flex:1">
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>UID</th><th>Ghi chú</th><th>Ngày thêm</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
-              <tbody id="normalCardsTable"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
 
       <!-- PROFILE (member) -->
       <div class="page" id="page-profile">
@@ -579,21 +559,7 @@
   </div>
 </div>
 
-<!-- MODAL: Thêm thẻ thường -->
-<div class="modal-overlay" id="modalAddNormalCard">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">➕ Thêm thẻ thường</div>
-      <button class="modal-close" onclick="closeModal('modalAddNormalCard')">✕</button>
-    </div>
-    <div class="form-group"><label class="form-label">UID Thẻ *</label><input class="form-input" id="newNormalUID" placeholder="AB:CD:EF:12"></div>
-    <div class="form-group"><label class="form-label">Ghi chú</label><input class="form-input" id="newNormalNote" placeholder="Vd: Xe máy khách vãng lai"></div>
-    <div class="modal-footer">
-      <button class="btn-sm outline" onclick="closeModal('modalAddNormalCard')">Hủy</button>
-      <button class="btn-sm primary" onclick="submitAddNormalCard()">✅ Thêm thẻ</button>
-    </div>
-  </div>
-</div>
+
 
 <script>
 // ════════════════════════════════════════════
@@ -612,7 +578,6 @@ const ESP32_TIMEOUT = 8000;
 let currentUser     = null;
 let accountsData    = [];
 let cardsData       = [];
-let normalCardsData = [];
 let historyData     = [];
 let slotData        = Array.from({length:TOTAL_SLOTS},(_,i)=>({id:i+1,label:'Chỗ '+(i+1),occupied:false}));
 let gateOpenState   = { entry:false, exit:false };
@@ -630,7 +595,6 @@ const adminNav = [
   {id:'history',  icon:'📋',label:'Lịch sử vào/ra'},
   {id:'revenue',  icon:'💰',label:'Doanh thu'},
   {id:'cards',    icon:'👥',label:'Quản lý tài khoản'},
-  {id:'normalcards',icon:'🎫',label:'Thẻ thường'},
 ];
 const memberNav = [
   {id:'profile',icon:'👤',label:'Hồ sơ của tôi'},
@@ -673,22 +637,28 @@ async function fbPatch(path, value) {
 // ════════════════════════════════════════════
 function listenFirebase(path, callback) {
   const url = `${FIREBASE_URL}${path}.json`;
+  let cached = null;
   let es;
   function connect() {
     es = new EventSource(url);
-    // "put" = full replace (initial load hoặc overwrite)
     es.addEventListener('put', e => {
       try {
         const d = JSON.parse(e.data);
-        if (d && d.data !== undefined && d.data !== null) callback(d.data);
+        if (d && d.data !== undefined && d.data !== null) {
+          cached = d.data;
+          callback(cached);
+        }
       } catch(err) {}
     });
-    // "patch" = partial update — merge với data hiện tại
     es.addEventListener('patch', e => {
       try {
         const d = JSON.parse(e.data);
-        // patch data có thể là partial object, path="/" thì là toàn bộ
-        if (d && d.data !== undefined && d.data !== null) callback(d.data);
+        if (d && d.data !== undefined && d.data !== null) {
+          cached = (cached && typeof cached === 'object')
+            ? Object.assign({}, cached, d.data)
+            : d.data;
+          callback(cached);
+        }
       } catch(err) {}
     });
     es.onerror = () => {
@@ -795,7 +765,6 @@ async function initApp() {
   // Load initial data
   await Promise.all([
     loadMembersFromFirebase(),
-    loadNormalCardsFromFirebase(),
     loadHistory(),
   ]);
 
@@ -978,11 +947,10 @@ function navigateTo(pageId) {
   updateMobileNavActive(pageId);
   window.scrollTo(0,0);
   const titles = {dashboard:'Trang chủ',history:'Lịch sử vào/ra',revenue:'Doanh thu',
-    cards:'Quản lý tài khoản',normalcards:'Thẻ thường',profile:'Hồ sơ của tôi'};
+    cards:'Quản lý tài khoản',profile:'Hồ sơ của tôi'};
   document.getElementById('topbarTitle').textContent = titles[pageId] || pageId;
 
   if (pageId === 'cards') loadMembersFromFirebase();
-  if (pageId === 'normalcards') loadNormalCardsFromFirebase();
   if (pageId === 'history') renderHistoryTable();
   if (pageId === 'profile' && currentUser?.role === 'member') renderMemberHistory();
 }
@@ -1186,72 +1154,6 @@ async function submitAddMember() {
   showToast(`✅ Đã tạo thành viên: ${fullname}`,'success');
 }
 
-// ════════════════════════════════════════════
-//  NORMAL CARDS
-// ════════════════════════════════════════════
-async function loadNormalCardsFromFirebase() {
-  const data = await fbGet('/normalcards');
-  normalCardsData = data ? Object.values(data) : [];
-  renderNormalCards();
-}
-
-function renderNormalCards() {
-  const tbody = document.getElementById('normalCardsTable');
-  if (!tbody) return;
-  const s = (document.getElementById('normalCardSearch')?.value||'').toLowerCase();
-  const list = s ? normalCardsData.filter(c=>c.uid.toLowerCase().includes(s)||(c.note||'').toLowerCase().includes(s)) : normalCardsData;
-  if (!list.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:24px">Chưa có thẻ thường nào</td></tr>'; return; }
-  tbody.innerHTML = list.map(c => {
-    const idx = normalCardsData.indexOf(c);
-    return `<tr>
-      <td data-label="UID"><span class="mono">${c.uid}</span></td>
-      <td data-label="Ghi chú">${c.note||'—'}</td>
-      <td data-label="Ngày thêm">${c.created||'—'}</td>
-      <td data-label="Trạng thái"><span class="badge ${c.blocked?'red':'green'}">${c.blocked?'Bị khóa':'Hoạt động'}</span></td>
-      <td data-label="Thao tác" style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn-sm ${c.blocked?'success':'outline'}" onclick="toggleBlockNormalCard(${idx})">${c.blocked?'🔓 Mở khóa':'🔒 Khóa'}</button>
-        <button class="btn-sm danger" onclick="deleteNormalCard(${idx})">🗑️ Xóa</button>
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-function openAddNormalCardModal() {
-  document.getElementById('newNormalUID').value = '';
-  document.getElementById('newNormalNote').value = '';
-  document.getElementById('modalAddNormalCard').classList.add('show');
-}
-
-async function submitAddNormalCard() {
-  const uid  = document.getElementById('newNormalUID').value.trim().toUpperCase();
-  const note = document.getElementById('newNormalNote').value.trim();
-  if (!uid) { showToast('❌ Nhập UID thẻ!','danger'); return; }
-  if (normalCardsData.find(c=>c.uid===uid)) { showToast('❌ UID đã tồn tại!','danger'); return; }
-  const fmt = d=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-  const entry = {uid, note, created:fmt(new Date()), blocked:false};
-  await fbPut('/normalcards/'+uid.replace(/:/g,'-'), entry);
-  normalCardsData.unshift(entry);
-  renderNormalCards();
-  closeModal('modalAddNormalCard');
-  showToast(`✅ Đã thêm thẻ ${uid}`,'success');
-}
-
-async function toggleBlockNormalCard(idx) {
-  const c = normalCardsData[idx]; if (!c) return;
-  c.blocked = !c.blocked;
-  await fbPatch('/normalcards/'+c.uid.replace(/:/g,'-'), {blocked:c.blocked});
-  renderNormalCards();
-  showToast(c.blocked?`🔒 Đã khóa thẻ ${c.uid}`:`🔓 Đã mở khóa ${c.uid}`, c.blocked?'danger':'success');
-}
-
-async function deleteNormalCard(idx) {
-  const c = normalCardsData[idx]; if (!c) return;
-  if (!confirm(`Xóa thẻ ${c.uid}?`)) return;
-  await fetch(`${FIREBASE_URL}/normalcards/${c.uid.replace(/:/g,'-')}.json`,{method:'DELETE'});
-  normalCardsData.splice(idx,1);
-  renderNormalCards();
-  showToast(`🗑️ Đã xóa thẻ ${c.uid}`,'danger');
-}
 
 // ════════════════════════════════════════════
 //  REVENUE CHART
