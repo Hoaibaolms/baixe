@@ -568,8 +568,7 @@
 const FIREBASE_URL  = 'https://baidoxe-a798f-default-rtdb.firebaseio.com';
 const ADMIN_USER    = { role:'admin', name:'Admin', pass:'123456' };
 const TOTAL_SLOTS   = 4;
-// ESP32 gửi heartbeat mỗi 2s → timeout 8s = miss 3 lần mới offline
-// Heartbeat ESP32 mỗi 5s → timeout 15s (3 lần miss)
+// ESP32 gửi heartbeat mỗi 5s → timeout 15s = miss 3 lần mới offline
 const ESP32_TIMEOUT = 15000;
 
 // ════════════════════════════════════════════
@@ -645,7 +644,11 @@ function listenFirebase(path, callback) {
   // merge=false (PUT): replace hoàn toàn node đích
   function applyPath(base, subPath, data, merge) {
     if (!subPath || subPath === '/') {
-      // path="/" → replace toàn bộ (initial load)
+      // PUT (merge=false): replace hoàn toàn
+      // PATCH (merge=true): merge vào base — giữ các field không thay đổi
+      if (merge && base && typeof base === 'object' && data && typeof data === 'object') {
+        return Object.assign({}, base, data);
+      }
       return data;
     }
     const parts = subPath.replace(/^\//, '').split('/').filter(Boolean);
@@ -843,10 +846,14 @@ function startRealtimeListeners() {
   // 4. Control (manual mode + gate state) — SSE pushed khi ESP32 hoặc app ghi
   listenFirebase('/control', (data) => {
     if (!data) return;
-    const nm = data.manualMode === true || data.manualMode === 'true';
-    applyManualModeUI(nm); // luôn sync UI, kể cả khi không đổi
+    // Chỉ thay đổi manualMode khi field thực sự tồn tại trong data
+    // Tránh trường hợp partial patch (chỉ có entry/exit) vô tình tắt manual mode
+    if ('manualMode' in data) {
+      const nm = data.manualMode === true || data.manualMode === 'true';
+      applyManualModeUI(nm);
+    }
     // Đồng bộ UI cổng từ Firebase /control (source of truth)
-    if (nm) {
+    if (manualMode) {
       if (data.entry) updateGateUI('entry', data.entry);
       if (data.exit)  updateGateUI('exit',  data.exit);
     }
