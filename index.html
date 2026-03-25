@@ -569,8 +569,8 @@ const FIREBASE_URL  = 'https://baidoxe-a798f-default-rtdb.firebaseio.com';
 const ADMIN_USER    = { role:'admin', name:'Admin', pass:'123456' };
 const TOTAL_SLOTS   = 4;
 // ESP32 gửi heartbeat mỗi 2s → timeout 8s = miss 3 lần mới offline
-// Dùng Date.now() đo khoảng cách thực tế nhận SSE event, không so epoch
-const ESP32_TIMEOUT = 8000;
+// Heartbeat ESP32 mỗi 5s → timeout 15s (3 lần miss)
+const ESP32_TIMEOUT = 15000;
 
 // ════════════════════════════════════════════
 //  STATE
@@ -640,9 +640,14 @@ function listenFirebase(path, callback) {
   let cached = null;
   let es;
 
-  // Helper: set deep value vào object theo path "/a/b/c"
-  function applyPath(base, subPath, data) {
-    if (!subPath || subPath === '/') return data; // replace toàn bộ
+  // Helper: apply Firebase event vào cached object
+  // merge=true (PATCH): merge object ở node đích thay vì replace
+  // merge=false (PUT): replace hoàn toàn node đích
+  function applyPath(base, subPath, data, merge) {
+    if (!subPath || subPath === '/') {
+      // path="/" → replace toàn bộ (initial load)
+      return data;
+    }
     const parts = subPath.replace(/^\//, '').split('/').filter(Boolean);
     const root = (base && typeof base === 'object') ? Object.assign({}, base) : {};
     let obj = root;
@@ -651,7 +656,13 @@ function listenFirebase(path, callback) {
         ? Object.assign({}, obj[parts[i]]) : {};
       obj = obj[parts[i]];
     }
-    obj[parts[parts.length - 1]] = data;
+    const lastKey = parts[parts.length - 1];
+    if (merge && obj[lastKey] && typeof obj[lastKey] === 'object' && typeof data === 'object') {
+      // PATCH tại sub-path: merge vào object hiện có, không replace
+      obj[lastKey] = Object.assign({}, obj[lastKey], data);
+    } else {
+      obj[lastKey] = data;
+    }
     return root;
   }
 
@@ -666,7 +677,8 @@ function listenFirebase(path, callback) {
       try {
         const d = JSON.parse(e.data);
         if (d && d.data !== undefined) {
-          cached = applyPath(cached, d.path, d.data);
+          // PUT: replace node (merge=false)
+          cached = applyPath(cached, d.path, d.data, false);
           if (cached !== null) callback(cached);
         }
       } catch(err) {}
@@ -677,12 +689,8 @@ function listenFirebase(path, callback) {
       try {
         const d = JSON.parse(e.data);
         if (d && d.data !== undefined && d.data !== null) {
-          if (!d.path || d.path === '/') {
-            cached = (cached && typeof cached === 'object')
-              ? Object.assign({}, cached, d.data) : d.data;
-          } else {
-            cached = applyPath(cached, d.path, d.data);
-          }
+          // PATCH: merge vào node hiện có (merge=true)
+          cached = applyPath(cached, d.path || '/', d.data, true);
           if (cached !== null) callback(cached);
         }
       } catch(err) {}
@@ -852,12 +860,17 @@ function startRealtimeListeners() {
     if (!data || typeof data !== 'object') return;
     // Giữ toàn bộ data, sort mới nhất lên đầu
     const allRows = Object.entries(data)
-      .map(([k,h]) => ({...h, key:k}))
+      .map(([k,h]) => {
+        // h phải là object hợp lệ (có uid hoặc timeIn), bỏ qua nếu chỉ là patch fragment
+        if (!h || typeof h !== 'object') return null;
+        return {...h, key:k};
+      })
+      .filter(Boolean)
       .reverse();
     historyData = allRows;
-    renderRecentTable();   // hàm render chỉ lấy 5 dòng đầu
-    renderHistoryTable();  // hàm render filter theo ngày
-    calcStatsFromHistory(); // tính từ toàn bộ data → không bao giờ thiếu
+    renderRecentTable();
+    renderHistoryTable();
+    calcStatsFromHistory();
     if (currentUser?.role === 'member') renderMemberHistory();
   });
 
