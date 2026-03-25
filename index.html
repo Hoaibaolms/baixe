@@ -1091,10 +1091,10 @@ function calcStatsFromHistory() {
   // historyData đã load từ Firebase
   for (const h of historyData) {
     if (h.date === today) {
-      totalToday++;
-      // Tính cả xe đang trong bãi (inside) lẫn đã ra (done)
-      // Thẻ tháng fee=0 không cộng, khách/thường mới cộng
-      if (h.fee && h.fee > 0 && (h.status === 'done' || h.status === 'inside')) {
+      totalToday++; // đếm tất cả lượt vào hôm nay
+      // Chỉ tính doanh thu khi xe ĐÃ RA (status==='done')
+      // Xe đang trong bãi (inside) chưa thu tiền → KHÔNG cộng
+      if (h.fee && h.fee > 0 && h.status === 'done') {
         revenueToday += Number(h.fee);
       }
     }
