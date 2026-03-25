@@ -639,33 +639,56 @@ function listenFirebase(path, callback) {
   const url = `${FIREBASE_URL}${path}.json`;
   let cached = null;
   let es;
+
+  // Helper: set deep value vào object theo path "/a/b/c"
+  function applyPath(base, subPath, data) {
+    if (!subPath || subPath === '/') return data; // replace toàn bộ
+    const parts = subPath.replace(/^\//, '').split('/').filter(Boolean);
+    const root = (base && typeof base === 'object') ? Object.assign({}, base) : {};
+    let obj = root;
+    for (let i = 0; i < parts.length - 1; i++) {
+      obj[parts[i]] = (obj[parts[i]] && typeof obj[parts[i]] === 'object')
+        ? Object.assign({}, obj[parts[i]]) : {};
+      obj = obj[parts[i]];
+    }
+    obj[parts[parts.length - 1]] = data;
+    return root;
+  }
+
   function connect() {
     es = new EventSource(url);
+
+    // "put": Firebase gửi khi có write tại path BẤT KỲ dưới node đang lắng nghe
+    // d.path = "/" → replace toàn bộ (lần đầu load hoặc delete)
+    // d.path = "/eXXXX" → PUT sub-node (xe vào/ra ghi history)
+    // BUG CŨ: luôn làm cached = d.data → xóa sạch history, chỉ còn 1 entry → revenue = 0
     es.addEventListener('put', e => {
       try {
         const d = JSON.parse(e.data);
-        if (d && d.data !== undefined && d.data !== null) {
-          cached = d.data;
-          callback(cached);
+        if (d && d.data !== undefined) {
+          cached = applyPath(cached, d.path, d.data);
+          if (cached !== null) callback(cached);
         }
       } catch(err) {}
     });
+
+    // "patch": merge tại path root (ESP32 PATCH /slots, /esp32, /gates, /control)
     es.addEventListener('patch', e => {
       try {
         const d = JSON.parse(e.data);
         if (d && d.data !== undefined && d.data !== null) {
-          cached = (cached && typeof cached === 'object')
-            ? Object.assign({}, cached, d.data)
-            : d.data;
-          callback(cached);
+          if (!d.path || d.path === '/') {
+            cached = (cached && typeof cached === 'object')
+              ? Object.assign({}, cached, d.data) : d.data;
+          } else {
+            cached = applyPath(cached, d.path, d.data);
+          }
+          if (cached !== null) callback(cached);
         }
       } catch(err) {}
     });
-    es.onerror = () => {
-      // EventSource tự reconnect, không cần xử lý thêm
-      // Log để debug nếu cần
-      // console.warn('[SSE] Reconnecting', path);
-    };
+
+    es.onerror = () => {};
     fbListeners.push(es);
   }
   connect();
@@ -920,7 +943,10 @@ function setBadge(state, text) {
   if (state === 'disconnected' && _lastBadge !== 'disconnected') {
     applyManualModeUI(false);
     updateGateUI('entry','closed'); updateGateUI('exit','closed');
-    showToast('⚠️ ESP32 mất kết nối', 'warning');
+    // Ghi Firebase để đảm bảo ESP32 nhận lệnh tắt manual khi reconnect
+    // Tránh trường hợp Firebase còn lưu manualMode:true → ESP32 bật lại manual sau khi lên
+    fbPatch('/control', JSON.stringify({manualMode:false, entry:'closed', exit:'closed'}));
+    showToast('⚠️ ESP32 mất kết nối — Chế độ thủ công đã tắt', 'warning');
   }
   _lastBadge = state;
   const shortText = state==='connected'?'Online':state==='disconnected'?'Offline':'…';
