@@ -221,6 +221,10 @@
   .row-gap{display:flex;gap:16px}
   .row-gap>*{flex:1}
   select.form-input{appearance:none}
+
+  /* Thẻ tháng trong bảng hoạt động gần đây — nền xanh nhạt */
+  tr.member-row td { background: var(--primary-light) !important; }
+  tr.member-row:hover td { background: #d8e7fc !important; }
   ::-webkit-scrollbar{width:5px;height:5px}
   ::-webkit-scrollbar-track{background:transparent}
   ::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
@@ -466,8 +470,8 @@
         <div class="section-gap">
           <div class="grid-4">
             <div class="stat-card"><div class="stat-icon green">📅</div><div><div class="stat-value" id="revToday">0k</div><div class="stat-label">Hôm nay</div></div></div>
-            <div class="stat-card"><div class="stat-icon blue">📆</div><div><div class="stat-value">—</div><div class="stat-label">Tuần này</div></div></div>
-            <div class="stat-card"><div class="stat-icon orange">🗓️</div><div><div class="stat-value">—</div><div class="stat-label">Tháng này</div></div></div>
+            <div class="stat-card"><div class="stat-icon blue">📆</div><div><div class="stat-value" id="revWeek">0k</div><div class="stat-label">Tuần này</div></div></div>
+            <div class="stat-card"><div class="stat-icon orange">🗓️</div><div><div class="stat-value" id="revMonth">0k</div><div class="stat-label">Tháng này</div></div></div>
             <div class="stat-card"><div class="stat-icon purple">📊</div><div><div class="stat-value" id="revTrips">0</div><div class="stat-label">Lượt hôm nay</div></div></div>
           </div>
           <div class="card">
@@ -568,8 +572,8 @@
 const FIREBASE_URL  = 'https://baidoxe-a798f-default-rtdb.firebaseio.com';
 const ADMIN_USER    = { role:'admin', name:'Admin', pass:'123456' };
 const TOTAL_SLOTS   = 4;
-// ESP32 gửi heartbeat mỗi 5s → timeout 15s = miss 3 lần mới offline
-const ESP32_TIMEOUT = 15000;
+// ESP32 gửi heartbeat mỗi 8s → timeout 25s = miss 3 lần mới offline
+const ESP32_TIMEOUT = 25000;
 
 // ════════════════════════════════════════════
 //  STATE
@@ -578,9 +582,11 @@ let currentUser     = null;
 let accountsData    = [];
 let cardsData       = [];
 let historyData     = [];
+let memberUIDs      = new Set(); // Set UID thẻ tháng — dùng để xác định type khi Firebase thiếu field
 let slotData        = Array.from({length:TOTAL_SLOTS},(_,i)=>({id:i+1,label:'Chỗ '+(i+1),occupied:false}));
 let gateOpenState   = { entry:false, exit:false };
 let manualMode      = false;
+let currentRevTab   = 'day'; // tab doanh thu đang active
 let _esp32ReceivedAt = 0;  // Date.now() lúc nhận HB cuối — so sánh với Date.now() hiện tại
 let _esp32LastSeq   = -1;  // seq number từ ESP32 — tăng mỗi HB
 let _lastBadge      = '';
@@ -1040,19 +1046,29 @@ function calcDuration(timeIn, timeOut) {
   } catch { return '—'; }
 }
 
+// Xác định loại thẻ: ưu tiên field type trong Firebase, fallback cross-check memberUIDs
+// Cần thiết vì entry cũ/lỗi có thể không có field type, hoặc ESP32 cũ không ghi type
+function resolveType(h) {
+  if (h.type === 'month') return 'month';
+  if (h.uid && memberUIDs.has(h.uid.toUpperCase())) return 'month';
+  return h.type || 'normal';
+}
+
 function renderRecentTable() {
   const tbody = document.getElementById('recentTable');
   if (!tbody) return;
   const rows = historyData.slice(0,5);
   if (!rows.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px">Chưa có hoạt động</td></tr>'; return; }
-  tbody.innerHTML = rows.map(h => `<tr>
+  tbody.innerHTML = rows.map(h => {
+    const type = resolveType(h);
+    return `<tr${type==='month' ? ' class="member-row"' : ''}>
     <td data-label="Thời gian" class="mono">${h.date||''} ${h.timeIn||''}</td>
     <td data-label="UID"><span class="mono">${h.uid||'—'}</span></td>
     <td data-label="Chủ xe">${h.owner||'Khách'}</td>
-    <td data-label="Loại thẻ">${h.type==='month'?'<span class="badge purple">Thẻ tháng</span>':'<span class="badge blue">Thẻ thường</span>'}</td>
+    <td data-label="Loại thẻ">${type==='month'?'<span class="badge purple">Thẻ tháng</span>':'<span class="badge blue">Thẻ thường</span>'}</td>
     <td data-label="Trạng thái">${h.status==='inside'?'<span class="badge green">● Đang trong bãi</span>':'<span class="badge orange">Đã ra</span>'}</td>
     <td data-label="Phí"><b>${h.fee>0 ? (h.fee/1000)+'k' : '—'}</b></td>
-  </tr>`).join('');
+  </tr>`;}).join('');
 }
 
 function renderHistoryTable() {
@@ -1066,17 +1082,19 @@ function renderHistoryTable() {
     rows = rows.filter(h => h.date === fmtDate);
   }
   if (!rows.length) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:24px">Không có dữ liệu</td></tr>'; return; }
-  tbody.innerHTML = rows.map((h,i) => `<tr>
+  tbody.innerHTML = rows.map((h,i) => {
+    const type = resolveType(h);
+    return `<tr>
     <td data-label="#">${i+1}</td>
     <td data-label="Giờ vào" class="mono">${h.timeIn||'—'}</td>
     <td data-label="Giờ ra" class="mono">${h.timeOut||'—'}</td>
     <td data-label="Thời gian đỗ">${calcDuration(h.timeIn, h.timeOut)}</td>
     <td data-label="UID"><span class="mono">${h.uid||'—'}</span></td>
     <td data-label="Chủ xe">${h.owner||'Khách'}</td>
-    <td data-label="Loại thẻ">${h.type==='month'?'<span class="badge purple">Thẻ tháng</span>':'<span class="badge blue">Thẻ thường</span>'}</td>
+    <td data-label="Loại thẻ">${type==='month'?'<span class="badge purple">Thẻ tháng</span>':'<span class="badge blue">Thẻ thường</span>'}</td>
     <td data-label="Phí"><b>${h.fee>0?(h.fee/1000)+'k':'—'}</b></td>
     <td data-label="Trạng thái">${h.status==='inside'?'<span class="badge green">Đang trong bãi</span>':'<span class="badge orange">Đã ra</span>'}</td>
-  </tr>`).join('');
+  </tr>`;}).join('');
 }
 
 function renderMemberHistory() {
@@ -1133,6 +1151,9 @@ function calcStatsFromHistory() {
   if (el2) el2.textContent = revStr;
   if (el3) el3.textContent = revStr;
   if (el4) el4.textContent = totalToday;
+
+  // Cập nhật biểu đồ doanh thu mỗi khi stats thay đổi
+  calcChartFromHistory();
 }
 
 async function loadHistory() {
@@ -1152,11 +1173,13 @@ async function loadHistory() {
 // ════════════════════════════════════════════
 async function loadMembersFromFirebase() {
   const data = await fbGet('/members');
-  accountsData = []; cardsData = [];
+  accountsData = []; cardsData = []; memberUIDs = new Set();
   if (!data || typeof data !== 'object') return;
   Object.entries(data).forEach(([username, m]) => {
     accountsData.push({username, name:m.fullname||m.name||username, phone:m.phone||'—', uid:m.uid||'—', created:m.created||'—', expiry:m.expiry||'—', status:m.status||'active'});
     cardsData.push({uid:m.uid||'—', owner:m.fullname||username, type:'month', expiry:m.expiry||'—', fee:m.fee?Number(m.fee).toLocaleString('vi-VN')+'đ':'—', status:m.status||'active', account:username});
+    // Build memberUIDs Set để cross-check type khi Firebase history thiếu field
+    if (m.uid) memberUIDs.add(m.uid.toUpperCase());
   });
   renderAccountsTable();
 }
@@ -1267,7 +1290,77 @@ function renderRevenueChart(type) {
 function switchRevTab(btn, type) {
   document.querySelectorAll('.rev-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
+  currentRevTab = type;
   renderRevenueChart(type);
+}
+
+// ════════════════════════════════════════════
+//  TÍNH BIỂU ĐỒ DOANH THU TỪ HISTORY
+//  Gọi sau calcStatsFromHistory() — cùng nguồn dữ liệu historyData
+// ════════════════════════════════════════════
+function calcChartFromHistory() {
+  const now = new Date();
+
+  // ── Day chart: 7 ngày trong tuần hiện tại (T2–CN) ──
+  const dayVals = [0,0,0,0,0,0,0];
+  const dow0 = now.getDay(); // 0=CN, 1=T2...
+  // startOfWeek = thứ 2 đầu tuần
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - (dow0 === 0 ? 6 : dow0 - 1));
+  startOfWeek.setHours(0,0,0,0);
+
+  for (const h of historyData) {
+    if (!h.date || !h.fee || h.fee <= 0 || h.status !== 'done') continue;
+    const [d,m,y] = h.date.split('/').map(Number);
+    const ed = new Date(y, m-1, d);
+    if (ed >= startOfWeek && ed <= now) {
+      const dow = ed.getDay();
+      const idx = dow === 0 ? 6 : dow - 1; // T2=0 … CN=6
+      dayVals[idx] += Number(h.fee) / 1000;
+    }
+  }
+  chartData.day.vals = dayVals;
+
+  // ── Week chart: 4 tuần gần nhất ──
+  const weekVals = [0,0,0,0];
+  const MS_WEEK = 7*24*3600*1000;
+  for (const h of historyData) {
+    if (!h.date || !h.fee || h.fee <= 0 || h.status !== 'done') continue;
+    const [d,m,y] = h.date.split('/').map(Number);
+    const ed = new Date(y, m-1, d);
+    const weeksAgo = Math.floor((now - ed) / MS_WEEK);
+    if (weeksAgo >= 0 && weeksAgo < 4) weekVals[3 - weeksAgo] += Number(h.fee) / 1000;
+  }
+  chartData.week.vals = weekVals;
+  // Cập nhật label tuần động
+  chartData.week.labels = ['T-3','T-2','T-1','Tuần này'];
+
+  // ── Month chart: 6 tháng gần nhất ──
+  const monthVals = [0,0,0,0,0,0];
+  const monthLabels = [];
+  for (let i=5; i>=0; i--) {
+    const d2 = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    monthLabels.push('Th'+(d2.getMonth()+1));
+  }
+  chartData.month.labels = monthLabels;
+  chartData.month.vals   = monthVals; // reset trước khi cộng
+  for (const h of historyData) {
+    if (!h.date || !h.fee || h.fee <= 0 || h.status !== 'done') continue;
+    const [d,m,y] = h.date.split('/').map(Number);
+    const monthsAgo = (now.getFullYear()-y)*12 + (now.getMonth()+1-m);
+    if (monthsAgo >= 0 && monthsAgo < 6) chartData.month.vals[5-monthsAgo] += Number(h.fee)/1000;
+  }
+
+  // Cập nhật stat card Tuần / Tháng trên trang Doanh thu
+  const weekSum  = weekVals.reduce((a,b)=>a+b,0);
+  const monthSum = monthVals.reduce((a,b)=>a+b,0);
+  const el5 = document.getElementById('revWeek');
+  const el6 = document.getElementById('revMonth');
+  if (el5) el5.textContent = weekSum  > 0 ? weekSum.toFixed(0)+'k'  : '0k';
+  if (el6) el6.textContent = monthSum > 0 ? monthSum.toFixed(0)+'k' : '0k';
+
+  // Re-render tab đang active
+  renderRevenueChart(currentRevTab);
 }
 
 // ════════════════════════════════════════════
