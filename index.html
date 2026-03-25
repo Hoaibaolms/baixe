@@ -884,6 +884,7 @@ function startRealtimeListeners() {
     renderRecentTable();
     renderHistoryTable();
     calcStatsFromHistory();
+    calcChartFromHistory();  // ⭐ CẬP NHẬT CHART KHI HISTORY THAY ĐỔI - TAB DOANH THU LIÊN TỤC
     if (currentUser?.role === 'member') renderMemberHistory();
   });
 
