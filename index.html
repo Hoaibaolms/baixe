@@ -821,25 +821,20 @@ function startRealtimeListeners() {
     }
   });
 
-  // 5. Stats
-  listenFirebase('/stats', (data) => {
-    if (!data) return;
-    document.getElementById('statTodayTrips').textContent = data.totalToday || 0;
-    const rev = data.revenueToday || 0;
-    const revStr = (rev/1000).toFixed(0) + 'k';
-    document.getElementById('statTodayRevenue').textContent = revStr;
-    document.getElementById('revToday').textContent = revStr;
-    document.getElementById('revTrips').textContent = data.totalToday || 0;
-  });
+  // 5. Stats — tính trực tiếp từ /history, không phụ thuộc /stats
+  // → không bao giờ về 0 khi reload app
 
-  // 6. History (chỉ listen recent 50 entries)
+  // 6. History — load toàn bộ để tính stats đúng, không slice cứng 50
   listenFirebase('/history', (data) => {
     if (!data || typeof data !== 'object') return;
-    const rows = Object.entries(data).reverse().slice(0, 50);
-    historyData = rows.map(([k,h]) => ({...h, key:k}));
-    renderRecentTable();
-    renderHistoryTable();
-    // Nếu đang xem profile member, cập nhật lịch sử của họ
+    // Giữ toàn bộ data, sort mới nhất lên đầu
+    const allRows = Object.entries(data)
+      .map(([k,h]) => ({...h, key:k}))
+      .reverse();
+    historyData = allRows;
+    renderRecentTable();   // hàm render chỉ lấy 5 dòng đầu
+    renderHistoryTable();  // hàm render filter theo ngày
+    calcStatsFromHistory(); // tính từ toàn bộ data → không bao giờ thiếu
     if (currentUser?.role === 'member') renderMemberHistory();
   });
 
@@ -1054,12 +1049,55 @@ function renderMemberHistory() {
   </tr>`).join('');
 }
 
+// ════════════════════════════════════════════
+//  TÍNH STATS TỪ HISTORY — không phụ thuộc /stats Firebase
+//  → reload app vẫn hiện đúng, không bao giờ về 0
+// ════════════════════════════════════════════
+function calcStatsFromHistory() {
+  // Lấy ngày hôm nay theo định dạng dd/mm/yyyy (giống ESP32 ghi)
+  const now   = new Date();
+  const today = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
+
+  let totalToday   = 0;
+  let revenueToday = 0;
+
+  // Duyệt toàn bộ history (không giới hạn 50 để tính chính xác)
+  // historyData đã load từ Firebase
+  for (const h of historyData) {
+    if (h.date === today) {
+      totalToday++;
+      // Tính cả xe đang trong bãi (inside) lẫn đã ra (done)
+      // Thẻ tháng fee=0 không cộng, khách/thường mới cộng
+      if (h.fee && h.fee > 0 && (h.status === 'done' || h.status === 'inside')) {
+        revenueToday += Number(h.fee);
+      }
+    }
+  }
+
+  // Cập nhật UI
+  const revStr = revenueToday >= 1000
+    ? (revenueToday/1000).toFixed(0) + 'k'
+    : revenueToday + 'đ';
+
+  const el1 = document.getElementById('statTodayTrips');
+  const el2 = document.getElementById('statTodayRevenue');
+  const el3 = document.getElementById('revToday');
+  const el4 = document.getElementById('revTrips');
+  if (el1) el1.textContent = totalToday;
+  if (el2) el2.textContent = revStr;
+  if (el3) el3.textContent = revStr;
+  if (el4) el4.textContent = totalToday;
+}
+
 async function loadHistory() {
   const data = await fbGet('/history');
   if (!data) return;
-  historyData = Object.entries(data).reverse().slice(0,100).map(([k,h])=>({...h,key:k}));
+  historyData = Object.entries(data)
+    .map(([k,h])=>({...h,key:k}))
+    .reverse();
   renderHistoryTable();
   renderRecentTable();
+  calcStatsFromHistory();
   if (currentUser?.role === 'member') renderMemberHistory();
 }
 
