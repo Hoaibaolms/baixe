@@ -262,10 +262,15 @@
     .table-wrap{margin:0 -14px}
     table thead{display:none}
     table,tbody,tr,td{display:block;width:100%}
-    tr{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 14px}
+    tr{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 14px;display:grid!important;grid-template-columns:1fr 1fr;column-gap:12px;row-gap:4px}
     tr:hover td{background:transparent!important}
     td{padding:2px 0!important;border:none!important;font-size:13px!important}
     td[data-label]::before{content:attr(data-label) ': ';font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:1px}
+    /* Chiếm full row */
+    td:first-child,
+    td[data-label="Chủ xe"],
+    td[data-label="Thời gian đỗ"],
+    td[data-label="Thao tác"]{grid-column:1/-1}
     .filter-row{flex-wrap:wrap!important;gap:8px!important}
     .filter-row .filter-input,.filter-row input,.filter-row select{flex:1 1 calc(50% - 4px)!important;min-width:120px!important;width:auto!important;font-size:13px!important}
     .modal-overlay{align-items:flex-end!important;padding:0!important}
@@ -1049,7 +1054,7 @@ function renderRecentTable() {
     <td data-label="Thời gian" class="mono">${h.date||''} ${h.timeIn||''}</td>
     <td data-label="UID"><span class="mono">${h.uid||'—'}</span></td>
     <td data-label="Chủ xe">${h.owner||'Khách'}</td>
-    <td data-label="Loại thẻ">${h.type==='month'?'<span class="badge purple">Thẻ tháng</span>':'<span class="badge blue">Thẻ thường</span>'}</td>
+    <td data-label="Loại thẻ">${h.type==='month'?'<span class="badge blue">Thẻ tháng</span>':'<span class="badge orange">Thẻ thường</span>'}</td>
     <td data-label="Trạng thái">${h.status==='inside'?'<span class="badge green">● Đang trong bãi</span>':'<span class="badge orange">Đã ra</span>'}</td>
     <td data-label="Phí"><b>${h.fee>0 ? (h.fee/1000)+'k' : '—'}</b></td>
   </tr>`).join('');
@@ -1073,7 +1078,7 @@ function renderHistoryTable() {
     <td data-label="Thời gian đỗ">${calcDuration(h.timeIn, h.timeOut)}</td>
     <td data-label="UID"><span class="mono">${h.uid||'—'}</span></td>
     <td data-label="Chủ xe">${h.owner||'Khách'}</td>
-    <td data-label="Loại thẻ">${h.type==='month'?'<span class="badge purple">Thẻ tháng</span>':'<span class="badge blue">Thẻ thường</span>'}</td>
+    <td data-label="Loại thẻ">${h.type==='month'?'<span class="badge blue">Thẻ tháng</span>':'<span class="badge orange">Thẻ thường</span>'}</td>
     <td data-label="Phí"><b>${h.fee>0?(h.fee/1000)+'k':'—'}</b></td>
     <td data-label="Trạng thái">${h.status==='inside'?'<span class="badge green">Đang trong bãi</span>':'<span class="badge orange">Đã ra</span>'}</td>
   </tr>`).join('');
