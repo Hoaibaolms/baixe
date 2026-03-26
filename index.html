@@ -262,15 +262,18 @@
     .table-wrap{margin:0 -14px}
     table thead{display:none}
     table,tbody,tr,td{display:block;width:100%}
-    tr{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 14px;display:grid!important;grid-template-columns:1fr 1fr;column-gap:12px;row-gap:4px}
+    tr{background:var(--surface);border-bottom:1px solid var(--border);padding:5px 14px;display:grid!important;grid-template-columns:1fr 1fr;column-gap:8px;row-gap:1px}
     tr:hover td{background:transparent!important}
-    td{padding:2px 0!important;border:none!important;font-size:13px!important}
-    td[data-label]::before{content:attr(data-label) ': ';font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:1px}
+    td{padding:0!important;border:none!important;font-size:12px!important;line-height:1.6!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    td[data-label]::before{content:attr(data-label) ': ';font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;display:inline}
+    /* Ẩn cột # không cần thiết trên mobile */
+    td[data-label="#"]{display:none!important}
     /* Chiếm full row */
-    td:first-child,
     td[data-label="Chủ xe"],
-    td[data-label="Thời gian đỗ"],
-    td[data-label="Thao tác"]{grid-column:1/-1}
+    td[data-label="Thao tác"],
+    td[data-label="Trạng thái"]{grid-column:1/-1}
+    /* Badge nhỏ hơn trong bảng mobile */
+    td .badge{padding:1px 6px!important;font-size:10px!important}
     .filter-row{flex-wrap:wrap!important;gap:8px!important}
     .filter-row .filter-input,.filter-row input,.filter-row select{flex:1 1 calc(50% - 4px)!important;min-width:120px!important;width:auto!important;font-size:13px!important}
     .modal-overlay{align-items:flex-end!important;padding:0!important}
@@ -898,13 +901,11 @@ async function setManualMode(enabled) {
   if (enabled) {
     // Bật manual: ghi cổng closed mặc định để ESP32 đồng bộ trạng thái
     await fbPatch('/control', JSON.stringify({manualMode:true, entry:'closed', exit:'closed'}));
-    showToast('🎛️ Chế độ thủ công đã bật','warning');
   } else {
     // Tắt manual: đóng 2 cổng ngay, ghi 1 PATCH atomic
     await fbPatch('/control', JSON.stringify({manualMode:false, entry:'closed', exit:'closed'}));
     updateGateUI('entry','closed');
     updateGateUI('exit','closed');
-    showToast('🔒 Tắt thủ công — 2 cổng đã đóng','info');
   }
 }
 
@@ -971,7 +972,6 @@ function setBadge(state, text) {
     // Ghi Firebase để đảm bảo ESP32 nhận lệnh tắt manual khi reconnect
     // Tránh trường hợp Firebase còn lưu manualMode:true → ESP32 bật lại manual sau khi lên
     fbPatch('/control', JSON.stringify({manualMode:false, entry:'closed', exit:'closed'}));
-    showToast('⚠️ ESP32 mất kết nối — Chế độ thủ công đã tắt', 'warning');
   }
   _lastBadge = state;
   const shortText = state==='connected'?'Online':state==='disconnected'?'Offline':'…';
