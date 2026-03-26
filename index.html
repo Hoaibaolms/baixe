@@ -262,18 +262,15 @@
     .table-wrap{margin:0 -14px}
     table thead{display:none}
     table,tbody,tr,td{display:block;width:100%}
-    tr{background:var(--surface);border-bottom:1px solid var(--border);padding:5px 14px;display:grid!important;grid-template-columns:1fr 1fr;column-gap:8px;row-gap:1px}
+    tr{background:var(--surface);border-bottom:1px solid var(--border);padding:14px;display:grid!important;grid-template-columns:1fr 1fr;column-gap:12px;row-gap:6px}
+    tr.tr-month{background:var(--primary-light)!important}
     tr:hover td{background:transparent!important}
-    td{padding:0!important;border:none!important;font-size:12px!important;line-height:1.6!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    td[data-label]::before{content:attr(data-label) ': ';font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.3px;display:inline}
-    /* Ẩn cột # không cần thiết trên mobile */
-    td[data-label="#"]{display:none!important}
+    td{padding:2px 0!important;border:none!important;font-size:13px!important}
+    td[data-label]::before{content:attr(data-label) ': ';font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:1px}
     /* Chiếm full row */
+    td:first-child,
     td[data-label="Chủ xe"],
-    td[data-label="Thao tác"],
-    td[data-label="Trạng thái"]{grid-column:1/-1}
-    /* Badge nhỏ hơn trong bảng mobile */
-    td .badge{padding:1px 6px!important;font-size:10px!important}
+    td[data-label="Thao tác"]{grid-column:1/-1}
     .filter-row{flex-wrap:wrap!important;gap:8px!important}
     .filter-row .filter-input,.filter-row input,.filter-row select{flex:1 1 calc(50% - 4px)!important;min-width:120px!important;width:auto!important;font-size:13px!important}
     .modal-overlay{align-items:flex-end!important;padding:0!important}
@@ -460,7 +457,7 @@
           </div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>#</th><th>Giờ vào</th><th>Giờ ra</th><th>Thời gian đỗ</th><th>UID Thẻ</th><th>Chủ xe</th><th>Loại thẻ</th><th>Phí</th><th>Trạng thái</th></tr></thead>
+              <thead><tr><th>#</th><th>Giờ vào</th><th>Giờ ra</th><th>UID Thẻ</th><th>Chủ xe</th><th>Loại thẻ</th><th>Phí</th><th>Trạng thái</th></tr></thead>
               <tbody id="historyTable"></tbody>
             </table>
           </div>
@@ -901,11 +898,13 @@ async function setManualMode(enabled) {
   if (enabled) {
     // Bật manual: ghi cổng closed mặc định để ESP32 đồng bộ trạng thái
     await fbPatch('/control', JSON.stringify({manualMode:true, entry:'closed', exit:'closed'}));
+    showToast('🎛️ Chế độ thủ công đã bật','warning');
   } else {
     // Tắt manual: đóng 2 cổng ngay, ghi 1 PATCH atomic
     await fbPatch('/control', JSON.stringify({manualMode:false, entry:'closed', exit:'closed'}));
     updateGateUI('entry','closed');
     updateGateUI('exit','closed');
+    showToast('🔒 Tắt thủ công — 2 cổng đã đóng','info');
   }
 }
 
@@ -972,6 +971,7 @@ function setBadge(state, text) {
     // Ghi Firebase để đảm bảo ESP32 nhận lệnh tắt manual khi reconnect
     // Tránh trường hợp Firebase còn lưu manualMode:true → ESP32 bật lại manual sau khi lên
     fbPatch('/control', JSON.stringify({manualMode:false, entry:'closed', exit:'closed'}));
+    showToast('⚠️ ESP32 mất kết nối — Chế độ thủ công đã tắt', 'warning');
   }
   _lastBadge = state;
   const shortText = state==='connected'?'Online':state==='disconnected'?'Offline':'…';
@@ -1050,7 +1050,7 @@ function renderRecentTable() {
   if (!tbody) return;
   const rows = historyData.slice(0,5);
   if (!rows.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px">Chưa có hoạt động</td></tr>'; return; }
-  tbody.innerHTML = rows.map(h => `<tr>
+  tbody.innerHTML = rows.map(h => `<tr class="${h.type==='month'?'tr-month':''}">
     <td data-label="Thời gian" class="mono">${h.date||''} ${h.timeIn||''}</td>
     <td data-label="UID"><span class="mono">${h.uid||'—'}</span></td>
     <td data-label="Chủ xe">${h.owner||'Khách'}</td>
@@ -1071,11 +1071,10 @@ function renderHistoryTable() {
     rows = rows.filter(h => h.date === fmtDate);
   }
   if (!rows.length) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:24px">Không có dữ liệu</td></tr>'; return; }
-  tbody.innerHTML = rows.map((h,i) => `<tr>
+  tbody.innerHTML = rows.map((h,i) => `<tr class="${h.type==='month'?'tr-month':''}">
     <td data-label="#">${i+1}</td>
     <td data-label="Giờ vào" class="mono">${h.timeIn||'—'}</td>
     <td data-label="Giờ ra" class="mono">${h.timeOut||'—'}</td>
-    <td data-label="Thời gian đỗ">${calcDuration(h.timeIn, h.timeOut)}</td>
     <td data-label="UID"><span class="mono">${h.uid||'—'}</span></td>
     <td data-label="Chủ xe">${h.owner||'Khách'}</td>
     <td data-label="Loại thẻ">${h.type==='month'?'<span class="badge blue">Thẻ tháng</span>':'<span class="badge orange">Thẻ thường</span>'}</td>
@@ -1105,27 +1104,80 @@ function renderMemberHistory() {
 //  → reload app vẫn hiện đúng, không bao giờ về 0
 // ════════════════════════════════════════════
 function calcStatsFromHistory() {
-  // Lấy ngày hôm nay theo định dạng dd/mm/yyyy (giống ESP32 ghi)
   const now   = new Date();
   const today = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
 
   let totalToday   = 0;
   let revenueToday = 0;
 
-  // Duyệt toàn bộ history (không giới hạn 50 để tính chính xác)
-  // historyData đã load từ Firebase
+  // Biểu đồ theo ngày trong tuần (T2=0 … CN=6)
+  const dayVals = [0,0,0,0,0,0,0];
+  // Tuần hiện tại: từ thứ 2
+  const weekStart = new Date(now);
+  const dow = now.getDay(); // 0=CN
+  weekStart.setDate(now.getDate() - (dow === 0 ? 6 : dow - 1));
+  weekStart.setHours(0,0,0,0);
+
+  // Biểu đồ theo tuần trong tháng (4 tuần)
+  const weekVals = [0,0,0,0];
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  // Biểu đồ theo tháng (6 tháng gần nhất)
+  const monthVals = [0,0,0,0,0,0];
+  const curMonth = now.getMonth(); // 0-11
+
   for (const h of historyData) {
+    if (!h.date) continue;
+    const [dd, mm, yy] = h.date.split('/');
+    const hDate = new Date(+yy, +mm-1, +dd);
+
     if (h.date === today) {
-      totalToday++; // đếm tất cả lượt vào hôm nay
-      // Chỉ tính doanh thu khi xe ĐÃ RA (status==='done')
-      // Xe đang trong bãi (inside) chưa thu tiền → KHÔNG cộng
-      if (h.fee && h.fee > 0 && h.status === 'done') {
-        revenueToday += Number(h.fee);
+      totalToday++;
+    }
+
+    // Chỉ tính doanh thu khi xe ĐÃ RA (status==='done')
+    if (h.fee && h.fee > 0 && h.status === 'done') {
+      const feeK = Math.round(Number(h.fee) / 1000);
+
+      if (h.date === today) revenueToday += Number(h.fee);
+
+      // Biểu đồ ngày — tuần hiện tại
+      if (hDate >= weekStart) {
+        const hDow = hDate.getDay();
+        const idx = hDow === 0 ? 6 : hDow - 1; // 0=T2 … 6=CN
+        dayVals[idx] += feeK;
+      }
+
+      // Biểu đồ tuần — tháng hiện tại
+      if (hDate >= monthStart) {
+        const weekIdx = Math.min(Math.floor((hDate.getDate()-1) / 7), 3);
+        weekVals[weekIdx] += feeK;
+      }
+
+      // Biểu đồ tháng — 6 tháng gần nhất
+      const hMonth = hDate.getMonth();
+      const hYear  = hDate.getFullYear();
+      for (let i = 0; i < 6; i++) {
+        let tm = curMonth - (5 - i); let ty = now.getFullYear();
+        if (tm < 0) { tm += 12; ty--; }
+        if (hMonth === tm && hYear === ty) { monthVals[i] += feeK; break; }
       }
     }
   }
 
-  // Cập nhật UI
+  // Cập nhật chartData
+  chartData.day.vals   = dayVals;
+  chartData.week.vals  = weekVals;
+  chartData.month.vals = monthVals;
+
+  // Re-render biểu đồ tab đang active
+  const tabs  = document.querySelectorAll('.rev-tab');
+  const types = ['day','week','month'];
+  let rendered = false;
+  tabs.forEach((t,i) => { if (t.classList.contains('active')) { renderRevenueChart(types[i]); rendered = true; } });
+  if (!rendered) renderRevenueChart('day');
+
+  // Cập nhật UI stat cards
   const revStr = revenueToday >= 1000
     ? (revenueToday/1000).toFixed(0) + 'k'
     : revenueToday + 'đ';
@@ -1249,9 +1301,21 @@ async function submitAddMember() {
 // ════════════════════════════════════════════
 const chartData = {
   day:  {labels:['T2','T3','T4','T5','T6','T7','CN'],vals:[0,0,0,0,0,0,0]},
-  week: {labels:['T1','T2','T3','T4'],vals:[0,0,0,0]},
+  week: {labels:['Tuần 1','Tuần 2','Tuần 3','Tuần 4'],vals:[0,0,0,0]},
   month:{labels:['Th1','Th2','Th3','Th4','Th5','Th6'],vals:[0,0,0,0,0,0]},
 };
+
+// Sinh labels tháng động (6 tháng gần nhất)
+(function initChartLabels() {
+  const now = new Date();
+  const labels = [];
+  for (let i = 5; i >= 0; i--) {
+    let m = now.getMonth() - i;
+    if (m < 0) m += 12;
+    labels.push('Th' + (m + 1));
+  }
+  chartData.month.labels = labels;
+})();
 
 function renderRevenueChart(type) {
   const d = chartData[type];
