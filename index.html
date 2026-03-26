@@ -143,8 +143,7 @@
   .toggle-switch input:checked + .toggle-slider:before{transform:translateX(20px)}
   .gate-controls.disabled .btn-gate{opacity:.35!important;pointer-events:none!important;filter:grayscale(.6)}
   .gate-controls.disabled .gate-card{opacity:.45!important;pointer-events:none!important}
-  .gate-overlay{display:none;position:absolute;inset:0;background:rgba(240,242,245,.82);border-radius:var(--radius);align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text2);text-align:center;padding:12px;z-index:10}
-  .gate-controls.disabled .gate-overlay{display:flex}
+
   .btn-gate{width:100%;padding:10px;border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
   .btn-gate.open-btn{background:var(--success-light);color:var(--success);border:1.5px solid #99f6e4}
   .btn-gate.open-btn:hover{background:var(--success);color:white}
@@ -413,7 +412,6 @@
                 </label>
               </div>
               <div class="gate-controls disabled" id="gateControlBtns">
-                <div class="gate-overlay">🔒 Bật chế độ thủ công<br>để điều khiển cổng</div>
                 <div class="gate-card">
                   <div class="gate-icon">🚧</div>
                   <div class="gate-name">Cổng Vào</div>
@@ -457,7 +455,7 @@
           </div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>#</th><th>Giờ vào</th><th>Giờ ra</th><th>UID Thẻ</th><th>Chủ xe</th><th>Loại thẻ</th><th>Phí</th><th>Trạng thái</th></tr></thead>
+              <thead><tr><th>#</th><th>Giờ vào</th><th>Giờ ra</th><th>UID Thẻ</th><th>Chủ xe</th><th>Loại thẻ</th><th>Phí</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
               <tbody id="historyTable"></tbody>
             </table>
           </div>
@@ -544,7 +542,22 @@
 <!-- TOAST -->
 <div class="toast-container" id="toastContainer"></div>
 
-<!-- MODAL: Thêm thành viên -->
+<!-- MODAL: Xác nhận xóa lịch sử -->
+<div class="modal-overlay" id="modalDeleteHistory">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title">🗑️ Xóa lịch sử</div>
+      <button class="modal-close" onclick="closeModal('modalDeleteHistory')">✕</button>
+    </div>
+    <p style="color:var(--text2);font-size:14px;line-height:1.6">Bạn có chắc muốn xóa bản ghi này không?<br><span style="color:var(--danger);font-weight:600" id="deleteHistoryInfo"></span></p>
+    <div class="modal-footer">
+      <button class="btn-sm outline" onclick="closeModal('modalDeleteHistory')">Hủy</button>
+      <button class="btn-sm danger" id="confirmDeleteHistoryBtn">🗑️ Xác nhận xóa</button>
+    </div>
+  </div>
+</div>
+
+
 <div class="modal-overlay" id="modalAddMember">
   <div class="modal">
     <div class="modal-header">
@@ -1080,7 +1093,28 @@ function renderHistoryTable() {
     <td data-label="Loại thẻ">${h.type==='month'?'<span class="badge blue">Thẻ tháng</span>':'<span class="badge orange">Thẻ thường</span>'}</td>
     <td data-label="Phí"><b>${h.fee>0?(h.fee/1000)+'k':'—'}</b></td>
     <td data-label="Trạng thái">${h.status==='inside'?'<span class="badge green">Đang trong bãi</span>':'<span class="badge orange">Đã ra</span>'}</td>
+    <td data-label="Thao tác"><button class="btn-sm danger" style="padding:5px 10px;font-size:11px" onclick="confirmDeleteHistory('${h.key}','${h.uid||''}','${h.date||''}','${h.timeIn||''}')">🗑️ Xóa</button></td>
   </tr>`).join('');
+}
+
+function confirmDeleteHistory(key, uid, date, timeIn) {
+  const info = `${date} ${timeIn} — UID: ${uid||'?'}`;
+  document.getElementById('deleteHistoryInfo').textContent = info;
+  const btn = document.getElementById('confirmDeleteHistoryBtn');
+  btn.onclick = () => deleteHistoryEntry(key);
+  document.getElementById('modalDeleteHistory').classList.add('show');
+}
+
+async function deleteHistoryEntry(key) {
+  if (!key) return;
+  await fetch(`${FIREBASE_URL}/history/${key}.json`, {method:'DELETE'});
+  closeModal('modalDeleteHistory');
+  // Xóa khỏi local data ngay
+  historyData = historyData.filter(h => h.key !== key);
+  renderHistoryTable();
+  renderRecentTable();
+  calcStatsFromHistory();
+  showToast('🗑️ Đã xóa bản ghi lịch sử', 'danger');
 }
 
 function renderMemberHistory() {
@@ -1322,15 +1356,24 @@ function renderRevenueChart(type) {
   const max = Math.max(...d.vals, 1);
   const chart = document.getElementById('revenueChart');
   if (!chart) return;
-  const maxH = chart.offsetHeight - 36 || 80;
-  chart.innerHTML = d.labels.map((l,i) => {
-    const h = Math.max(4, Math.round((d.vals[i]/max)*maxH));
-    return `<div class="chart-bar-col">
-      <div class="chart-val">${d.vals[i]}k</div>
-      <div class="chart-bar" style="height:${h}px"></div>
-      <div class="chart-label">${l}</div>
-    </div>`;
-  }).join('');
+
+  // Render placeholder trước để DOM có kích thước
+  chart.innerHTML = d.labels.map((l,i) => `<div class="chart-bar-col">
+    <div class="chart-val">${d.vals[i]}k</div>
+    <div class="chart-bar" style="height:4px"></div>
+    <div class="chart-label">${l}</div>
+  </div>`).join('');
+
+  // Sau khi DOM paint xong, tính lại chiều cao thật
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const maxH = chart.offsetHeight - 36 || 80;
+      chart.querySelectorAll('.chart-bar-col').forEach((col, i) => {
+        const h = Math.max(4, Math.round((d.vals[i]/max)*maxH));
+        col.querySelector('.chart-bar').style.height = h + 'px';
+      });
+    });
+  });
 }
 
 function switchRevTab(btn, type) {
