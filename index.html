@@ -1110,7 +1110,8 @@ function renderSlots() {
 }
 
 // Sort history: mới nhất lên đầu
-// Ưu tiên: 1) date 2) timeIn 3) key Firebase (e<millis> — lớn hơn = mới hơn)
+// Ưu tiên: 1) date 2) key Firebase (e<millis> — lớn hơn = ghi mới hơn) 3) timeIn
+// Lý do: key là timestamp ghi vào Firebase → xe vừa quẹt thẻ luôn có key lớn nhất → đứng đầu
 function sortHistory(rows) {
   return rows.sort((a, b) => {
     const parseDate = s => {
@@ -1119,22 +1120,21 @@ function sortHistory(rows) {
       if (p.length !== 3) return 0;
       return new Date(+p[2], +p[1]-1, +p[0]).getTime();
     };
+    // Ưu tiên 1: ngày — mới nhất lên đầu
+    const da = parseDate(a.date), db = parseDate(b.date);
+    if (db !== da) return db - da;
+    // Ưu tiên 2: Firebase key (e<timestamp_ms>) — key lớn hơn = ghi/cập nhật gần đây hơn
+    // Đảm bảo xe vừa quẹt thẻ (entry mới nhất) luôn đứng đầu trong cùng ngày
+    const na = parseInt((a.key||'').replace(/\D/g,'')) || 0;
+    const nb = parseInt((b.key||'').replace(/\D/g,'')) || 0;
+    if (nb !== na) return nb - na;
+    // Ưu tiên 3: timeIn — giờ vào lớn hơn = vào muộn hơn = lên trước
     const parseTime = s => {
-      if (!s) return Infinity; // không có timeIn → xe đang trong bãi = mới nhất, sắp xếp lên đầu
+      if (!s) return -1;
       const p = s.split(':').map(Number);
       return (p[0]||0)*3600 + (p[1]||0)*60 + (p[2]||0);
     };
-    // Ưu tiên 1: ngày
-    const da = parseDate(a.date), db = parseDate(b.date);
-    if (db !== da) return db - da;
-    // Ưu tiên 2: giờ vào
-    const ta = parseTime(a.timeIn), tb = parseTime(b.timeIn);
-    if (tb !== ta) return tb - ta;
-    // Ưu tiên 3: key (e<millis>) — lớn hơn = mới hơn
-    const ka = a.key || '', kb = b.key || '';
-    const na = parseInt(ka.replace(/\D/g,'')) || 0;
-    const nb = parseInt(kb.replace(/\D/g,'')) || 0;
-    return nb - na;
+    return parseTime(b.timeIn) - parseTime(a.timeIn);
   });
 }
 
@@ -1187,18 +1187,17 @@ function renderHistoryTable() {
     const fmtDate = `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`;
     // Lọc theo ngày đã chọn, giữ thứ tự sort (mới nhất trên cùng)
     rows = historyData.filter(h => normalizeDate(h.date) === fmtDate);
-    // Sắp xếp lại các entry trong cùng ngày: mới nhất (timeIn lớn nhất) lên đầu
+    // Sắp xếp lại các entry trong cùng ngày: key mới nhất lên đầu (xe vừa quẹt = đầu bảng)
     rows = [...rows].sort((a,b) => {
+      const na = parseInt((a.key||'').replace(/\D/g,''))||0;
+      const nb = parseInt((b.key||'').replace(/\D/g,''))||0;
+      if (nb !== na) return nb - na;
       const parseT = s => {
-        if (!s) return Infinity;
+        if (!s) return -1;
         const p = s.split(':').map(Number);
         return (p[0]||0)*3600 + (p[1]||0)*60 + (p[2]||0);
       };
-      const ta = parseT(a.timeIn), tb = parseT(b.timeIn);
-      if (tb !== ta) return tb - ta;
-      const ka = parseInt((a.key||'').replace(/\D/g,''))||0;
-      const kb = parseInt((b.key||'').replace(/\D/g,''))||0;
-      return kb - ka;
+      return parseT(b.timeIn) - parseT(a.timeIn);
     });
   }
   if (!rows.length) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:24px">Không có dữ liệu</td></tr>'; return; }
