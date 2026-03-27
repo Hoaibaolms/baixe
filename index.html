@@ -695,6 +695,7 @@ async function fbPatch(path, value) {
 function listenFirebase(path, callback) {
   const url = `${FIREBASE_URL}${path}.json`;
   let cached = null;
+  let fetching = false; // tránh fetch song song khi nhiều event đến cùng lúc
   let es;
 
   // Helper: apply Firebase event vào cached object
@@ -730,6 +731,16 @@ function listenFirebase(path, callback) {
   function connect() {
     es = new EventSource(url);
 
+    // Fetch snapshot ngay khi connect — không chờ Firebase gửi put "/"
+    // Tránh trường hợp cached=null khi SSE reconnect giữa chừng
+    fetching = true;
+    fetch(url).then(r=>r.json()).then(full=>{
+      if (full && typeof full === 'object' && !full.error) {
+        cached = full;
+        callback(cached);
+      }
+    }).catch(()=>{}).finally(()=>{ fetching = false; });
+
     // "put": Firebase gửi khi có write tại path BẤT KỲ dưới node đang lắng nghe
     // d.path = "/" → replace toàn bộ (lần đầu load hoặc delete)
     // d.path = "/eXXXX" → PUT sub-node (xe vào/ra ghi history)
@@ -742,12 +753,15 @@ function listenFirebase(path, callback) {
           // nghĩa là SSE connect giữa chừng, chưa có snapshot đầy đủ
           // → fetch lại toàn bộ node để không mất data cũ
           if (cached === null && d.path && d.path !== '/' && d.path !== '') {
-            fetch(url).then(r=>r.json()).then(full=>{
-              if (full && typeof full === 'object' && !full.error) {
-                cached = full;
-                callback(cached);
-              }
-            }).catch(()=>{});
+            if (!fetching) {
+              fetching = true;
+              fetch(url).then(r=>r.json()).then(full=>{
+                if (full && typeof full === 'object' && !full.error) {
+                  cached = full;
+                  callback(cached);
+                }
+              }).catch(()=>{}).finally(()=>{ fetching = false; });
+            }
             return;
           }
           // PUT: replace node (merge=false)
@@ -1123,6 +1137,14 @@ function renderRecentTable() {
   </tr>`).join('');
 }
 
+function normalizeDate(dateStr) {
+  // Chuẩn hóa về dd/MM/yyyy — xử lý cả "27/3/2026" lẫn "27/03/2026"
+  if (!dateStr) return '';
+  const parts = dateStr.split('/');
+  if (parts.length !== 3) return dateStr;
+  return `${parts[0].padStart(2,'0')}/${parts[1].padStart(2,'0')}/${parts[2]}`;
+}
+
 function renderHistoryTable() {
   const tbody = document.getElementById('historyTable');
   if (!tbody) return;
@@ -1131,7 +1153,7 @@ function renderHistoryTable() {
   if (dateFilter) {
     const [y,m,d] = dateFilter.split('-');
     const fmtDate = `${d}/${m}/${y}`;
-    rows = rows.filter(h => h.date === fmtDate);
+    rows = rows.filter(h => normalizeDate(h.date) === fmtDate);
   }
   if (!rows.length) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:24px">Không có dữ liệu</td></tr>'; return; }
   tbody.innerHTML = rows.map((h,i) => `<tr class="${h.type==='month'?'tr-month':''}">
@@ -1160,7 +1182,7 @@ function confirmDeleteByDate() {
   if (!dateVal) { showToast('❌ Vui lòng chọn ngày trước!', 'danger'); return; }
   const [y,m,d] = dateVal.split('-');
   const fmtDate = `${d}/${m}/${y}`;
-  const count = historyData.filter(h => h.date === fmtDate).length;
+  const count = historyData.filter(h => normalizeDate(h.date) === fmtDate).length;
   if (count === 0) { showToast('Không có dữ liệu ngày này!', 'info'); return; }
   document.getElementById('deleteDateInfo').textContent = `${fmtDate} (${count} bản ghi)`;
   document.getElementById('confirmDeleteByDateBtn').onclick = () => deleteByDate(fmtDate);
@@ -1168,12 +1190,12 @@ function confirmDeleteByDate() {
 }
 
 async function deleteByDate(fmtDate) {
-  const toDelete = historyData.filter(h => h.date === fmtDate);
+  const toDelete = historyData.filter(h => normalizeDate(h.date) === fmtDate);
   // Xóa song song tất cả entries
   await Promise.all(toDelete.map(h =>
     fetch(`${FIREBASE_URL}/history/${h.key}.json`, {method:'DELETE'})
   ));
-  historyData = historyData.filter(h => h.date !== fmtDate);
+  historyData = historyData.filter(h => normalizeDate(h.date) !== fmtDate);
   renderHistoryTable();
   renderRecentTable();
   calcStatsFromHistory();
@@ -1243,7 +1265,7 @@ function calcStatsFromHistory() {
     const [dd, mm, yy] = h.date.split('/');
     const hDate = new Date(+yy, +mm-1, +dd);
 
-    if (h.date === today) {
+    if (normalizeDate(h.date) === today) {
       totalToday++;
     }
 
@@ -1251,7 +1273,7 @@ function calcStatsFromHistory() {
     if (h.fee && h.fee > 0 && h.status === 'done') {
       const feeK = Math.round(Number(h.fee) / 1000);
 
-      if (h.date === today) revenueToday += Number(h.fee);
+      if (normalizeDate(h.date) === today) revenueToday += Number(h.fee);
 
       // Biểu đồ ngày — tuần hiện tại
       if (hDate >= weekStart) {
