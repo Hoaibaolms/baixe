@@ -187,6 +187,10 @@
   .btn-sm.danger{background:var(--danger-light);color:var(--danger)}.btn-sm.danger:hover{background:var(--danger);color:white}
   .btn-sm.success{background:var(--success-light);color:var(--success)}.btn-sm.success:hover{background:var(--success);color:white}
 
+  /* Thành viên: trang lịch sử chỉ xem của mình — ẩn cột/xóa admin */
+  .page.history-member-mode #btnDeleteHistoryByDate{display:none!important}
+  .page.history-member-mode #historyTableFull .history-col-actions{display:none!important}
+
   /* MODAL */
   .modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,28,46,.4);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center}
   .modal-overlay.show{display:flex;animation:fadeIn .2s}
@@ -445,18 +449,18 @@
 
       <!-- LỊCH SỬ -->
       <div class="page" id="page-history">
-        <div class="page-title">Lịch sử xe vào/ra</div>
-        <div class="page-subtitle">Toàn bộ lịch sử quét thẻ</div>
+        <div class="page-title" id="historyPageTitle">Lịch sử xe vào/ra</div>
+        <div class="page-subtitle" id="historyPageSubtitle">Toàn bộ lịch sử quét thẻ</div>
         <div class="card">
           <div class="filter-row">
             <input class="filter-input" type="date" id="historyDate" style="width:160px">
             <button class="btn-sm primary" onclick="renderHistoryTable()">🔍 Lọc</button>
             <button class="btn-sm outline" onclick="reloadHistory()">🔄 Tải lại</button>
-            <button class="btn-sm danger" onclick="confirmDeleteByDate()">🗑️ Xóa ngày này</button>
+            <button class="btn-sm danger" id="btnDeleteHistoryByDate" onclick="confirmDeleteByDate()">🗑️ Xóa ngày này</button>
           </div>
           <div class="table-wrap">
-            <table>
-              <thead><tr><th>#</th><th>Giờ vào</th><th>Giờ ra</th><th>UID Thẻ</th><th>Chủ xe</th><th>Loại thẻ</th><th>Phí</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+            <table id="historyTableFull">
+              <thead><tr><th>#</th><th>Giờ vào</th><th>Giờ ra</th><th>UID Thẻ</th><th>Chủ xe</th><th>Loại thẻ</th><th>Phí</th><th>Trạng thái</th><th class="history-col-actions">Thao tác</th></tr></thead>
               <tbody id="historyTable"></tbody>
             </table>
           </div>
@@ -1075,7 +1079,25 @@ function navigateTo(pageId) {
   window.scrollTo(0,0);
   const titles = {dashboard:'Trang chủ',history:'Lịch sử vào/ra',revenue:'Doanh thu',
     cards:'Quản lý tài khoản',profile:'Hồ sơ của tôi'};
-  document.getElementById('topbarTitle').textContent = titles[pageId] || pageId;
+  let topTitle = titles[pageId] || pageId;
+  if (pageId === 'history' && currentUser?.role === 'member') topTitle = 'Lịch sử xe của tôi';
+  document.getElementById('topbarTitle').textContent = topTitle;
+
+  const pageHistoryEl = document.getElementById('page-history');
+  if (pageHistoryEl) {
+    pageHistoryEl.classList.toggle('history-member-mode', pageId === 'history' && currentUser?.role === 'member');
+  }
+  if (pageId === 'history') {
+    const ht = document.getElementById('historyPageTitle');
+    const hs = document.getElementById('historyPageSubtitle');
+    if (currentUser?.role === 'member') {
+      if (ht) ht.textContent = 'Lịch sử xe của tôi';
+      if (hs) hs.textContent = 'Chỉ hiển thị lượt vào/ra của thẻ RFID đã đăng ký';
+    } else {
+      if (ht) ht.textContent = 'Lịch sử xe vào/ra';
+      if (hs) hs.textContent = 'Toàn bộ lịch sử quét thẻ';
+    }
+  }
 
   if (pageId === 'cards') loadMembersFromFirebase();
   if (pageId === 'history') renderHistoryTable();
@@ -1225,6 +1247,19 @@ function normalizeDate(dateStr) {
   return `${parts[0].padStart(2,'0')}/${parts[1].padStart(2,'0')}/${parts[2]}`;
 }
 
+/** Chuẩn hóa UID thẻ để so khớp lịch sử (cùng logic với renderMemberHistory) */
+function normalizeHistoryUid(u) {
+  return (u == null ? '' : String(u)).trim().toUpperCase();
+}
+
+/** Thành viên chỉ thấy bản ghi trùng UID thẻ đã đăng ký */
+function filterHistoryRowsForRole(rows) {
+  if (currentUser?.role !== 'member') return rows;
+  const my = normalizeHistoryUid(currentUser.uid);
+  if (!my) return [];
+  return rows.filter(h => h.uid && normalizeHistoryUid(h.uid) === my);
+}
+
 // So sánh ngày bằng số — an toàn hơn so sánh string
 function isToday(dateStr) {
   if (!dateStr) return false;
@@ -1247,6 +1282,8 @@ function renderHistoryTable() {
     rows = rows.filter(h => normalizeDate(h.date) === fmtDate);
   }
 
+  rows = filterHistoryRowsForRole(rows);
+
   // historyData đã được sort trong sortHistory() rồi, không cần sort lại
   // Chỉ hiển thị tất cả (không giới hạn số lượng)
 
@@ -1267,12 +1304,15 @@ function renderHistoryTable() {
     <td data-label="Loại thẻ">${h.type==='month'?'<span class="badge blue">Thẻ tháng</span>':'<span class="badge orange">Thẻ thường</span>'}</td>
     <td data-label="Phí"><b>${displayFee > 0 ? (displayFee/1000)+'k' : '—'}</b></td>
     <td data-label="Trạng thái">${h.status==='inside'?'<span class="badge green">Đang trong bãi</span>':'<span class="badge orange">Đã ra</span>'}</td>
-    <td data-label="Thao tác"><button class="btn-sm danger" style="padding:5px 10px;font-size:11px" onclick="confirmDeleteHistory('${h.key}','${h.uid||''}','${h.date||''}','${h.timeIn||''}')">🗑️ Xóa</button></td>
+    ${currentUser?.role === 'admin'
+      ? `<td class="history-col-actions" data-label="Thao tác"><button class="btn-sm danger" style="padding:5px 10px;font-size:11px" onclick="confirmDeleteHistory('${h.key}','${(h.uid||'').replace(/'/g, "\\'")}','${(h.date||'').replace(/'/g, "\\'")}','${(h.timeIn||'').replace(/'/g, "\\'")}')">🗑️ Xóa</button></td>`
+      : `<td class="history-col-actions"></td>`}
   </tr>`;
   }).join('');
 }
 
 function confirmDeleteHistory(key, uid, date, timeIn) {
+  if (currentUser?.role !== 'admin') { showToast('❌ Không có quyền xóa', 'danger'); return; }
   const info = `${date} ${timeIn} — UID: ${uid||'?'}`;
   document.getElementById('deleteHistoryInfo').textContent = info;
   const btn = document.getElementById('confirmDeleteHistoryBtn');
@@ -1281,6 +1321,7 @@ function confirmDeleteHistory(key, uid, date, timeIn) {
 }
 
 function confirmDeleteByDate() {
+  if (currentUser?.role !== 'admin') { showToast('❌ Không có quyền xóa', 'danger'); return; }
   const dateVal = document.getElementById('historyDate')?.value;
   if (!dateVal) { showToast('❌ Vui lòng chọn ngày trước!', 'danger'); return; }
   const [y,m,d] = dateVal.split('-');
@@ -1293,6 +1334,7 @@ function confirmDeleteByDate() {
 }
 
 async function deleteByDate(fmtDate) {
+  if (currentUser?.role !== 'admin') return;
   const toDelete = historyData.filter(h => normalizeDate(h.date) === fmtDate);
   // Xóa song song tất cả entries
   await Promise.all(toDelete.map(h =>
@@ -1308,6 +1350,7 @@ async function deleteByDate(fmtDate) {
 
 async function deleteHistoryEntry(key) {
   if (!key) return;
+  if (currentUser?.role !== 'admin') return;
   await fetch(`${FIREBASE_URL}/history/${key}.json`, {method:'DELETE'});
   closeModal('modalDeleteHistory');
   // Xóa khỏi local data ngay
