@@ -886,11 +886,11 @@ async function initApp() {
   // Load initial data
   await loadMembersFromFirebase();
 
-  // Load lịch sử ngay qua REST để doanh thu & lịch sử không bị 0 khi reload
-  await loadHistoryInit();
-
-  // Start realtime listeners — SSE giữ data cập nhật realtime sau khi REST đã load xong
+  // Start realtime listeners — SSE tự fetch snapshot history ngay khi connect
   startRealtimeListeners();
+
+  // Tính stats ngay lập tức khi init (phòng trường hợp history đã có sẵn trong Firebase)
+  calcStatsFromHistory();
 }
 
 // ════════════════════════════════════════════
@@ -966,6 +966,9 @@ function startRealtimeListeners() {
     calcStatsFromHistory();
     if (currentUser?.role === 'member') renderMemberHistory();
   });
+
+  // Load history ngay lần đầu để đảm bảo stats không bị trễ
+  loadHistory();
 
   // ESP32 badge ticker
   setInterval(tickESP32Badge, 2000);
@@ -1109,9 +1112,8 @@ function renderSlots() {
   });
 }
 
-// Sort history: mới nhất lên đầu
-// Ưu tiên: 1) date 2) key Firebase (e<millis> — lớn hơn = ghi mới hơn) 3) timeIn
-// Lý do: key là timestamp ghi vào Firebase → xe vừa quẹt thẻ luôn có key lớn nhất → đứng đầu
+// Sort history: mới nhất lên đầu, KHÔNG ưu tiên xe trong bãi
+// Thứ tự: 1) ngày đã chọn (nếu có) 2) date giảm dần 3) timeIn giảm dần 4) key
 function sortHistory(rows) {
   return rows.sort((a, b) => {
     const parseDate = s => {
@@ -1120,21 +1122,22 @@ function sortHistory(rows) {
       if (p.length !== 3) return 0;
       return new Date(+p[2], +p[1]-1, +p[0]).getTime();
     };
-    // Ưu tiên 1: ngày — mới nhất lên đầu
-    const da = parseDate(a.date), db = parseDate(b.date);
-    if (db !== da) return db - da;
-    // Ưu tiên 2: Firebase key (e<timestamp_ms>) — key lớn hơn = ghi/cập nhật gần đây hơn
-    // Đảm bảo xe vừa quẹt thẻ (entry mới nhất) luôn đứng đầu trong cùng ngày
-    const na = parseInt((a.key||'').replace(/\D/g,'')) || 0;
-    const nb = parseInt((b.key||'').replace(/\D/g,'')) || 0;
-    if (nb !== na) return nb - na;
-    // Ưu tiên 3: timeIn — giờ vào lớn hơn = vào muộn hơn = lên trước
     const parseTime = s => {
       if (!s) return -1;
       const p = s.split(':').map(Number);
       return (p[0]||0)*3600 + (p[1]||0)*60 + (p[2]||0);
     };
-    return parseTime(b.timeIn) - parseTime(a.timeIn);
+    // Ưu tiên 1: ngày (mới nhất lên)
+    const da = parseDate(a.date), db = parseDate(b.date);
+    if (db !== da) return db - da;
+    // Ưu tiên 2: giờ vào (mới nhất lên)
+    const ta = parseTime(a.timeIn), tb = parseTime(b.timeIn);
+    if (tb !== ta) return tb - ta;
+    // Ưu tiên 3: key (e<millis>) — lớn hơn = mới hơn
+    const ka = a.key || '', kb = b.key || '';
+    const na = parseInt(ka.replace(/\D/g,'')) || 0;
+    const nb = parseInt(kb.replace(/\D/g,'')) || 0;
+    return nb - na;
   });
 }
 
@@ -1142,31 +1145,76 @@ function sortHistory(rows) {
 //  RENDER TABLES
 // ════════════════════════════════════════════
 function calcDuration(timeIn, timeOut) {
-  if (!timeIn || !timeOut) return '—';
+  if (!timeIn) return '—';
   try {
+    // Nếu chưa ra (timeOut rỗng), tính đến giờ hiện tại
+    const now = new Date();
+    const nowHH = String(now.getHours()).padStart(2, '0');
+    const nowMM = String(now.getMinutes()).padStart(2, '0');
+    const outTime = timeOut || `${nowHH}:${nowMM}:00`;
+
     const [ih,im] = timeIn.split(':').map(Number);
-    const [oh,om] = timeOut.split(':').map(Number);
+    const [oh,om] = outTime.split(':').map(Number);
     const diff = (oh*60+om) - (ih*60+im);
     if (diff <= 0) return '—';
     return diff >= 60 ? `${Math.floor(diff/60)}g ${diff%60}p` : `${diff}p`;
   } catch { return '—'; }
 }
 
+// Tính phí tạm tính (tính ngay khi xe còn trong bãi)
+function calcTempFee(timeIn, isMonthCard) {
+  if (!timeIn) return 0;
+  try {
+    // Thẻ tháng: miễn phí
+    if (isMonthCard) return 0;
+
+    const now = new Date();
+    const nowHH = String(now.getHours()).padStart(2, '0');
+    const nowMM = String(now.getMinutes()).padStart(2, '0');
+    const outTime = `${nowHH}:${nowMM}:00`;
+
+    const [ih,im] = timeIn.split(':').map(Number);
+    const [oh,om] = outTime.split(':').map(Number);
+    const diff = (oh*60+om) - (ih*60+im);
+    if (diff < 0) return 0;
+
+    // 30 phút đầu miễn phí, sau đó 5k/giờ
+    if (diff <= 30) return 0;
+    const hours = Math.ceil((diff - 30) / 60);
+    return hours * 5000;
+  } catch { return 0; }
+}
+
 function renderRecentTable() {
   const tbody = document.getElementById('recentTable');
   if (!tbody) return;
-  // Lấy 5 xe gần nhất: xe đang trong bãi (mới vào) và xe đã ra, sắp xếp mới nhất lên đầu
-  // historyData đã được sort bởi sortHistory() (mới nhất lên đầu, xe trong bãi ưu tiên)
-  const rows = historyData.slice(0,5);
-  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px">Chưa có hoạt động</td></tr>'; return; }
-  tbody.innerHTML = rows.map(h => `<tr class="${h.type==='month'?'tr-month':''}">
+
+  // Lấy ngày hôm nay theo giờ Việt Nam (UTC+7)
+  const nowVN = new Date(new Date().toLocaleString('en-US', {timeZone:'Asia/Ho_Chi_Minh'}));
+  const today = `${String(nowVN.getDate()).padStart(2,'0')}/${String(nowVN.getMonth()+1).padStart(2,'0')}/${nowVN.getFullYear()}`;
+
+  // Lọc chỉ hôm nay, sort theo thời gian vào giảm dần (mới nhất lên), lấy 5 xe gần nhất
+  const todayRows = historyData
+    .filter(h => normalizeDate(h.date) === today)
+    .slice(0, 5);
+
+  if (!todayRows.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px">Chưa có hoạt động hôm nay</td></tr>';
+    return;
+  }
+  tbody.innerHTML = todayRows.map(h => {
+    const isMonth = h.type === 'month';
+    // Phí: nếu đã ra dùng h.fee, nếu còn trong bãi tính tạm
+    const displayFee = h.fee > 0 ? h.fee : (h.status === 'inside' ? calcTempFee(h.timeIn, isMonth) : 0);
+    return `<tr class="${h.type==='month'?'tr-month':''}">
     <td data-label="Thời gian" class="mono">${h.date||''} ${h.timeIn||''}</td>
     <td data-label="UID"><span class="mono">${h.uid||'—'}</span></td>
     <td data-label="Chủ xe">${h.owner||'Khách'}</td>
     <td data-label="Loại thẻ">${h.type==='month'?'<span class="badge blue">Thẻ tháng</span>':'<span class="badge orange">Thẻ thường</span>'}</td>
     <td data-label="Trạng thái">${h.status==='inside'?'<span class="badge green">● Đang trong bãi</span>':'<span class="badge orange">Đã ra</span>'}</td>
-    <td data-label="Phí"><b>${h.fee>0 ? (h.fee/1000)+'k' : '—'}</b></td>
-  </tr>`).join('');
+    <td data-label="Phí"><b>${displayFee > 0 ? (displayFee/1000)+'k' : '—'}</b></td>
+  </tr>`;
+  }).join('');
 }
 
 function normalizeDate(dateStr) {
@@ -1177,41 +1225,51 @@ function normalizeDate(dateStr) {
   return `${parts[0].padStart(2,'0')}/${parts[1].padStart(2,'0')}/${parts[2]}`;
 }
 
+// So sánh ngày bằng số — an toàn hơn so sánh string
+function isToday(dateStr) {
+  if (!dateStr) return false;
+  const normalized = normalizeDate(dateStr);
+  const nowVN = new Date(new Date().toLocaleString('en-US', {timeZone:'Asia/Ho_Chi_Minh'}));
+  const todayNorm = `${String(nowVN.getDate()).padStart(2,'0')}/${String(nowVN.getMonth()+1).padStart(2,'0')}/${nowVN.getFullYear()}`;
+  return normalized === todayNorm;
+}
+
 function renderHistoryTable() {
   const tbody = document.getElementById('historyTable');
   if (!tbody) return;
   const dateFilter = document.getElementById('historyDate')?.value;
+
+  // Lọc theo ngày đã chọn (nếu có), KHÔNG slice cứng 50
   let rows = historyData;
   if (dateFilter) {
     const [y,m,d] = dateFilter.split('-');
-    const fmtDate = `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`;
-    // Lọc theo ngày đã chọn, giữ thứ tự sort (mới nhất trên cùng)
-    rows = historyData.filter(h => normalizeDate(h.date) === fmtDate);
-    // Sắp xếp lại các entry trong cùng ngày: key mới nhất lên đầu (xe vừa quẹt = đầu bảng)
-    rows = [...rows].sort((a,b) => {
-      const na = parseInt((a.key||'').replace(/\D/g,''))||0;
-      const nb = parseInt((b.key||'').replace(/\D/g,''))||0;
-      if (nb !== na) return nb - na;
-      const parseT = s => {
-        if (!s) return -1;
-        const p = s.split(':').map(Number);
-        return (p[0]||0)*3600 + (p[1]||0)*60 + (p[2]||0);
-      };
-      return parseT(b.timeIn) - parseT(a.timeIn);
-    });
+    const fmtDate = `${d}/${m}/${y}`;
+    rows = rows.filter(h => normalizeDate(h.date) === fmtDate);
   }
-  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:24px">Không có dữ liệu</td></tr>'; return; }
-  tbody.innerHTML = rows.map((h,i) => `<tr class="${h.type==='month'?'tr-month':''}">
+
+  // historyData đã được sort trong sortHistory() rồi, không cần sort lại
+  // Chỉ hiển thị tất cả (không giới hạn số lượng)
+
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:24px">Không có dữ liệu</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map((h,i) => {
+    const isMonth = h.type === 'month';
+    // Phí: nếu đã ra dùng h.fee, nếu còn trong bãi tính tạm
+    const displayFee = h.fee > 0 ? h.fee : (h.status === 'inside' ? calcTempFee(h.timeIn, isMonth) : 0);
+    return `<tr class="${h.type==='month'?'tr-month':''}">
     <td data-label="#">${i+1}</td>
     <td data-label="Giờ vào" class="mono">${h.timeIn||'—'}</td>
     <td data-label="Giờ ra" class="mono">${h.timeOut||'—'}</td>
     <td data-label="UID"><span class="mono">${h.uid||'—'}</span></td>
     <td data-label="Chủ xe">${h.owner||'Khách'}</td>
     <td data-label="Loại thẻ">${h.type==='month'?'<span class="badge blue">Thẻ tháng</span>':'<span class="badge orange">Thẻ thường</span>'}</td>
-    <td data-label="Phí"><b>${h.fee>0?(h.fee/1000)+'k':'—'}</b></td>
+    <td data-label="Phí"><b>${displayFee > 0 ? (displayFee/1000)+'k' : '—'}</b></td>
     <td data-label="Trạng thái">${h.status==='inside'?'<span class="badge green">Đang trong bãi</span>':'<span class="badge orange">Đã ra</span>'}</td>
     <td data-label="Thao tác"><button class="btn-sm danger" style="padding:5px 10px;font-size:11px" onclick="confirmDeleteHistory('${h.key}','${h.uid||''}','${h.date||''}','${h.timeIn||''}')">🗑️ Xóa</button></td>
-  </tr>`).join('');
+  </tr>`;
+  }).join('');
 }
 
 function confirmDeleteHistory(key, uid, date, timeIn) {
@@ -1226,7 +1284,7 @@ function confirmDeleteByDate() {
   const dateVal = document.getElementById('historyDate')?.value;
   if (!dateVal) { showToast('❌ Vui lòng chọn ngày trước!', 'danger'); return; }
   const [y,m,d] = dateVal.split('-');
-  const fmtDate = `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`;
+  const fmtDate = `${d}/${m}/${y}`;
   const count = historyData.filter(h => normalizeDate(h.date) === fmtDate).length;
   if (count === 0) { showToast('Không có dữ liệu ngày này!', 'info'); return; }
   document.getElementById('deleteDateInfo').textContent = `${fmtDate} (${count} bản ghi)`;
@@ -1277,49 +1335,62 @@ function renderMemberHistory() {
 }
 
 // ════════════════════════════════════════════
-//  TÍNH STATS TỪ HISTORY — không phụ thuộc /stats Firebase
-//  → reload app vẫn hiện đúng, không bao giờ về 0
+//  TÍNH STATS TỪ HISTORY
+//  - Doanh thu = tổng phí đã thanh toán (khi xe ra) + phí tạm tính (xe còn trong bãi)
+//  - Lượt hôm nay = tất cả xe vào hôm nay (cả đang trong bãi lẫn đã ra)
 // ════════════════════════════════════════════
 function calcStatsFromHistory() {
   // Lấy ngày giờ theo múi giờ Việt Nam (UTC+7)
   const nowVN  = new Date(new Date().toLocaleString('en-US', {timeZone:'Asia/Ho_Chi_Minh'}));
-  const now    = nowVN;
-  // Chuẩn hóa ngày hôm nay về dd/MM/yyyy (padded)
-  const today  = `${String(nowVN.getDate()).padStart(2,'0')}/${String(nowVN.getMonth()+1).padStart(2,'0')}/${nowVN.getFullYear()}`;
 
-  let totalToday   = 0;
-  let revenueToday = 0;
+  let totalToday    = 0;
+  let revenueToday  = 0;
 
   // Biểu đồ theo ngày trong tuần (T2=0 … CN=6)
   const dayVals = [0,0,0,0,0,0,0];
   // Tuần hiện tại: từ thứ 2
-  const weekStart = new Date(now);
-  const dow = now.getDay(); // 0=CN
-  weekStart.setDate(now.getDate() - (dow === 0 ? 6 : dow - 1));
+  const weekStart = new Date(nowVN);
+  const dow = nowVN.getDay(); // 0=CN
+  weekStart.setDate(nowVN.getDate() - (dow === 0 ? 6 : dow - 1));
   weekStart.setHours(0,0,0,0);
 
   // Biểu đồ theo tuần trong tháng (4 tuần)
   const weekVals = [0,0,0,0];
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const monthStart = new Date(nowVN.getFullYear(), nowVN.getMonth(), 1);
 
   // Biểu đồ theo tháng (6 tháng gần nhất)
   const monthVals = [0,0,0,0,0,0];
-  const curMonth = now.getMonth(); // 0-11
+  const curMonth = nowVN.getMonth(); // 0-11
 
   for (const h of historyData) {
     if (!h.date) continue;
     const [dd, mm, yy] = h.date.split('/');
     const hDate = new Date(+yy, +mm-1, +dd);
+    const isMonthCard = h.type === 'month';
 
-    if (normalizeDate(h.date) === today) {
+    // Lượt hôm nay = tất cả xe vào hôm nay (inside + done)
+    if (isToday(h.date)) {
       totalToday++;
     }
 
-    // Chỉ tính doanh thu khi xe ĐÃ RA (status==='done')
+    // Doanh thu hôm nay:
+    // - Xe đã ra (done): dùng h.fee đã tính
+    // - Xe còn trong bãi (inside): tính phí tạm
+    if (isToday(h.date)) {
+      let dayRevenue = 0;
+      if (h.status === 'done' && h.fee && h.fee > 0) {
+        // Xe đã ra: dùng phí đã lưu
+        dayRevenue = Number(h.fee);
+      } else if (h.status === 'inside') {
+        // Xe còn trong bãi: tính phí tạm
+        dayRevenue = calcTempFee(h.timeIn, isMonthCard);
+      }
+      revenueToday += dayRevenue;
+    }
+
+    // Chỉ tính vào biểu đồ khi xe ĐÃ RA (phí đã thanh toán chắc chắn)
     if (h.fee && h.fee > 0 && h.status === 'done') {
       const feeK = Math.round(Number(h.fee) / 1000);
-
-      if (normalizeDate(h.date) === today) revenueToday += Number(h.fee);
 
       // Biểu đồ ngày — tuần hiện tại
       if (hDate >= weekStart) {
@@ -1338,7 +1409,7 @@ function calcStatsFromHistory() {
       const hMonth = hDate.getMonth();
       const hYear  = hDate.getFullYear();
       for (let i = 0; i < 6; i++) {
-        let tm = curMonth - (5 - i); let ty = now.getFullYear();
+        let tm = curMonth - (5 - i); let ty = nowVN.getFullYear();
         if (tm < 0) { tm += 12; ty--; }
         if (hMonth === tm && hYear === ty) { monthVals[i] += feeK; break; }
       }
@@ -1372,29 +1443,14 @@ function calcStatsFromHistory() {
   if (el4) el4.textContent = totalToday;
 }
 
-// Tải lịch sử không hiện toast — dùng khi init app
-async function loadHistoryInit() {
-  const data = await fbGet('/history');
-  if (!data || typeof data !== 'object') return;
-  const allRows = Object.entries(data)
-    .map(([k,h]) => (!h || typeof h !== 'object') ? null : {...h, key:k})
-    .filter(Boolean);
-  historyData = sortHistory(allRows);
-  // Sync SSE cache để không bị ghi đè bởi snapshot cũ
-  if (_historyListener) _historyListener.updateCache(data);
-  renderRecentTable();
-  renderHistoryTable();
-  calcStatsFromHistory();
-  if (currentUser?.role === 'member') renderMemberHistory();
-}
-
 async function reloadHistory() {
   const data = await fbGet('/history');
   if (!data) { showToast('❌ Không tải được lịch sử', 'danger'); return; }
-  const allRows = Object.entries(data)
-    .map(([k,h]) => (!h || typeof h !== 'object') ? null : {...h, key:k})
-    .filter(Boolean);
-  historyData = sortHistory(allRows);
+  historyData = sortHistory(
+    Object.entries(data)
+      .map(([k,h]) => (!h || typeof h !== 'object') ? null : {...h, key:k})
+      .filter(Boolean)
+  );
   // Sync vào SSE cached để không bị overwrite bởi event cũ
   if (_historyListener) _historyListener.updateCache(data);
   renderHistoryTable();
@@ -1637,6 +1693,16 @@ function updateMobileNavActive(pageId) {
 const _initVN = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Ho_Chi_Minh'}));
 document.getElementById('historyDate').value =
   `${_initVN.getFullYear()}-${String(_initVN.getMonth()+1).padStart(2,'0')}-${String(_initVN.getDate()).padStart(2,'0')}`;
+
+// Cập nhật phí tạm tính mỗi 30s cho xe đang trong bãi
+setInterval(() => {
+  if (currentUser) {
+    renderRecentTable();
+    renderHistoryTable();
+    calcStatsFromHistory();
+    if (currentUser?.role === 'member') renderMemberHistory();
+  }
+}, 30000);
 </script>
 </body>
 </html>
