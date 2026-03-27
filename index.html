@@ -1541,8 +1541,10 @@ function updateMobileNavActive(pageId) {
   });
 }
 
-// INIT
-document.getElementById('historyDate').value = new Date().toISOString().split('T')[0];
+// INIT — set historyDate theo giờ Việt Nam
+const _initVN = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Ho_Chi_Minh'}));
+document.getElementById('historyDate').value =
+  `${_initVN.getFullYear()}-${String(_initVN.getMonth()+1).padStart(2,'0')}-${String(_initVN.getDate()).padStart(2,'0')}`;
 </script>
 </body>
 </html>
