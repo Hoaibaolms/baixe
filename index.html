@@ -314,7 +314,7 @@
       <input class="form-input" type="password" id="loginPass" placeholder="••••••••" value="123456">
     </div>
     <button class="btn-primary" onclick="doLogin()">Đăng nhập →</button>
-    <p class="login-hint">Demo: admin/<b>123456</b> &nbsp;|&nbsp; member01/<b>123456</b></p>
+    <p class="login-hint">Demo: admin/<b>123456</b></p>
   </div>
 </div>
 
@@ -452,6 +452,7 @@
             <input class="filter-input" type="date" id="historyDate" style="width:160px">
             <button class="btn-sm primary" onclick="renderHistoryTable()">🔍 Lọc</button>
             <button class="btn-sm outline" onclick="loadHistory()">🔄 Tải lại</button>
+            <button class="btn-sm danger" onclick="confirmDeleteByDate()">🗑️ Xóa ngày này</button>
           </div>
           <div class="table-wrap">
             <table>
@@ -541,6 +542,45 @@
 
 <!-- TOAST -->
 <div class="toast-container" id="toastContainer"></div>
+
+<!-- MODAL: Gia hạn thành viên -->
+<div class="modal-overlay" id="modalRenew">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-title">🔄 Gia hạn thành viên</div>
+      <button class="modal-close" onclick="closeModal('modalRenew')">✕</button>
+    </div>
+    <div style="margin-bottom:18px;padding:14px 16px;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border)">
+      <div style="font-size:12px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Thành viên</div>
+      <div style="font-size:15px;font-weight:700" id="renewMemberName">—</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:3px">Hết hạn hiện tại: <span style="font-weight:700;color:var(--danger)" id="renewCurrentExpiry">—</span></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Chọn ngày hết hạn mới</label>
+      <input class="form-input" type="date" id="renewDatePicker" style="font-size:15px;padding:12px 14px">
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-top:-10px;margin-bottom:4px" id="renewDateHint"></div>
+    <div class="modal-footer">
+      <button class="btn-sm outline" onclick="closeModal('modalRenew')">Hủy</button>
+      <button class="btn-sm success" id="confirmRenewBtn">✅ Xác nhận gia hạn</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Xác nhận xóa theo ngày -->
+<div class="modal-overlay" id="modalDeleteByDate">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title">🗑️ Xóa lịch sử theo ngày</div>
+      <button class="modal-close" onclick="closeModal('modalDeleteByDate')">✕</button>
+    </div>
+    <p style="color:var(--text2);font-size:14px;line-height:1.6">Xóa toàn bộ lịch sử ngày <span style="color:var(--danger);font-weight:700" id="deleteDateInfo">—</span>?<br><span style="color:var(--text3);font-size:12px">Hành động này không thể hoàn tác.</span></p>
+    <div class="modal-footer">
+      <button class="btn-sm outline" onclick="closeModal('modalDeleteByDate')">Hủy</button>
+      <button class="btn-sm danger" id="confirmDeleteByDateBtn">🗑️ Xóa tất cả</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL: Xác nhận xóa lịch sử -->
 <div class="modal-overlay" id="modalDeleteHistory">
@@ -698,6 +738,18 @@ function listenFirebase(path, callback) {
       try {
         const d = JSON.parse(e.data);
         if (d && d.data !== undefined) {
+          // Nếu cached=null mà nhận PUT sub-path (không phải root "/"): 
+          // nghĩa là SSE connect giữa chừng, chưa có snapshot đầy đủ
+          // → fetch lại toàn bộ node để không mất data cũ
+          if (cached === null && d.path && d.path !== '/' && d.path !== '') {
+            fetch(url).then(r=>r.json()).then(full=>{
+              if (full && typeof full === 'object' && !full.error) {
+                cached = full;
+                callback(cached);
+              }
+            }).catch(()=>{});
+            return;
+          }
           // PUT: replace node (merge=false)
           cached = applyPath(cached, d.path, d.data, false);
           if (cached !== null) callback(cached);
@@ -737,6 +789,7 @@ function switchLoginTab(tab) {
     b.classList.toggle('active', (i===0 && tab==='admin') || (i===1 && tab==='member'));
   });
   document.getElementById('loginUser').value = tab === 'admin' ? 'admin' : '';
+  document.getElementById('loginPass').value = tab === 'admin' ? '123456' : '';
 }
 
 async function doLogin() {
@@ -911,13 +964,11 @@ async function setManualMode(enabled) {
   if (enabled) {
     // Bật manual: ghi cổng closed mặc định để ESP32 đồng bộ trạng thái
     await fbPatch('/control', JSON.stringify({manualMode:true, entry:'closed', exit:'closed'}));
-    showToast('🎛️ Chế độ thủ công đã bật','warning');
   } else {
     // Tắt manual: đóng 2 cổng ngay, ghi 1 PATCH atomic
     await fbPatch('/control', JSON.stringify({manualMode:false, entry:'closed', exit:'closed'}));
     updateGateUI('entry','closed');
     updateGateUI('exit','closed');
-    showToast('🔒 Tắt thủ công — 2 cổng đã đóng','info');
   }
 }
 
@@ -984,7 +1035,6 @@ function setBadge(state, text) {
     // Ghi Firebase để đảm bảo ESP32 nhận lệnh tắt manual khi reconnect
     // Tránh trường hợp Firebase còn lưu manualMode:true → ESP32 bật lại manual sau khi lên
     fbPatch('/control', JSON.stringify({manualMode:false, entry:'closed', exit:'closed'}));
-    showToast('⚠️ ESP32 mất kết nối — Chế độ thủ công đã tắt', 'warning');
   }
   _lastBadge = state;
   const shortText = state==='connected'?'Online':state==='disconnected'?'Offline':'…';
@@ -1105,6 +1155,32 @@ function confirmDeleteHistory(key, uid, date, timeIn) {
   document.getElementById('modalDeleteHistory').classList.add('show');
 }
 
+function confirmDeleteByDate() {
+  const dateVal = document.getElementById('historyDate')?.value;
+  if (!dateVal) { showToast('❌ Vui lòng chọn ngày trước!', 'danger'); return; }
+  const [y,m,d] = dateVal.split('-');
+  const fmtDate = `${d}/${m}/${y}`;
+  const count = historyData.filter(h => h.date === fmtDate).length;
+  if (count === 0) { showToast('Không có dữ liệu ngày này!', 'info'); return; }
+  document.getElementById('deleteDateInfo').textContent = `${fmtDate} (${count} bản ghi)`;
+  document.getElementById('confirmDeleteByDateBtn').onclick = () => deleteByDate(fmtDate);
+  document.getElementById('modalDeleteByDate').classList.add('show');
+}
+
+async function deleteByDate(fmtDate) {
+  const toDelete = historyData.filter(h => h.date === fmtDate);
+  // Xóa song song tất cả entries
+  await Promise.all(toDelete.map(h =>
+    fetch(`${FIREBASE_URL}/history/${h.key}.json`, {method:'DELETE'})
+  ));
+  historyData = historyData.filter(h => h.date !== fmtDate);
+  renderHistoryTable();
+  renderRecentTable();
+  calcStatsFromHistory();
+  closeModal('modalDeleteByDate');
+  showToast(`🗑️ Đã xóa ${toDelete.length} bản ghi ngày ${fmtDate}`, 'danger');
+}
+
 async function deleteHistoryEntry(key) {
   if (!key) return;
   await fetch(`${FIREBASE_URL}/history/${key}.json`, {method:'DELETE'});
@@ -1138,8 +1214,10 @@ function renderMemberHistory() {
 //  → reload app vẫn hiện đúng, không bao giờ về 0
 // ════════════════════════════════════════════
 function calcStatsFromHistory() {
-  const now   = new Date();
-  const today = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
+  // Lấy ngày giờ theo múi giờ Việt Nam (UTC+7)
+  const nowVN  = new Date(new Date().toLocaleString('en-US', {timeZone:'Asia/Ho_Chi_Minh'}));
+  const now    = nowVN;
+  const today  = `${String(nowVN.getDate()).padStart(2,'0')}/${String(nowVN.getMonth()+1).padStart(2,'0')}/${nowVN.getFullYear()}`;
 
   let totalToday   = 0;
   let revenueToday = 0;
@@ -1276,17 +1354,53 @@ function renderAccountsTable() {
   }).join('');
 }
 
-async function renewAccount(idx) {
+function renewAccount(idx) {
   const acc = accountsData[idx]; if (!acc) return;
   const fmt = d=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+  const fmtInput = d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   const parse = s=>{ const[d,m,y]=s.split('/'); return new Date(+y,+m-1,+d); };
+
+  // Tính ngày gợi ý: hết hạn hiện tại + 1 tháng (hoặc hôm nay + 1 tháng)
   let base = parse(acc.expiry);
-  if (isNaN(base)||base<new Date()) base = new Date();
-  base.setMonth(base.getMonth()+1);
-  const newExpiry = fmt(base);
+  const nowVN = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Ho_Chi_Minh'}));
+  if (isNaN(base) || base < nowVN) base = nowVN;
+  const suggested = new Date(base);
+  suggested.setMonth(suggested.getMonth() + 1);
+
+  // Điền thông tin vào modal
+  document.getElementById('renewMemberName').textContent = `${acc.name} (${acc.username})`;
+  document.getElementById('renewCurrentExpiry').textContent = acc.expiry || '—';
+  const picker = document.getElementById('renewDatePicker');
+  picker.value = fmtInput(suggested);
+  picker.min = fmtInput(new Date()); // không cho chọn ngày trong quá khứ
+
+  // Hiện hint ngày gợi ý
+  const hint = document.getElementById('renewDateHint');
+  hint.textContent = `Gợi ý: +1 tháng → ${fmt(suggested)}`;
+
+  // Cập nhật hint khi đổi ngày
+  picker.oninput = () => {
+    if (picker.value) {
+      const [y,m,d] = picker.value.split('-');
+      hint.textContent = `Ngày hết hạn mới: ${d}/${m}/${y}`;
+    }
+  };
+
+  // Gán handler xác nhận
+  document.getElementById('confirmRenewBtn').onclick = () => submitRenew(idx);
+  document.getElementById('modalRenew').classList.add('show');
+}
+
+async function submitRenew(idx) {
+  const acc = accountsData[idx]; if (!acc) return;
+  const picker = document.getElementById('renewDatePicker');
+  if (!picker.value) { showToast('❌ Vui lòng chọn ngày hết hạn!', 'danger'); return; }
+  const [y,m,d] = picker.value.split('-');
+  const newExpiry = `${d}/${m}/${y}`;
   acc.expiry = newExpiry;
   await fbPatch('/members/'+acc.username, {expiry:newExpiry, status:'active'});
   renderAccountsTable();
+  closeModal('modalRenew');
   showToast(`✅ Đã gia hạn ${acc.name} đến ${newExpiry}`,'success');
 }
 
@@ -1320,7 +1434,8 @@ async function submitAddMember() {
   const existing = await fbGet('/members/'+username);
   if (existing)  { showToast('❌ Tên đăng nhập đã tồn tại!','danger'); return; }
   const fmt = d=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-  const today = new Date(), expiry = new Date(today); expiry.setMonth(expiry.getMonth()+1);
+  const todayVN = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Ho_Chi_Minh'}));
+  const today = todayVN, expiry = new Date(todayVN); expiry.setMonth(expiry.getMonth()+1);
   const memberData = {pass:password, fullname, uid, phone:phone||'—', fee:fee?+fee:0, created:fmt(today), expiry:fmt(expiry), status:'active'};
   await fbPut('/members/'+username, memberData);
   accountsData.unshift({username,name:fullname,phone:phone||'—',uid,created:fmt(today),expiry:fmt(expiry),status:'active'});
@@ -1357,23 +1472,16 @@ function renderRevenueChart(type) {
   const chart = document.getElementById('revenueChart');
   if (!chart) return;
 
-  // Render placeholder trước để DOM có kích thước
-  chart.innerHTML = d.labels.map((l,i) => `<div class="chart-bar-col">
+  // Chiều cao cố định: container 120px - 36px (val+label) = 84px cho cột bar
+  const maxH = 84;
+  chart.innerHTML = d.labels.map((l,i) => {
+    const h = Math.max(4, Math.round((d.vals[i]/max)*maxH));
+    return `<div class="chart-bar-col">
     <div class="chart-val">${d.vals[i]}k</div>
-    <div class="chart-bar" style="height:4px"></div>
+    <div class="chart-bar" style="height:${h}px"></div>
     <div class="chart-label">${l}</div>
-  </div>`).join('');
-
-  // Sau khi DOM paint xong, tính lại chiều cao thật
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      const maxH = chart.offsetHeight - 36 || 80;
-      chart.querySelectorAll('.chart-bar-col').forEach((col, i) => {
-        const h = Math.max(4, Math.round((d.vals[i]/max)*maxH));
-        col.querySelector('.chart-bar').style.height = h + 'px';
-      });
-    });
-  });
+  </div>`;
+  }).join('');
 }
 
 function switchRevTab(btn, type) {
@@ -1403,8 +1511,8 @@ function showToast(msg, type='info') {
 function startClock() {
   const tick = () => {
     const now = new Date();
-    const f = now.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    const s = now.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
+    const f = now.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit',second:'2-digit', timeZone:'Asia/Ho_Chi_Minh'});
+    const s = now.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit', timeZone:'Asia/Ho_Chi_Minh'});
     const el = document.getElementById('clockDisplay');
     const em = document.getElementById('clockMobile');
     if (el) el.textContent = f;
